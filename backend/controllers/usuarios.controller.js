@@ -1,4 +1,4 @@
-const pool = require('../db/db');
+const pool = require('../db.js');
 const bcrypt = require('bcrypt');
 
 async function getUsuario(req, res) {
@@ -20,12 +20,12 @@ async function getUsuarios(req, res) {
 }
 
 async function crearUsuario(req, res) {
-  const { nombre, email, password, rol } = req.body;
+  const { dni, email, password, rol } = req.body;
   try {
     const hashedPass = await bcrypt.hash(password, 10);
     await pool.query(
-      'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
-      [nombre, email, hashedPass, rol]
+      'INSERT INTO usuarios (dni, email, password, rol) VALUES (?, ?, ?, ?)',
+      [dni, email, hashedPass, rol]
     );
     res.json({ mensaje: 'Usuario creado' });
   } catch (error) {
