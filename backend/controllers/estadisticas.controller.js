@@ -4,7 +4,7 @@ async function getEstadisticas(req, res) {
   try {
     const [result] = await pool.query(`
       SELECT estado, COUNT(*) as total
-      FROM tickets
+      FROM ticket
       GROUP BY estado
     `);
     res.json(result);
