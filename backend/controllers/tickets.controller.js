@@ -2,7 +2,7 @@ const pool = require('../db.js');
 
 async function getTicketsUsuario(req, res) {
   try {
-    const [rows] = await pool.query('SELECT * FROM tickets WHERE usuario_id = ?', [req.user.id]);
+    const [rows] = await pool.query('SELECT * FROM ticket WHERE usuarioCrea = ?', [req.user.id]);
     res.json(rows);
   } catch (error) {
     res.status(500).json({ mensaje: error.message });

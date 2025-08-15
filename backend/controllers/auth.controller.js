@@ -1,19 +1,19 @@
 const pool = require('../db.js');
-const jwt = require('jsonwebtoken');
+const {firmarToken} = require('../utils/jwt.js');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 async function login(req, res) {
   const { email, password } = req.body;
   try {
-    const [rows] = await pool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    const [rows] = await pool.query('SELECT * FROM usuario WHERE correo = ?', [email]);
     if (rows.length === 0) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
 
     const usuario = rows[0];
     const esValido = await bcrypt.compare(password, usuario.password);
     if (!esValido) return res.status(401).json({ mensaje: 'Credenciales inválidas' });
 
-    const token = jwt.sign(
+    const token =firmarToken(
       { id: usuario.id, rol: usuario.rol },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
