@@ -12,7 +12,7 @@ router.get('/:id', verificarToken, getUsuario);
 router.get('/', verificarToken, esAdmin, getUsuarios);
 router.post('/', verificarToken, esAdmin, crearUsuario);
 
-// Edición: el admin edita a cualquiera; el usuario podría editarse a sí mismo (puedes reforzar en controller)
+// Edición: el admin edita cualquiera; el usuario podría editarse a sí mismo (puedes reforzar en controller)
 router.put('/:id', verificarToken, actualizarUsuario);
 
 module.exports = router;

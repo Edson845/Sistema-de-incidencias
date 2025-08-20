@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 async function getUsuario(req, res) {
   try {
-    const [rows] = await pool.query('SELECT id, nombre, email, rol FROM usuarios WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query('SELECT dni, usuario, celular, nombres, apellidos, correo FROM usuario WHERE dni = ?', [req.params.id]);
     res.json(rows[0]);
   } catch (error) {
     res.status(500).json({ mensaje: error.message });
@@ -12,7 +12,7 @@ async function getUsuario(req, res) {
 
 async function getUsuarios(req, res) {
   try {
-    const [rows] = await pool.query('SELECT id, nombre, email, rol FROM usuarios');
+    const [rows] = await pool.query('SELECT dni, nombres ,apellidos , correo,idCargo FROM usuario');
     res.json(rows);
   } catch (error) {
     res.status(500).json({ mensaje: error.message });
@@ -20,12 +20,12 @@ async function getUsuarios(req, res) {
 }
 
 async function crearUsuario(req, res) {
-  const { dni, email, password, rol } = req.body;
+  const { dni, usuario, password, nombres, apellidos, correo,  idCargo } = req.body;
   try {
     const hashedPass = await bcrypt.hash(password, 10);
     await pool.query(
-      'INSERT INTO usuarios (dni, email, password, rol) VALUES (?, ?, ?, ?)',
-      [dni, email, hashedPass, rol]
+      'INSERT INTO usuario (dni, usuario, password, nombres,apellidos, correo,  idCargo) VALUES (?, ?, ?, ?,?,?,?)',
+      [dni, usuario, hashedPass, nombres, apellidos, correo,  idCargo]
     );
     res.json({ mensaje: 'Usuario creado' });
   } catch (error) {
@@ -34,12 +34,12 @@ async function crearUsuario(req, res) {
 }
 
 async function actualizarUsuario(req, res) {
-  const { id } = req.params;
+  const { dni } = req.params;
   const { nombre, email, rol } = req.body;
   try {
     await pool.query(
-      'UPDATE usuarios SET nombre = ?, email = ?, rol = ? WHERE id = ?',
-      [nombre, email, rol, id]
+      'UPDATE usuario SET nombres = ?, correo = ?, rol = ? WHERE dni = ?',
+      [nombre, email, rol, dni]
     );
     res.json({ mensaje: 'Usuario actualizado' });
   } catch (error) {
