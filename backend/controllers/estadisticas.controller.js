@@ -3,9 +3,9 @@ const pool = require('../db.js');
 async function getEstadisticas(req, res) {
   try {
     const [result] = await pool.query(`
-      SELECT estado, COUNT(*) as total
+      SELECT idEstado, COUNT(*) as total
       FROM ticket
-      GROUP BY estado
+      GROUP BY idEstado
     `);
     res.json(result);
   } catch (error) {

@@ -4,9 +4,9 @@ const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 async function login(req, res) {
-  const { email, password } = req.body;
+  const { correo, password } = req.body;
   try {
-    const [rows] = await pool.query('SELECT * FROM usuario WHERE correo = ?', [email]);
+    const [rows] = await pool.query('SELECT * FROM usuario WHERE correo = ?', [correo]);
     if (rows.length === 0) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
 
     const usuario = rows[0];

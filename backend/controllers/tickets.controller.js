@@ -11,7 +11,7 @@ async function getTicketsUsuario(req, res) {
 
 async function getTodosTickets(req, res) {
   try {
-    const [rows] = await pool.query('SELECT * FROM tickets');
+    const [rows] = await pool.query('SELECT * FROM ticket');
     res.json(rows);
   } catch (error) {
     res.status(500).json({ mensaje: error.message });
@@ -19,13 +19,13 @@ async function getTodosTickets(req, res) {
 }
 
 async function crearTicket(req, res) {
-  const { titulo, descripcion } = req.body;
+  const { tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto } = req.body;
   try {
     await pool.query(
-      'INSERT INTO tickets (titulo, descripcion, usuario_id, estado) VALUES (?, ?, ?, "pendiente")',
-      [titulo, descripcion, req.user.id]
+      'INSERT INTO ticket (tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto]
     );
-    res.json({ mensaje: 'Ticket creado' });
+    res.json({ mensaje: 'Ticket Creado' });
   } catch (error) {
     res.status(500).json({ mensaje: error.message });
   }
@@ -36,7 +36,7 @@ async function actualizarTicket(req, res) {
   const { titulo, descripcion, estado } = req.body;
   try {
     await pool.query(
-      'UPDATE tickets SET titulo = ?, descripcion = ?, estado = ? WHERE id = ?',
+      'UPDATE ticket SET tituloTicket = ?, descTicket = ?, idEstado = ? WHERE idTicket = ?',
       [titulo, descripcion, estado, id]
     );
     res.json({ mensaje: 'Ticket actualizado' });
