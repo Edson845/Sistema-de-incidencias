@@ -25,7 +25,7 @@ async function crearTicket(req, res) {
       'INSERT INTO ticket (tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto]
     );
-    res.json({ mensaje: 'Ticket creado' });
+    res.json({ mensaje: 'Ticket Creado' });
   } catch (error) {
     res.status(500).json({ mensaje: error.message });
   }
