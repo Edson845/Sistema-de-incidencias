@@ -23,7 +23,7 @@ async function crearTicket(req, res) {
   try {
     await pool.query(
       'INSERT INTO ticket (tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto, req.user.id]
+      [tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto]
     );
     res.json({ mensaje: 'Ticket creado' });
   } catch (error) {
