@@ -1,0 +1,15 @@
+<h2>Tickets</h2>
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Título</th>
+    <th>Estado</th>
+    <th>Usuario</th>
+  </tr>
+  <tr *ngFor="let t of tickets">
+    <td>{{ t.id }}</td>
+    <td>{{ t.titulo }}</td>
+    <td>{{ t.estado }}</td>
+    <td *ngIf="authService.rol === 'admin'">{{ t.usuario_id }}</td>
+  </tr>
+</table>

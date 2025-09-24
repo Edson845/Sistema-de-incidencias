@@ -1,0 +1,10 @@
+<h2>Editar Usuario</h2>
+<form (ngSubmit)="guardarCambios()">
+  <input type="text" [(ngModel)]="usuario.nombre" name="nombre" placeholder="Nombre">
+  <input type="email" [(ngModel)]="usuario.email" name="email" placeholder="Correo">
+  <select [(ngModel)]="usuario.rol" name="rol">
+    <option value="usuario">Usuario</option>
+    <option value="admin">Administrador</option>
+  </select>
+  <button type="submit">Guardar</button>
+</form>
