@@ -1,0 +1,6 @@
+<h2>Nuevo Ticket</h2>
+<form (ngSubmit)="crearTicket()">
+  <input type="text" [(ngModel)]="titulo" name="titulo" placeholder="Título" required>
+  <textarea [(ngModel)]="descripcion" name="descripcion" placeholder="Descripción"></textarea>
+  <button type="submit">Crear</button>
+</form>
