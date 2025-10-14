@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Módulo de Usuarios</title>
+  <link rel="stylesheet" href="modulo_usuario.css" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="logo-01.png" alt="Logo Puno" />
+    </div>
+    <h2>Sistema de Incidentes</h2>
+    <p>Bienvenido, Admin Admin</p>
+    <button class="role-selector">Super Administrador</button>
+
+    <nav>
+      <ul>
+        <li data-icon="🏠">Dashboard</li>
+        <li data-icon="🎟️">Tickets</li>
+        <li data-icon="👤" class="active">Usuarios</li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+    <!-- Barra superior con íconos -->
+    <div class="top-bar">
+      <div class="user-actions">
+        <span class="icon">🔔</span>
+        <span class="icon">❓</span>
+        <span class="icon">👤</span>
+        <span class="icon">☰</span>
+      </div>
+    </div>
+
+    <!-- Encabezado con botón de registro -->
+    <div class="header">
+      <div class="add-user-btn">
+        <span>👤+</span>
+        <span>Registrar nuevo usuario</span>
+      </div>
+    </div>
+
+    <!-- Título del gestor -->
+    <h3 class="section-title">Gestor de usuarios</h3>
+
+    <!-- Filtro avanzado -->
+    <div class="filter-toggle">
+      Activar filtros avanzados ▼
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="users-table-container">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Estado</th>
+            <th>Apellido paterno</th>
+            <th>Apellido materno</th>
+            <th>Nombres</th>
+            <th>Celular</th>
+            <th>Correo</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="status-badge active">ACTIVO</span></td>
+            <td>User</td>
+            <td>User</td>
+            <td>Modificado</td>
+            <td>123456789</td>
+            <td>modified@gmail.com</td>
+            <td class="actions">
+              <span class="action-icon edit">✏️</span>
+              <span class="action-icon view">👁️</span>
+              <span class="action-icon delete">🗑️</span>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="status-badge active">ACTIVO</span></td>
+            <td>Admin</td>
+            <td>Admin</td>
+            <td>Solo Admin</td>
+            <td>123123123</td>
+            <td>asd@asd.com</td>
+            <td class="actions">
+              <span class="action-icon edit">✏️</span>
+              <span class="action-icon view">👁️</span>
+              <span class="action-icon delete">🗑️</span>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="status-badge active">ACTIVO</span></td>
+            <td>Rojas</td>
+            <td>Velizaro</td>
+            <td>Manolo</td>
+            <td>976974284</td>
+            <td>mrojas@gmail.com</td>
+            <td class="actions">
+              <span class="action-icon edit">✏️</span>
+              <span class="action-icon view">👁️</span>
+              <span class="action-icon delete">🗑️</span>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="status-badge active">ACTIVO</span></td>
+            <td>Ordoñez</td>
+            <td>Quinta</td>
+            <td>Diego Alberto</td>
+            <td>987654321</td>
+            <td>dalberto@gmail.com</td>
+            <td class="actions">
+              <span class="action-icon edit">✏️</span>
+              <span class="action-icon view">👁️</span>
+              <span class="action-icon delete">🗑️</span>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="status-badge active">ACTIVO</span></td>
+            <td>Ramon</td>
+            <td>Castillo</td>
+            <td>Emanuel</td>
+            <td>964242142</td>
+            <td>ecastillo@gmail.com</td>
+            <td class="actions">
+              <span class="action-icon edit">✏️</span>
+              <span class="action-icon view">👁️</span>
+              <span class="action-icon delete">🗑️</span>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="status-badge active">ACTIVO</span></td>
+            <td>Mamani</td>
+            <td>Lopez</td>
+            <td>Christian</td>
+            <td>971678356</td>
+            <td>lmamani@gmail.com</td>
+            <td class="actions">
+              <span class="action-icon edit">✏️</span>
+              <span class="action-icon view">👁️</span>
+              <span class="action-icon delete">🗑️</span>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="status-badge active">ACTIVO</span></td>
+            <td>Mamani</td>
+            <td>Condon</td>
+            <td>Mana Rosano</td>
+            <td>971678356</td>
+            <td>manto@gmail.com</td>
+            <td class="actions">
+              <span class="action-icon edit">✏️</span>
+              <span class="action-icon view">👁️</span>
+              <span class="action-icon delete">🗑️</span>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="status-badge active">ACTIVO</span></td>
+            <td>Quispe</td>
+            <td>Palomino</td>
+            <td>Rodolfo</td>
+            <td>971678356</td>
+            <td>manto@gmail.com</td>
+            <td class="actions">
+              <span class="action-icon edit">✏️</span>
+              <span class="action-icon view">👁️</span>
+              <span class="action-icon delete">🗑️</span>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="status-badge active">ACTIVO</span></td>
+            <td>Usuaro</td>
+            <td>Irequest</td>
+            <td>Nuevo</td>
+            <td>987345071</td>
+            <td>try@gmail.com</td>
+            <td class="actions">
+              <span class="action-icon edit">✏️</span>
+              <span class="action-icon view">👁️</span>
+              <span class="action-icon delete">🗑️</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination">
+      <div class="page-size">
+        Tamaño de Página:
+        <select>
+          <option>10</option>
+          <option>25</option>
+          <option>50</option>
+        </select>
+      </div>
+      <div class="page-info">
+        <span>1 a 9 de 9</span>
+        <button disabled>◀</button>
+        <span>Página 1 de 1</span>
+        <button disabled>▶</button>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
