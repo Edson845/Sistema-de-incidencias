@@ -6,6 +6,9 @@ require('dotenv').config();
 async function login(req, res) {
   const { correo, password } = req.body;
   try {
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
+
     const [rows] = await pool.query('SELECT * FROM usuario WHERE correo = ?', [correo]);
     if (rows.length === 0) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
 
@@ -16,7 +19,7 @@ async function login(req, res) {
     const token =firmarToken(
       { id: usuario.id, rol: usuario.rol },
       process.env.JWT_SECRET,
-      { expiresIn: '8h' }
+      '8h' 
     );
 
     res.json({ token, rol: usuario.rol });
