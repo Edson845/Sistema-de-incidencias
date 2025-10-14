@@ -8,39 +8,62 @@
 </head>
 <body>
     <div class="login-container">
-        <!-- Sección Izquierda -->
-        <div class="left-section">
-            <div class="logo-container">
-                <img src="assets/img/logo_02.png" >
-                <h2>MUNICIPALIDAD PROVINCIAL SAN ROMAN - JULIACA<br></h2>
-                <span>Rumbo al Centenario</span>
-            </div>
-        </div>
-
-        <!-- Sección Derecha -->
-        <div class="right-section">
-            <div class="login-box">
-                <img src="assets/img/logo_01.png" alt="Logo Municipalidad de Juliaca" class="logo-login">
-                <h2>Inicia Sesión</h2>
-                <p>Visualiza y registra tus tickets</p>
-
-                <form>
-                    <label for="usuario">Usuario</label>
-                    <input type="text" id="usuario" name="usuario" placeholder="Ingresa tu Correo Institucional">
-
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña">
-
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfR7LdoK_YdTY8vbWr-5qRztLp_c-8e27XCeQkT3zUGUxIRLg/viewform?usp=header" class="link">¿Olvidaste tu contraseña? Clic aquí</a>
-                    
-                    <button type="submit">INICIAR SESIÓN</button>
-                </form>
-
-                <p class="register-text">
-                 ¿Sin una cuenta? <a href="https://docs.google.com/forms/d/e/1FAIpQLSfR7LdoK_YdTY8vbWr-5qRztLp_c-8e27XCeQkT3zUGUxIRLg/viewform?usp=header" class="link" target="_blank">Solicita una cuenta aquí</a>
-                </p>
-            </div>
-        </div>
+  <!-- Sección Izquierda -->
+  <div class="left-section">
+    <div class="logo-container">
+      <img src="assets/img/logo_02.png" alt="Logo Municipalidad de Juliaca">
+      <h2>MUNICIPALIDAD PROVINCIAL SAN ROMÁN - JULIACA</h2>
+      <span>Rumbo al Centenario</span>
     </div>
+  </div>
+
+  <!-- Sección Derecha -->
+  <div class="right-section">
+    <div class="login-box">
+      <img src="assets/img/logo_01.png" alt="Logo Municipalidad de Juliaca" class="logo-login">
+      <h2>Inicia Sesión</h2>
+      <p>Visualiza y registra tus tickets</p>
+
+      <!-- Formulario Angular -->
+      <form (ngSubmit)="login()" #loginForm="ngForm">
+        <label for="email">Correo Institucional</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="Ingresa tu correo institucional"
+          required
+        >
+
+        <label for="password">Contraseña</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="Ingresa tu contraseña"
+          required
+        >
+
+        <!-- Error visible -->
+        <div *ngIf="error" class="error-message">{{ error }}</div>
+
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfR7LdoK_YdTY8vbWr-5qRztLp_c-8e27XCeQkT3zUGUxIRLg/viewform?usp=header"
+           class="link" target="_blank">
+          ¿Olvidaste tu contraseña? Clic aquí
+        </a>
+
+        <button type="submit" [disabled]="loginForm.invalid">INICIAR SESIÓN</button>
+      </form>
+
+      <p class="register-text">
+        ¿Sin una cuenta?
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfR7LdoK_YdTY8vbWr-5qRztLp_c-8e27XCeQkT3zUGUxIRLg/viewform?usp=header"
+           class="link" target="_blank">Solicita una cuenta aquí</a>
+      </p>
+    </div>
+  </div>
+</div>
 </body>
 </html>
