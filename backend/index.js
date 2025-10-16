@@ -1,24 +1,28 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
 
+import authRoutes from './routes/auth.routes.js';
+import ticketsRoutes from './routes/tickets.routes.js';
+import usuariosRoutes from './routes/usuarios.routes.js';
+import estadisticasRoutes from './routes/estadisticas.routes.js';
 
-const authRoutes = require('./routes/auth.routes');
-const ticketsRoutes = require('./routes/tickets.routes');
-const usuariosRoutes = require('./routes/usuarios.routes');
-const estadisticasRoutes = require('./routes/estadisticas.routes');
-
+dotenv.config();
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
-app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ["'self'"],
-    connectSrc: ["'self'", "http://localhost:3000"]
-  }
-}));
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: ["'self'", "http://localhost:3000"],
+    },
+  })
+);
+
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketsRoutes);
 app.use('/api/usuarios', usuariosRoutes);

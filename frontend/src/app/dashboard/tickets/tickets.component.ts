@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { TicketsService } from '../../services/tickets.service';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { SidebarComponent } from '../../components/sidebar/sidebar';
 
 @Component({
   selector: 'app-tickets',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SidebarComponent],
   templateUrl: './tickets.component.html',
   styleUrls: ['./tickets.component.css']
 })

@@ -1,6 +1,11 @@
-const express = require('express');
-const { verificarToken, esAdmin } = require('../middlewares/auth.middleware');
-const { getTicketsUsuario, getTodosTickets, crearTicket, actualizarTicket } = require('../controllers/tickets.controller');
+import express from 'express';
+import { verificarToken, esAdmin } from '../middlewares/auth.middleware.js';
+import { 
+  getTicketsUsuario, 
+  getTodosTickets, 
+  crearTicket, 
+  actualizarTicket 
+} from '../controllers/tickets.controller.js';
 
 const router = express.Router();
 
@@ -9,4 +14,4 @@ router.get('/', verificarToken, esAdmin, getTodosTickets);
 router.post('/', verificarToken, crearTicket);
 router.put('/:id', verificarToken, actualizarTicket);
 
-module.exports = router;
+export default router;

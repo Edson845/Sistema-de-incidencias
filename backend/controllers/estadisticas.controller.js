@@ -1,5 +1,4 @@
-console.log("¿ESM?", typeof require);
-const pool = require('../db.js');
+import pool from '../db.js';
 
 export const getResumen = async (req, res) => {
   try {
@@ -19,7 +18,6 @@ export const getResumen = async (req, res) => {
   }
 };
 
-// 📈 2. Tickets por estado
 export const getTicketsPorEstado = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT estado, COUNT(*) AS cantidad FROM tickets GROUP BY estado');
@@ -29,7 +27,6 @@ export const getTicketsPorEstado = async (req, res) => {
   }
 };
 
-// 👤 3. Tickets por usuario
 export const getTicketsPorUsuario = async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -44,7 +41,6 @@ export const getTicketsPorUsuario = async (req, res) => {
   }
 };
 
-// 🧩 4. Usuarios por rol
 export const getUsuariosPorRol = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT rol, COUNT(*) AS cantidad FROM usuarios GROUP BY rol');
@@ -54,7 +50,6 @@ export const getUsuariosPorRol = async (req, res) => {
   }
 };
 
-// 📊 5. Estadísticas generales (opcional, mezcla de todo)
 export const getEstadisticasGenerales = async (req, res) => {
   try {
     const [ultimosTickets] = await pool.query('SELECT id, titulo, estado, fecha_creacion FROM tickets ORDER BY fecha_creacion DESC LIMIT 5');
@@ -70,5 +65,3 @@ export const getEstadisticasGenerales = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener estadísticas generales', error: error.message });
   }
 };
-
-

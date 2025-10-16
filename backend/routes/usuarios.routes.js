@@ -1,9 +1,10 @@
-const express = require('express');
-const router = express.Router();
-const { verificarToken, esAdmin } = require('../middlewares/auth.middleware');
-const {
+import express from 'express';
+import { verificarToken, esAdmin } from '../middlewares/auth.middleware.js';
+import {
   getUsuario, getUsuarios, crearUsuario, actualizarUsuario
-} = require('../controllers/usuarios.controller');
+} from '../controllers/usuarios.controller.js';
+
+const router = express.Router();
 
 // Perfil individual (propio o por id si es admin)
 router.get('/:id', verificarToken, getUsuario);
@@ -12,7 +13,7 @@ router.get('/:id', verificarToken, getUsuario);
 router.get('/', verificarToken, esAdmin, getUsuarios);
 router.post('/', verificarToken, esAdmin, crearUsuario);
 
-// Edición: el admin edita cualquiera; el usuario podría editarse a sí mismo (puedes reforzar en controller)
+// Edición: el admin edita cualquiera; el usuario podría editarse a sí mismo
 router.put('/:id', verificarToken, actualizarUsuario);
 
-module.exports = router;
+export default router;

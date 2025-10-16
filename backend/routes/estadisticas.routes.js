@@ -1,14 +1,19 @@
-const express = require('express');
+import express from 'express';
+import { verificarToken, esAdmin } from '../middlewares/auth.middleware.js';
+import { 
+  getResumen, 
+  getTicketsPorEstado, 
+  getTicketsPorUsuario, 
+  getUsuariosPorRol, 
+  getEstadisticasGenerales 
+} from '../controllers/estadisticas.controller.js';
+
 const router = express.Router();
-const { verificarToken, esAdmin } = require('../middlewares/auth.middleware');
-import  getEstadisticas  from '../controllers/estadisticas.controller';
 
-router.get('/', verificarToken, esAdmin, getEstadisticas);
+// Ruta principal solo para admin
+router.get('/', verificarToken, esAdmin, getEstadisticasGenerales);
 
-module.exports = router;
-
-const { getResumen, getTicketsPorEstado, getTicketsPorUsuario, getUsuariosPorRol, getEstadisticasGenerales } = require ('../controllers/estadisticas.controller.js');
-
+// Rutas de estadísticas específicas
 router.get('/resumen', getResumen);
 router.get('/tickets-por-estado', getTicketsPorEstado);
 router.get('/tickets-por-usuario', getTicketsPorUsuario);
