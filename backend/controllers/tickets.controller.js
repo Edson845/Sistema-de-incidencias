@@ -1,6 +1,6 @@
-const pool = require('../db.js');
+import pool from '../db.js';
 
-async function getTicketsUsuario(req, res) {
+export async function getTicketsUsuario(req, res) {
   try {
     const [rows] = await pool.query('SELECT * FROM ticket WHERE usuarioCrea = ?', [req.user.id]);
     res.json(rows);
@@ -9,7 +9,7 @@ async function getTicketsUsuario(req, res) {
   }
 }
 
-async function getTodosTickets(req, res) {
+export async function getTodosTickets(req, res) {
   try {
     const [rows] = await pool.query('SELECT * FROM ticket');
     res.json(rows);
@@ -18,7 +18,7 @@ async function getTodosTickets(req, res) {
   }
 }
 
-async function crearTicket(req, res) {
+export async function crearTicket(req, res) {
   const { tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto } = req.body;
   try {
     await pool.query(
@@ -31,7 +31,7 @@ async function crearTicket(req, res) {
   }
 }
 
-async function actualizarTicket(req, res) {
+export async function actualizarTicket(req, res) {
   const { id } = req.params;
   const { titulo, descripcion, estado } = req.body;
   try {
@@ -44,5 +44,3 @@ async function actualizarTicket(req, res) {
     res.status(500).json({ mensaje: error.message });
   }
 }
-
-module.exports = { getTicketsUsuario, getTodosTickets, crearTicket, actualizarTicket };

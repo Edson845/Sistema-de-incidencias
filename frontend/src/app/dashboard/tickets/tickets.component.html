@@ -6,24 +6,8 @@
   <title>Dashboard - Sistema de Gestión de Incidentes</title>
   <link rel="stylesheet" href="tickets.component.css" />
 </head>
+<app-sidebar></app-sidebar>
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="logo">
-      <img src="assets/img/logo_01.png" alt="Logo Puno" />
-    </div>
-    <h2>Sistema de Gestión de Incidentes</h2>
-    <p>Bienvenido, {{ usuario.nombre }}</p>
-    <button class="role-selector">{{ usuario.rol }}</button>
-    <nav>
-      <ul>
-        <li data-icon="🏠" class="active">Dashboard</li>
-        <li data-icon="🎟️">Tickets</li>
-        <li data-icon="👤">Usuarios</li>
-      </ul>
-    </nav>
-  </aside>
-
   <!-- Contenido Principal -->
   <main class="main-content">
     <!-- Barra superior con íconos -->
