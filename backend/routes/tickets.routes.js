@@ -1,5 +1,5 @@
 import express from 'express';
-import { verificarToken, esAdmin } from '../middlewares/auth.middleware.js';
+import { verificarToken, verificarRol } from '../middlewares/auth.middleware.js';
 import { 
   getTicketsUsuario, 
   getTodosTickets, 
@@ -9,9 +9,16 @@ import {
 
 const router = express.Router();
 
+// Solo tickets del usuario logueado
 router.get('/mios', verificarToken, getTicketsUsuario);
-router.get('/', verificarToken, esAdmin, getTodosTickets);
+
+// Solo administradores pueden ver todos los tickets
+router.get('/', verificarToken, verificarRol('admin'), getTodosTickets);
+
+// Cualquier usuario autenticado puede crear tickets
 router.post('/', verificarToken, crearTicket);
+
+// Actualizar ticket (puedes agregar rol si solo ciertos roles pueden actualizar)
 router.put('/:id', verificarToken, actualizarTicket);
 
 export default router;

@@ -23,12 +23,12 @@ export async function login(req, res) {
     }
 
     const token = firmarToken(
-      { id: usuario.id, rol: usuario.rol },
+      { id: usuario.id, dni: usuario.dni },
       process.env.JWT_SECRET,
       '8h'
     );
 
-    res.json({ token, rol: usuario.rol });
+    res.json({ token, dni: usuario.dni });
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: error.message });
