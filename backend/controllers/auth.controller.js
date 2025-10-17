@@ -22,13 +22,23 @@ export async function login(req, res) {
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
     }
 
+    // Obtener roles del usuario
+    const [rolesRows] = await pool.query(`
+      SELECT r.nombreRol
+      FROM rolusuario ru
+      JOIN rol r ON ru.idrol = r.idrol
+      WHERE ru.dni = ?
+    `, [usuario.dni]);
+
+    const roles = rolesRows.map(r => r.nombreRol);
+
     const token = firmarToken(
-      { id: usuario.id, dni: usuario.dni },
+      { dni: usuario.dni, roles },
       process.env.JWT_SECRET,
       '8h'
     );
 
-    res.json({ token, dni: usuario.dni });
+    res.json({ token, roles });
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: error.message });

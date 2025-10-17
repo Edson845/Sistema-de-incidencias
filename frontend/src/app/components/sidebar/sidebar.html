@@ -4,18 +4,27 @@
     <h2>Sistema de Gestión de Incidentes</h2>
   </div>
 
-  <div class="user-info">
-    <p>Bienvenido, Admin Admin</p>
-    <select class="role-select">
-      <option>Super Administrador</option>
-    </select>
+  <h3>Panel de Control</h3>
+  <p>👤 Bienvenido, {{ authService.obtenerDatosUsuario?.nombre || 'Invitado' }}</p>
+  <p>🔑 Rol: {{ authService.roles.join(', ') || 'Sin rol' }}</p>
+
+  <!-- Sección solo para ADMIN -->
+  <div *ngIf="authService.tieneRol('admin')" class="admin-section">
+    <button class="btn-admin">⚙️ Gestionar Usuarios</button>
+    <button class="btn-admin">📊 Ver estadísticas</button>
   </div>
 
-  <nav class="menu">
-    <ul>
-      <li routerLink="/dashboard" routerLinkActive="active">Dashboard</li>
-      <li routerLink="/tickets" routerLinkActive="active">Tickets</li>
-      <li routerLink="/usuarios" routerLinkActive="active">Usuarios</li>
-    </ul>
-  </nav>
+  <!-- Sección solo para TÉCNICO -->
+  <div *ngIf="authService.tieneRol('tecnico')" class="tecnico-section">
+    <button class="btn-tecnico">🧰 Ver tickets asignados</button>
+  </div>
+
+  <!-- Sección solo para USUARIO -->
+  <div *ngIf="authService.tieneRol('usuario')" class="usuario-section">
+    <button class="btn-usuario">🎫 Crear nuevo ticket</button>
+  </div>
+
+  <div class="logout-section">
+    <button (click)="logout()">Cerrar sesión</button>
+  </div>
 </div>

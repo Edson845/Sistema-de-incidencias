@@ -43,7 +43,7 @@
   width: 100%;
 }
 
-.menu li {
+.menu div {
   padding: 15px 20px;
   cursor: pointer;
   font-size: 16px;
@@ -52,8 +52,8 @@
   gap: 10px;
 }
 
-.menu li:hover,
-.menu li.active {
+.menu div:hover,
+.menu div.active {
   background-color: #12407f;
   border-left: 4px solid #ffffff;
 }

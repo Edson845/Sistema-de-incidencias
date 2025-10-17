@@ -1,41 +1,77 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
+import { jwtDecode } from 'jwt-decode';
+import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = 'http://localhost:3000/api/auth';
+  private tokenKey = 'token';
 
   constructor(private http: HttpClient) {}
 
-  login(correo: string, password: string) {
-    return this.http.post<{ token: string, rol: string }>(
-      `${this.apiUrl}/login`,
-      { correo, password }
-    ).pipe(
-      tap(res => {
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('rol', res.rol);
-      })
-    );
+  // 🔹 Inicia sesión y devuelve el token
+  login(correo: string, password: string): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(`${this.apiUrl}/login`, { correo, password });
   }
 
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('rol');
+  // 🔹 Guarda token en localStorage
+  guardarToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
   }
 
-  get token() {
-    return localStorage.getItem('token');
+  // 🔹 Obtiene token del localStorage
+  obtenerToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
   }
 
-  get rol() {
-    return localStorage.getItem('rol');
+  // 🔹 Elimina token
+  eliminarToken(): void {
+    localStorage.removeItem(this.tokenKey);
   }
 
-  isLoggedIn() {
-    return !!this.token;
+  // 🔹 Devuelve información básica del usuario
+  get obtenerDatosUsuario(): { nombre: string; rol: string } | null {
+    const token = this.obtenerToken(); // ✅ se llama como función
+    if (!token) return null;
+
+    try {
+      const decoded: any = jwtDecode(token);
+      return {
+        nombre: decoded.nombre || decoded.email || 'Usuario',
+        rol: decoded.rol || 'Empleado'
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // 🔹 Devuelve lista de roles (si existen múltiples)
+  get roles(): string[] {
+    const token = this.obtenerToken(); // ✅ corregido
+    if (!token) return [];
+
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.roles || [decoded.rol || decoded.role].filter(Boolean);
+    } catch {
+      return [];
+    }
+  }
+
+  // 🔹 Comprueba si el usuario está autenticado
+  isLoggedIn(): boolean {
+    return !!this.obtenerToken();
+  }
+
+  // 🔹 Verifica si el usuario tiene un rol específico
+  tieneRol(rolBuscado: string): boolean {
+    const datos = this.obtenerDatosUsuario; // ✅ sin paréntesis
+    return !!datos && datos.rol.toLowerCase() === rolBuscado.toLowerCase();
+  }
+
+  // 🔹 Cierra sesión
+  logout(): void {
+    this.eliminarToken();
   }
 }

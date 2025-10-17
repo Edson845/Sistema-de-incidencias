@@ -9,16 +9,9 @@ import {
 
 const router = express.Router();
 
-// Solo tickets del usuario logueado
-router.get('/mios', verificarToken, getTicketsUsuario);
-
-// Solo administradores pueden ver todos los tickets
-router.get('/', verificarToken, verificarRol('admin'), getTodosTickets);
-
-// Cualquier usuario autenticado puede crear tickets
-router.post('/', verificarToken, crearTicket);
-
-// Actualizar ticket (puedes agregar rol si solo ciertos roles pueden actualizar)
-router.put('/:id', verificarToken, actualizarTicket);
+router.get('/mios', verificarToken, verificarRol('usuario', 'tecnico', 'admin'), getTicketsUsuario);
+router.get('/', verificarToken, verificarRol('admin', 'tecnico'), getTodosTickets);
+router.post('/', verificarToken, verificarRol('usuario', 'admin'), crearTicket);
+router.put('/:id', verificarToken, verificarRol('tecnico', 'admin'), actualizarTicket);
 
 export default router;
