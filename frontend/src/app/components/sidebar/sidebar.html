@@ -1,30 +1,69 @@
-<div class="sidebar">
-  <div class="logo-section">
+<div class="sidebar" [class.closed]="isClosed">
+  <div class="close-btn" (click)="toggleSidebar()">
+    {{ isClosed ? '☰' : '✖' }}
+  </div>
+
+  <div class="logo-section" *ngIf="!isClosed">
     <img src="assets/img/logo_01.png" alt="Logo" class="logo">
-    <h2>Sistema de Gestión de Incidentes</h2>
+    <h2>Sistema de Gestion de Incidentes</h2>
   </div>
 
-  <h3>Panel de Control</h3>
-  <p>👤 Bienvenido, {{ authService.obtenerDatosUsuario?.nombre || 'Invitado' }}</p>
-  <p>🔑 Rol: {{ authService.roles.join(', ') || 'Sin rol' }}</p>
-
-  <!-- Sección solo para ADMIN -->
-  <div *ngIf="authService.tieneRol('admin')" class="admin-section">
-    <button class="btn-admin">⚙️ Gestionar Usuarios</button>
-    <button class="btn-admin">📊 Ver estadísticas</button>
+  <div class="user-info" *ngIf="!isClosed">
+    <p>Bienvenido, <strong>{{ authService.obtenerDatosUsuario?.nombre || 'Invitado' }}</strong></p>
+    <select class="rol-select" disabled>
+      <option>{{ authService.obtenerDatosUsuario?.rol || 'Sin Rol' }}</option>
+    </select>
   </div>
 
-  <!-- Sección solo para TÉCNICO -->
-  <div *ngIf="authService.tieneRol('tecnico')" class="tecnico-section">
-    <button class="btn-tecnico">🧰 Ver tickets asignados</button>
-  </div>
+  <nav class="menu">
 
-  <!-- Sección solo para USUARIO -->
-  <div *ngIf="authService.tieneRol('usuario')" class="usuario-section">
-    <button class="btn-usuario">🎫 Crear nuevo ticket</button>
-  </div>
+  <!-- Mostrar solo si el usuario es ADMIN -->
+  <ng-container *ngIf="authService.tieneRol('admin')">
+    <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
+      <i class="fas fa-home"></i>
+      <span *ngIf="!isClosed">Dashboard</span>
+    </a>
 
-  <div class="logout-section">
-    <button (click)="logout()">Cerrar sesión</button>
-  </div>
+    <a routerLink="/tickets" routerLinkActive="active" class="menu-item">
+      <i class="fas fa-ticket-alt"></i>
+      <span *ngIf="!isClosed">Tickets</span>
+    </a>
+
+    <a routerLink="/usuarios" routerLinkActive="active" class="menu-item">
+      <i class="fas fa-users"></i>
+      <span *ngIf="!isClosed">Usuarios</span>
+    </a>
+  </ng-container>
+
+  <!-- 🔹 Si el usuario NO es admin, se pueden mostrar otros accesos -->
+  <ng-container *ngIf="authService.tieneRol('tecnico')">
+    <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
+      <i class="fas fa-home"></i>
+      <span *ngIf="!isClosed">Dashboard</span>
+    </a>
+    <a routerLink="/tickets" routerLinkActive="active" class="menu-item">
+      <i class="fas fa-toolbox"></i>
+      <span *ngIf="!isClosed">Tickets Asignados</span>
+    </a>
+    <a routerLink="/tickets" routerLinkActive="active" class="menu-item">
+      <i class="fas fa-ticket-alt"></i>
+      <span *ngIf="!isClosed">Tickets</span>
+    </a>
+  </ng-container>
+
+  <ng-container *ngIf="authService.tieneRol('usuario')">
+    
+    <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
+      <i class="fas fa-home"></i>
+      <span *ngIf="!isClosed">Dashboard</span>
+    </a>
+    
+    <a routerLink="/tickets" routerLinkActive="active" class="menu-item">
+      <i class="fas fa-ticket-alt"></i>
+      <span *ngIf="!isClosed">Tickets</span>
+    </a>
+  </ng-container>
+
+</nav>
+
 </div>

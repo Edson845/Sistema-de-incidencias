@@ -1,20 +1,76 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard - Sistema de Gestión de Incidentes</title>
-  <link rel="stylesheet" href="tickets.component.css" />
-</head>
-<app-sidebar></app-sidebar>
-<main class="main-content">
-  <!-- Resto del dashboard -->
-  <div class="metrics-cards">
-    <div class="metric-card">
-      <div class="metric-title">Total de tickets</div>
-      <div class="metric-value">{{ resumen.total }}</div>
-    </div>
-  </div>
-</main>
+<div class="layout">
+  <app-sidebar></app-sidebar>
 
-</html>
+  <main class="dashboard-container">
+    <h2 class="titulo">Panel de Control</h2>
+
+    <!-- TARJETAS PRINCIPALES -->
+    <div class="stats-grid">
+      <div class="stat-card azul">
+        <h3>Tickets Nuevos</h3>
+        <p>{{ resumen.nuevos }}</p>
+      </div>
+
+      <div class="stat-card verde">
+        <h3>Tiempo promedio de solución</h3>
+        <p>{{ resumen.promedioSolucion }}</p>
+      </div>
+
+      <div class="stat-card morado">
+        <h3>Tickets resueltos hoy</h3>
+        <p>{{ resumen.resueltosHoy }}</p>
+      </div>
+
+      <div class="stat-card gris">
+        <h3>Total de Tickets</h3>
+        <p>{{ resumen.total }}</p>
+      </div>
+    </div>
+
+    <!-- GRÁFICOS -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h4>Tickets según complejidad</h4>
+        <canvas
+          baseChart
+          [data]="pieChartData"
+          [options]="pieChartOptions"
+          [type]="'pie'">
+        </canvas>
+      </div>
+
+      <div class="chart-card">
+        <h4>Tickets generados durante el mes</h4>
+        <canvas
+          baseChart
+          [data]="lineChartData"
+          [options]="lineChartOptions"
+          [type]="'line'">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="tabla-card">
+      <h3>Listado de Tickets</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ticket of tickets">
+            <td>{{ ticket.id }}</td>
+            <td>{{ ticket.titulo }}</td>
+            <td>{{ ticket.estado }}</td>
+            <td>{{ ticket.fecha | date }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
