@@ -33,7 +33,11 @@ export async function login(req, res) {
     const roles = rolesRows.map(r => r.nombreRol);
 
     const token = firmarToken(
-      { dni: usuario.dni, roles },
+      { dni: usuario.dni,
+        nombre: usuario.nombre || usuario.nombres || usuario.username || 'Usuario',
+        correo: usuario.correo,
+        rol: roles,
+        roles},
       process.env.JWT_SECRET,
       '8h'
     );

@@ -37,11 +37,14 @@ export class AuthService {
 
     try {
       const decoded: any = jwtDecode(token);
+      console.log('🔍 Token decodificado:', decoded); // 👈 agrega esto para depurar
+
       return {
-        nombre: decoded.nombre || decoded.email || 'Usuario',
-        rol: decoded.rol || 'Empleado'
+        nombre: decoded.nombre || decoded.username || decoded.email || 'Usuario',
+        rol: decoded.rol || decoded.role || 'Empleado'
       };
-    } catch {
+    } catch (error) {
+      console.error('❌ Error al decodificar el token:', error);
       return null;
     }
   }
@@ -66,9 +69,22 @@ export class AuthService {
 
   // 🔹 Verifica si el usuario tiene un rol específico
   tieneRol(rolBuscado: string): boolean {
-    const datos = this.obtenerDatosUsuario; // ✅ sin paréntesis
-    return !!datos && datos.rol.toLowerCase() === rolBuscado.toLowerCase();
+  const datos = this.obtenerDatosUsuario;
+  const roles = this.roles || [];
+
+  // Si hay varios roles, verifica si alguno coincide
+  if (Array.isArray(roles) && roles.length > 0) {
+    return roles.some(r => r.toLowerCase() === rolBuscado.toLowerCase());
   }
+
+  // Si solo hay un rol individual
+  if (typeof datos?.rol === 'string') {
+    return datos.rol.toLowerCase() === rolBuscado.toLowerCase();
+  }
+
+  return false;
+}
+
 
   // 🔹 Cierra sesión
   logout(): void {
