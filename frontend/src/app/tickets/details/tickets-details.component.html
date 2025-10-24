@@ -1,7 +1,14 @@
-<div *ngIf="ticket">
-  <h2>Detalle del Ticket</h2>
-  <p><b>ID:</b> {{ ticket.id }}</p>
-  <p><b>Título:</b> {{ ticket.titulo }}</p>
-  <p><b>Estado:</b> {{ ticket.estado }}</p>
-  <p><b>Descripción:</b> {{ ticket.descripcion }}</p>
+<div class="ticket-detail" *ngIf="!loading && ticket">
+  <h2>Ticket #{{ ticket.id }}</h2>
+
+  <p><strong>Título:</strong> {{ ticket.titulo }}</p>
+  <p><strong>Descripción:</strong> {{ ticket.descripcion }}</p>
+  <p><strong>Estado:</strong> {{ ticket.estado }}</p>
+  <p><strong>Prioridad:</strong> {{ ticket.prioridad }}</p>
+  <p><strong>Usuario:</strong> {{ ticket.usuario }}</p>
+  <p><strong>Fecha:</strong> {{ ticket.fecha | date: 'dd/MM/yyyy' }}</p>
+
+  <button (click)="volver()">⬅ Volver</button>
 </div>
+
+<div *ngIf="loading" class="loading">Cargando ticket...</div>

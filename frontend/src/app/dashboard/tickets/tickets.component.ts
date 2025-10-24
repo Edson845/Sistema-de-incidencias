@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { HttpClient } from '@angular/common/http';
@@ -9,7 +8,7 @@ import { environment } from '../../environments/environments';
 @Component({
   selector: 'app-tickets',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, NgChartsModule],
+  imports: [CommonModule, NgChartsModule],
   templateUrl: './tickets.component.html',
   styleUrls: ['./tickets.component.css']
 })

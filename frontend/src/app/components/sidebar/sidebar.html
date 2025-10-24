@@ -4,7 +4,7 @@
   </div>
 
   <div class="logo-section" *ngIf="!isClosed">
-    <img src="assets/img/logo_01.png" alt="Logo" class="logo">
+    <img class="logo "src="assets/img/logo_01.png">
     <h2>Sistema de Gestion de Incidentes</h2>
   </div>
 
@@ -17,53 +17,50 @@
 
   <nav class="menu">
 
-  <!-- Mostrar solo si el usuario es ADMIN -->
+  <!-- ADMIN -->
   <ng-container *ngIf="authService.tieneRol('admin')">
-    <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
+    <a routerLinkActive="active" class="menu-item" (click)="onMenuClick('dashboard')">
       <i class="fas fa-home"></i>
       <span *ngIf="!isClosed">Dashboard</span>
     </a>
 
-    <a routerLink="/tickets" routerLinkActive="active" class="menu-item">
+    <a routerLinkActive="active" class="menu-item" (click)="onMenuClick('tickets')">
       <i class="fas fa-ticket-alt"></i>
       <span *ngIf="!isClosed">Tickets</span>
     </a>
 
-    <a routerLink="/usuarios" routerLinkActive="active" class="menu-item">
+    <a routerLinkActive="active" class="menu-item" (click)="onMenuClick('usuarios')">
       <i class="fas fa-users"></i>
       <span *ngIf="!isClosed">Usuarios</span>
     </a>
   </ng-container>
 
-  <!-- 🔹 Si el usuario NO es admin, se pueden mostrar otros accesos -->
+  <!-- TECNICO -->
   <ng-container *ngIf="authService.tieneRol('tecnico')">
-    <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
+    <a routerLinkActive="active" class="menu-item" (click)="onMenuClick('dashboard')">
       <i class="fas fa-home"></i>
       <span *ngIf="!isClosed">Dashboard</span>
     </a>
-    <a routerLink="/tickets" routerLinkActive="active" class="menu-item">
-      <i class="fas fa-toolbox"></i>
-      <span *ngIf="!isClosed">Tickets Asignados</span>
-    </a>
-    <a routerLink="/tickets" routerLinkActive="active" class="menu-item">
+
+    <a routerLinkActive="active" class="menu-item" (click)="onMenuClick('tickets')">
       <i class="fas fa-ticket-alt"></i>
       <span *ngIf="!isClosed">Tickets</span>
     </a>
   </ng-container>
 
+  <!-- USUARIO -->
   <ng-container *ngIf="authService.tieneRol('usuario')">
-    
-    <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
+    <a routerLinkActive="active" class="menu-item" (click)="onMenuClick('dashboard')">
       <i class="fas fa-home"></i>
       <span *ngIf="!isClosed">Dashboard</span>
     </a>
-    
-    <a routerLink="/tickets" routerLinkActive="active" class="menu-item">
+
+    <a routerLinkActive="active" class="menu-item" (click)="onMenuClick('tickets')">
       <i class="fas fa-ticket-alt"></i>
       <span *ngIf="!isClosed">Tickets</span>
     </a>
   </ng-container>
+    <button *ngIf="!isClosed" class="btn-sesion" type="submit" (click)="logout()">Cerrar Sesion</button>
 
 </nav>
-
 </div>

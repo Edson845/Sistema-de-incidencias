@@ -40,6 +40,24 @@ export class SidebarComponent implements OnInit {
     this.rol = 'usuario';
   }
 }
+   onMenuClick(opcion: string) {
+    console.log('Botón presionado:', opcion);
+
+    switch (opcion) {
+      case 'dashboard':
+        this.router.navigate(['/dashboard']);
+        break;
+      case 'tickets':
+        this.router.navigate(['/tickets']);
+        break;
+      case 'usuarios':
+        this.router.navigate(['/usuarios']);
+        break;
+      default:
+        console.warn('Opción no reconocida:', opcion);
+        break;
+    }
+  }
 
 
   toggleSidebar() {
