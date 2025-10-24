@@ -54,7 +54,7 @@
           ¿Olvidaste tu contraseña? Clic aquí
         </a>
 
-        <button type="submit" [disabled]="loginForm.invalid">INICIAR SESIÓN</button>
+        <button type="submit" (click)="login()">INICIAR SESIÓN</button>
       </form>
 
       <p class="register-text">

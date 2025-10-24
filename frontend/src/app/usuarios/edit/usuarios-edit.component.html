@@ -1,10 +1,19 @@
-<h2>Editar Usuario</h2>
-<form (ngSubmit)="guardarCambios()">
-  <input type="text" [(ngModel)]="usuario.nombre" name="nombre" placeholder="Nombre">
-  <input type="email" [(ngModel)]="usuario.email" name="email" placeholder="Correo">
-  <select [(ngModel)]="usuario.rol" name="rol">
-    <option value="usuario">Usuario</option>
-    <option value="admin">Administrador</option>
+<div class="usuario-form">
+  <h2>Editar Usuario</h2>
+
+  <label>Nombre</label>
+  <input [(ngModel)]="usuario.nombre" />
+
+  <label>Email</label>
+  <input [(ngModel)]="usuario.email" />
+
+  <label>Rol</label>
+  <select [(ngModel)]="usuario.rol">
+    <option>admin</option>
+    <option>tecnico</option>
+    <option>usuario</option>
   </select>
-  <button type="submit">Guardar</button>
-</form>
+
+  <button (click)="guardarCambios()">Guardar</button>
+  <p>{{ mensaje }}</p>
+</div>

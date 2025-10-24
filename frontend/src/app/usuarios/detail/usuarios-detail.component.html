@@ -1,7 +1,10 @@
-<div *ngIf="usuario">
-  <h2>Detalle de Usuario</h2>
-  <p><b>ID:</b> {{ usuario.id }}</p>
-  <p><b>Nombre:</b> {{ usuario.nombre }}</p>
-  <p><b>Email:</b> {{ usuario.email }}</p>
-  <p><b>Rol:</b> {{ usuario.rol }}</p>
+<div class="usuario-detail" *ngIf="!loading && usuario">
+  <h2>Usuario #{{ usuario.id }}</h2>
+  <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+  <p><strong>Email:</strong> {{ usuario.email }}</p>
+  <p><strong>Rol:</strong> {{ usuario.rol }}</p>
+
+  <button (click)="volver()">⬅ Volver</button>
 </div>
+
+<div *ngIf="loading" class="loading">Cargando...</div>
