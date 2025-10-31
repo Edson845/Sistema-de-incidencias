@@ -1,34 +1,56 @@
 <div class="usuarios-container">
-  <h2>Usuarios Registrados</h2>
+  <h2>Gestión de Usuarios</h2>
 
-  <div *ngIf="loading" class="loading">Cargando...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
+  <!-- 🔹 Controles superiores -->
+  <div class="top-bar">
+    <!-- Botón agregar -->
+    <button class="btn-agregar" (click)="agregarUsuario()">➕ Agregar Usuario</button>
 
-  <table *ngIf="!loading && usuarios.length" class="usuarios-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nombre</th>
-        <th>Correo</th>
-        <th>Rol</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let u of usuarios">
-        <td>{{ u.id }}</td>
-        <td>{{ u.nombre }}</td>
-        <td>{{ u.email }}</td>
-        <td>{{ u.rol }}</td>
-        <td>
-          <button (click)="verDetalle(u.id)">👁️ Ver</button>
-          <button (click)="editarUsuario(u.id)">✏️ Editar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <!-- Barra de búsqueda -->
+    <input
+      type="text"
+      [(ngModel)]="filtro"
+      placeholder="🔍 Buscar por nombre o correo..."
+      class="search-input"
+    />
+  </div>
 
-  <div *ngIf="!loading && usuarios.length === 0" class="empty">
-    No hay usuarios registrados.
+  <!-- Indicadores de carga o error -->
+  <div *ngIf="loading" class="mensaje info">Cargando usuarios...</div>
+  <div *ngIf="error" class="mensaje error">{{ error }}</div>
+
+  <!-- Tabla de usuarios -->
+  <div *ngIf="!loading && usuariosFiltrados.length > 0" class="tabla-responsive">
+    <table class="usuarios-tabla">
+      <thead>
+        <tr>
+          <th>DNI</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
+          <th>Correo</th>
+          <th>ID Cargo</th>
+          <th>Usuario</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of usuariosFiltrados">
+          <td>{{ usuario.dni }}</td>
+          <td>{{ usuario.nombres }}</td>
+          <td>{{ usuario.apellidos }}</td>
+          <td>{{ usuario.correo }}</td>
+          <td>{{ usuario.idCargo }}</td>
+          <td>{{ usuario.usuario }}</td>
+          <td>
+            <button class="btn-ver" (click)="verDetalle(usuario.id)">👁 Ver</button>
+            <button class="btn-editar" (click)="editarUsuario(usuario.id)">✏️ Editar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!loading && usuariosFiltrados.length === 0" class="mensaje vacio">
+    No se encontraron usuarios.
   </div>
 </div>

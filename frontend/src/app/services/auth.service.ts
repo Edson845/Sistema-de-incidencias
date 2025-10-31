@@ -32,13 +32,11 @@ export class AuthService {
 
   // 🔹 Devuelve información básica del usuario
   get obtenerDatosUsuario(): { nombre: string; rol: string } | null {
-    const token = this.obtenerToken(); // ✅ se llama como función
+    const token = this.obtenerToken(); 
     if (!token) return null;
 
     try {
       const decoded: any = jwtDecode(token);
-      console.log('🔍 Token decodificado:', decoded); // 👈 agrega esto para depurar
-
       return {
         nombre: decoded.nombre || decoded.username || decoded.email || 'Usuario',
         rol: decoded.rol || decoded.role || 'Empleado'
