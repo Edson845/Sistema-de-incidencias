@@ -1,19 +1,56 @@
-<div class="ticket-form">
-  <h2>Nuevo Ticket</h2>
+<div class="container">
+  <main class="main-content">
+    <div class="form-container">
+      <h3 class="form-title">Registrando nuevo ticket</h3>
 
-  <label>Título</label>
-  <input [(ngModel)]="titulo" placeholder="Título del ticket" />
+      <form [formGroup]="ticketForm" (ngSubmit)="registrarTicket()" class="ticket-form">
 
-  <label>Descripción</label>
-  <textarea [(ngModel)]="descripcion" placeholder="Describe el problema..."></textarea>
+        <!-- TÍTULO -->
+        <label for="titulo">Registre el título del incidente <span>*</span></label>
+        <input
+          type="text"
+          id="titulo"
+          formControlName="titulo"
+          placeholder="Ingrese el título del incidente"
+        />
 
-  <label>Prioridad</label>
-  <select [(ngModel)]="prioridad">
-    <option>Alta</option>
-    <option>Media</option>
-    <option>Baja</option>
-  </select>
+        <!-- DESCRIPCIÓN -->
+        <label for="descripcion">Ingrese una breve descripción del problema <span>*</span></label>
+        <textarea
+          id="descripcion"
+          formControlName="descripcion"
+          maxlength="300"
+          placeholder="Máximo 300 caracteres"
+        ></textarea>
 
-  <button (click)="crearTicket()">Guardar</button>
-  <p class="mensaje">{{ mensaje }}</p>
+        <!-- CATEGORÍA -->
+        <label for="idCategoria">Seleccione la categoría del problema <span>*</span></label>
+        <select id="idCategoria" formControlName="idCategoria" class="form-select">
+          <option value="">Seleccione una categoría</option>
+          <option *ngFor="let cat of categorias" [value]="cat.idCategoria">
+            {{ cat.nombreCategoria }}
+          </option>
+        </select>
+
+        <!-- NIVEL -->
+        <label>Seleccione el nivel del incidente <span>*</span></label>
+        <div class="nivel-group">
+          <label><input type="radio" formControlName="nivel" value="bajo" /> Bajo</label>
+          <label><input type="radio" formControlName="nivel" value="medio" /> Medio</label>
+          <label><input type="radio" formControlName="nivel" value="alto" /> Alto</label>
+        </div>
+
+        <!-- ARCHIVOS -->
+        <label>Adjunte fotos, capturas o archivos (opcional)</label>
+        <input type="file" multiple (change)="onFileSelected($event)" />
+
+        <!-- BOTONES -->
+        <div class="button-group">
+          <button type="button" class="btn-cancelar" (click)="ticketForm.reset()">Cancelar</button>
+          <button type="submit" class="btn-registrar">Registrar Ticket</button>
+        </div>
+      </form>
+    </div>
+  </main>
 </div>
+
