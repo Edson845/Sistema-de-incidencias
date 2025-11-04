@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -15,8 +15,21 @@ export class TicketsService {
   getTicket(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
+  obtenerCategorias(): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
 
-  crearTicket(ticket: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, ticket);
+    return this.http.get<any[]>(`${this.apiUrl}/categorias`, { headers });
   }
+  crearTicket(ticket: FormData): Observable<any> {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.post(`${this.apiUrl}`, ticket, { headers });
+}
+
 }

@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import multer from 'multer';
 
 import authRoutes from './routes/auth.routes.js';
 import ticketsRoutes from './routes/tickets.routes.js';
@@ -22,6 +23,9 @@ app.use(
     },
   })
 );
+const upload = multer();
+app.use(express.urlencoded({ extended: true }));
+app.use(upload.none());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketsRoutes);

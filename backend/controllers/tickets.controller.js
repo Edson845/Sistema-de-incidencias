@@ -18,18 +18,37 @@ export async function getTodosTickets(req, res) {
   }
 }
 
-export async function crearTicket(req, res) {
-  const { tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto } = req.body;
+export const obtenerCategorias = async (req, res) => {
   try {
-    await pool.query(
-      'INSERT INTO ticket (tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [tituloTicket, descTicket, asignadoA, usuarioCrea, idCategoria, idEstado, idPrioridad, adjunto]
-    );
-    res.json({ mensaje: 'Ticket Creado' });
+    const [rows] = await pool.query('SELECT idCategoria, nombreCategoria FROM categoria');
+    res.json(rows);
   } catch (error) {
-    res.status(500).json({ mensaje: error.message });
+    console.error('❌ Error al obtener categorías:', error);
+    res.status(500).json({ mensaje: 'Error al obtener categorías' });
   }
-}
+};
+export const crearTicket = async (req, res) => {
+  try {
+    console.log("📦 Datos recibidos:", req.body); // depura
+
+    const { titulo, descripcion, idCategoria,tipo, nivel } = req.body;
+    const usuarioCrea = req.user?.dni;
+    if (!descripcion) {
+      return res.status(400).json({ mensaje: "La descripción es obligatoria" });
+    }
+
+    const [result] = await pool.query(
+      `INSERT INTO ticket (tituloTicket, descTicket, usuarioCrea, fechaCreacion, idCategoria, idPrioridad)
+       VALUES (?, ?, ?, NOW(), ?, ?)`,
+      [titulo, descripcion, usuarioCrea, idCategoria, 1]
+    );
+    res.json({ mensaje: "✅ Ticket creado correctamente", idTicket: result.insertId });
+  } catch (error) {
+    console.error("❌ Error en crearTicket:", error);
+    res.status(500).json({ mensaje: "Error al crear ticket", error: error.message });
+  }
+};
+
 
 export async function actualizarTicket(req, res) {
   const { id } = req.params;

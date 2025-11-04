@@ -33,11 +33,6 @@ export async function verificarToken(req, res, next) {
   }
 }
 
-/**
- * 🧠 Middleware para verificar rol
- * - Permite pasar un solo rol o un array de roles.
- * - Verifica si el usuario tiene alguno de los roles requeridos.
- */
 export function verificarRol(rolesPermitidos) {
   return async (req, res, next) => {
     try {
