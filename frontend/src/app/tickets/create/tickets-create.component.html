@@ -32,17 +32,15 @@
           </option>
         </select>
 
-        <!-- NIVEL -->
-        <label>Seleccione el nivel del incidente <span>*</span></label>
-        <div class="nivel-group">
-          <label><input type="radio" formControlName="nivel" value="bajo" /> Bajo</label>
-          <label><input type="radio" formControlName="nivel" value="medio" /> Medio</label>
-          <label><input type="radio" formControlName="nivel" value="alto" /> Alto</label>
-        </div>
+        <!-- 📸 Campo de archivo -->
+        <label for="adjunto">Adjunte una imagen o PDF (opcional)</label>
+        <input type="file" id="adjunto" accept=".jpg,.jpeg,.png,.pdf" (change)="onFileSelected($event)" />
 
-        <!-- ARCHIVOS -->
-        <label>Adjunte fotos, capturas o archivos (opcional)</label>
-        <input type="file" multiple (change)="onFileSelected($event)" />
+        <!-- 👁️ Vista previa si es imagen -->
+        <div class="preview-container" *ngIf="imagenPreview">
+          <p>Vista previa:</p>
+          <img [src]="imagenPreview" alt="Vista previa" class="preview-img" />
+        </div>
 
         <!-- BOTONES -->
         <div class="button-group">

@@ -4,12 +4,6 @@ import pool from '../db.js';
 
 dotenv.config();
 
-/**
- * 🧩 Middleware para verificar el token JWT
- * - Extrae el token del header Authorization.
- * - Lo verifica con JWT_SECRET.
- * - Añade los datos decodificados a req.user.
- */
 export async function verificarToken(req, res, next) {
   try {
     const authHeader = req.headers['authorization'];
