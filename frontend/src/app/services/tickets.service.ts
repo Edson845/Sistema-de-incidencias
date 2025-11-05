@@ -11,7 +11,14 @@ export class TicketsService {
   getTickets(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
-
+  obtenerMisTickets(): Observable<any> {
+  return this.http.get(`${this.apiUrl}/mios`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  }
+  
   getTicket(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }

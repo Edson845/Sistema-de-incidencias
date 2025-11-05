@@ -1,38 +1,87 @@
 <div class="tickets-container">
-  <div class="header">
-    <h2>Tickets Registrados</h2>
-    <button (click)="crearTicket()">+ Nuevo Ticket</button>
+  <h2>Gestión de Tickets</h2>
+
+  <!-- 🔹 Controles superiores -->
+  <div class="top-bar">
+    <!-- Botón agregar -->
+    <button class="btn-agregar" (click)="crearTicket()">➕ Nuevo Ticket</button>
+
+    <!-- Barra de búsqueda -->
+    <input
+      type="text"
+      [(ngModel)]="filtro"
+      placeholder="🔍 Buscar por título o usuario..."
+      class="search-input"
+      (input)="filtrarTickets()"
+    />
   </div>
 
-  <div *ngIf="loading" class="loading">Cargando...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
+  <!-- Indicadores de carga o error -->
+  <div *ngIf="loading" class="mensaje info">Cargando tickets...</div>
+  <div *ngIf="error" class="mensaje error">{{ error }}</div>
 
-  <table *ngIf="!loading && tickets.length" class="tickets-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Título</th>
-        <th>Estado</th>
-        <th>Prioridad</th>
-        <th>Usuario</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let t of tickets">
-        <td>{{ t.id }}</td>
-        <td>{{ t.titulo }}</td>
-        <td>{{ t.estado }}</td>
-        <td>{{ t.prioridad }}</td>
-        <td>{{ t.usuario }}</td>
-        <td>
-          <button (click)="verTicket(t.id)">👁️ Ver</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- Tabla de tickets -->
+  <div *ngIf="!loading && ticketsFiltrados.length > 0" class="tabla-responsive">
+    <table class="tickets-tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Descripción</th>
+          <th>Asignado A</th>
+          <th>Fecha Creación</th>
+          <th>Categoría</th>
+          <th>Estado</th>
+          <th *ngIf="rolUsuario === 'admin'">Prioridad</th>
+          <th *ngIf="rolUsuario === 'admin'">Usuario</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of ticketsFiltrados">
+          <td>{{ t.idTicket }}</td>
+          <td>{{ t.tituloTicket }}</td>
+          <td>{{ t.descTicket }}</td>
+          <td>{{ t.asignadoA }}</td>
+          <td>{{ t.fechaCreacion | date:'dd/MM/yyyy HH:mm'}}</td>
+          <td>{{ t.idCategoria }}</td>
+          <td>{{ t.idEstado }}</td>
 
-  <div *ngIf="!loading && tickets.length === 0" class="empty">
-    No hay tickets registrados.
+          <!-- Solo visible para admin -->
+          <td *ngIf="rolUsuario === 'admin'">
+            <span
+              [ngClass]="{
+                'prioridad-baja': t.idPrioridad == 1,
+                'prioridad-media': t.idPrioridad == 3,
+                'prioridad-alta': t.idPrioridad >= 4
+              }"
+            >
+              {{ t.idPrioridad }}
+            </span>
+          </td>
+          <td *ngIf="rolUsuario === 'admin'">{{ t.usuarioCrea }}</td>
+
+          <!-- Acciones -->
+          <td>
+            <button class="btn-ver" (click)="verTicket(t.idTicket)">👁 Ver</button>
+            <button class="btn-editar" (click)="editarTicket(t.idTicket)">✏️ Editar</button>
+
+            <!-- Botón Asignar solo para admin -->
+            <button
+              *ngIf="rolUsuario === 'admin'"
+              class="btn-asignar"
+              (click)="asignarTicket(t.idTicket)"
+            >
+              🛠 Asignar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mensaje si no hay tickets -->
+  <div *ngIf="!loading && ticketsFiltrados.length === 0" class="mensaje vacio">
+    No se encontraron tickets.
   </div>
 </div>
