@@ -2,12 +2,45 @@ import pool from '../db.js';
 import { predecirPrioridad,entrenarConNuevoEjemplo } from '../utils/nlp.js';
 export async function getTicketsUsuario(req, res) {
   try {
-    const [rows] = await pool.query('SELECT * FROM ticket WHERE usuarioCrea = ?', [req.user.id]);
+    const rolesUsuario = req.user?.rol || []; // array de roles
+    const idUsuario = String(req.user?.dni || '');
+
+    if (!rolesUsuario.length || !idUsuario) {
+      return res.status(401).json({ mensaje: 'Usuario no autenticado o datos incompletos' });
+    }
+
+    // Determinar rol principal del usuario
+    const rol = rolesUsuario[0].trim().toLowerCase(); // toma el primer rol
+
+    let query = '';
+    let params = [];
+
+    if (rol === 'admin') {
+      query = 'SELECT * FROM ticket';
+    } else if (rol === 'tecnico') {
+      query = `
+        SELECT * FROM ticket 
+        WHERE usuarioCrea = ? OR asignadoA = ?`;
+      params = [idUsuario, idUsuario];
+    } else {
+      query = 'SELECT * FROM ticket WHERE usuarioCrea = ?';
+      params = [idUsuario];
+    }
+
+    let rows;
+    if (params.length > 0) {
+      [rows] = await pool.query(query, params);
+    } else {
+      [rows] = await pool.query(query);
+    }
+
     res.json(rows);
   } catch (error) {
+    console.error('❌ Error en getTicketsUsuario:', error);
     res.status(500).json({ mensaje: error.message });
   }
 }
+
 
 export async function getTodosTickets(req, res) {
   try {

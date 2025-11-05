@@ -13,13 +13,9 @@ import {
 
 const router = express.Router();
 
-// 🔹 Asegurar que la carpeta uploads exista
-const uploadDir = path.resolve('uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
 
-// 🔹 Configuración de Multer
+const uploadDir = path.resolve('uploads');
+if (!fs.existsSync(uploadDir)) {fs.mkdirSync(uploadDir);}
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -41,11 +37,11 @@ const upload = multer({
     cb(new Error('Solo se permiten archivos .jpg, .jpeg, .png o .pdf'));
   }
 });
-router.get('/mios', verificarToken, verificarRol('usuario', 'tecnico', 'admin'), getTicketsUsuario);
-router.get('/', verificarToken, verificarRol('admin', 'tecnico'), getTodosTickets);
+router.get('/mios', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), getTicketsUsuario);
+router.get('/', verificarToken, verificarRol(['admin', 'tecnico']), getTodosTickets);
 router.get('/categorias', verificarToken, obtenerCategorias);
-router.post('/',verificarToken,verificarRol(['usuario']),upload.array('archivos', 5),crearTicket);
+router.post('/',verificarToken,verificarRol(['usuario','tecnico', 'admin']),upload.array('archivos', 5),crearTicket);
 
-router.put('/:id', verificarToken, verificarRol('tecnico', 'admin'), actualizarTicket);
+router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualizarTicket);
 
 export default router;

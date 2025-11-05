@@ -29,7 +29,7 @@ export const routes: Routes = [
       // Tickets
       { path: 'tickets', component: TicketsListComponent },
       { path: 'tickets/nuevo', component: TicketsCreateComponent },
-      { path: 'tickets/:id', component: TicketsDetailsComponent },
+      { path: 'tickets/id', component: TicketsDetailsComponent },
 
       // Usuarios
       { path: 'usuarios', component: UsuariosListComponent },
