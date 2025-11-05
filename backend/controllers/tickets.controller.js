@@ -1,5 +1,5 @@
 import pool from '../db.js';
-
+import { predecirPrioridad,entrenarConNuevoEjemplo } from '../utils/nlp.js';
 export async function getTicketsUsuario(req, res) {
   try {
     const [rows] = await pool.query('SELECT * FROM ticket WHERE usuarioCrea = ?', [req.user.id]);
@@ -29,26 +29,52 @@ export const obtenerCategorias = async (req, res) => {
 };
 export const crearTicket = async (req, res) => {
   try {
-    console.log("📦 Datos recibidos:", req.body); // depura
-
-    const { titulo, descripcion, idCategoria,tipo, nivel } = req.body;
+    const { titulo, descripcion, idCategoria } = req.body;
     const usuarioCrea = req.user?.dni;
-    if (!descripcion) {
-      return res.status(400).json({ mensaje: "La descripción es obligatoria" });
+
+    if (!titulo || !descripcion || !idCategoria) {
+      return res.status(400).json({ mensaje: 'Todos los campos obligatorios deben completarse' });
     }
 
+    // 🧠 Predecir prioridad automáticamente
+    const prioridad = predecirPrioridad(descripcion);
+
+    // 📁 Archivos adjuntos
+    const archivos = req.files && req.files.length > 0
+      ? req.files.map((file) => file.filename)
+      : [];
+    const adjunto = archivos.length > 0 ? archivos.join(',') : null;
+
+    // 💾 Guardar en la base de datos
     const [result] = await pool.query(
-      `INSERT INTO ticket (tituloTicket, descTicket, usuarioCrea, fechaCreacion, idCategoria, idPrioridad)
-       VALUES (?, ?, ?, NOW(), ?, ?)`,
-      [titulo, descripcion, usuarioCrea, idCategoria, 1]
+      `INSERT INTO ticket (
+        tituloTicket,
+        descTicket,
+        usuarioCrea,
+        fechaCreacion,
+        idCategoria,
+        idEstado,
+        idPrioridad,
+        adjunto
+      ) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?)`,
+      [titulo, descripcion, usuarioCrea, idCategoria, 1, prioridad, adjunto]
     );
-    res.json({ mensaje: "✅ Ticket creado correctamente", idTicket: result.insertId });
+
+    res.json({
+      mensaje: '✅ Ticket creado correctamente',
+      idTicket: result.insertId,
+      prioridad,
+      archivosGuardados: archivos
+    });
+
   } catch (error) {
-    console.error("❌ Error en crearTicket:", error);
-    res.status(500).json({ mensaje: "Error al crear ticket", error: error.message });
+    console.error('❌ Error en crearTicket:', error);
+    res.status(500).json({
+      mensaje: 'Error al crear ticket',
+      error: error.message
+    });
   }
 };
-
 
 export async function actualizarTicket(req, res) {
   const { id } = req.params;
@@ -58,6 +84,9 @@ export async function actualizarTicket(req, res) {
       'UPDATE ticket SET tituloTicket = ?, descTicket = ?, idEstado = ? WHERE idTicket = ?',
       [titulo, descripcion, estado, id]
     );
+    if (descripcion && prioridad) {
+      entrenarConNuevoEjemplo(descripcion, prioridad);
+    }
     res.json({ mensaje: 'Ticket actualizado' });
   } catch (error) {
     res.status(500).json({ mensaje: error.message });

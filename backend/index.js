@@ -8,11 +8,13 @@ import authRoutes from './routes/auth.routes.js';
 import ticketsRoutes from './routes/tickets.routes.js';
 import usuariosRoutes from './routes/usuarios.routes.js';
 import estadisticasRoutes from './routes/estadisticas.routes.js';
+import { cargarModelo } from './utils/nlp.js';
+cargarModelo();
 
 dotenv.config();
 
 const app = express();
-
+const upload = multer();
 app.use(cors());
 app.use(express.json());
 app.use(
@@ -23,10 +25,9 @@ app.use(
     },
   })
 );
-const upload = multer();
-app.use(express.urlencoded({ extended: true }));
-app.use(upload.none());
 
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketsRoutes);
 app.use('/api/usuarios', usuariosRoutes);

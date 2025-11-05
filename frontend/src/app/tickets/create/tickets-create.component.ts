@@ -5,7 +5,7 @@ import { TicketsService } from '../../services/tickets.service';
 
 @Component({
   selector: 'app-ticket-form',
-  standalone: true, // 👈 IMPORTANTE si no usas NgModule
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -17,60 +17,82 @@ import { TicketsService } from '../../services/tickets.service';
 export class TicketsCreateComponent implements OnInit {
   ticketForm!: FormGroup;
   archivos: File[] = [];
+  categorias: any[] = [];
+
+  // 🔹 Agrega esta línea — es la que faltaba:
+  imagenPreview: string | null = null;
 
   constructor(private fb: FormBuilder, private ticketService: TicketsService) {}
-categorias: any[] = [];
+
   ngOnInit(): void {
-  this.ticketForm = this.fb.group({
-    titulo: ['', Validators.required],
-    descripcion: ['', [Validators.required, Validators.maxLength(300)]],
-    tipo: ['', Validators.required],
-    idCategoria: ['', Validators.required],
-    nivel: ['', Validators.required]
-  });
-  this.cargarCategorias();
+    this.ticketForm = this.fb.group({
+      titulo: ['', Validators.required],
+      descripcion: ['', [Validators.required, Validators.maxLength(300)]],
+      idCategoria: ['', Validators.required],
+      adjunto: ['']
+    });
+    this.cargarCategorias();
   }
+
   cargarCategorias() {
-  this.ticketService.obtenerCategorias().subscribe({
-    next: (data) => {
-      this.categorias = data;
-    },
-    error: (err) => {
-      console.error('Error al obtener categorías:', err);
-    }
-  });
-}
+    this.ticketService.obtenerCategorias().subscribe({
+      next: (data) => {
+        this.categorias = data;
+      },
+      error: (err) => {
+        console.error('Error al obtener categorías:', err);
+      }
+    });
+  }
+
   onFileSelected(event: any) {
-    this.archivos = Array.from(event.target.files);
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      this.archivos = Array.from(files);
+      const file = files[0];
+
+      this.ticketForm.patchValue({ adjunto: file.name });
+      this.ticketForm.get('adjunto')?.updateValueAndValidity();
+
+      // 🔹 Genera la vista previa si es imagen
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.imagenPreview = reader.result as string;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        this.imagenPreview = null;
+      }
+    } else {
+      this.archivos = [];
+      this.imagenPreview = null;
+      this.ticketForm.patchValue({ adjunto: '' });
+    }
   }
 
   registrarTicket() {
-    console.log('✅ registrarTicket() ejecutado'); // <-- Prueba
+    console.log('✅ registrarTicket() ejecutado');
     if (this.ticketForm.invalid) {
       this.ticketForm.markAllAsTouched();
       return;
     }
-    console.log('📦 Datos del formulario:', this.ticketForm.value);
+
     const formData = new FormData();
-    
     formData.append('titulo', this.ticketForm.value.titulo);
     formData.append('descripcion', this.ticketForm.value.descripcion);
     formData.append('idCategoria', this.ticketForm.value.idCategoria);
-    formData.append('nivel', this.ticketForm.value.nivel);
 
     this.archivos.forEach(file => {
       formData.append('archivos', file);
     });
-    console.log('📦 Enviando al backend...');
-      for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
 
     this.ticketService.crearTicket(formData).subscribe({
       next: (res) => {
         alert('✅ Ticket registrado correctamente');
         this.ticketForm.reset();
         this.archivos = [];
+        this.imagenPreview = null;
       },
       error: (err) => {
         console.error(err);
@@ -79,4 +101,3 @@ categorias: any[] = [];
     });
   }
 }
-

@@ -122,18 +122,6 @@ body {
     resize: none;
     height: 80px;
 }
-
-.nivel-group {
-    display: flex;
-    gap: 20px;
-    margin-top: 10px;
-}
-
-.nivel-group label {
-    font-weight: normal;
-    color: #333;
-}
-
 /* Subida de archivos */
 .upload-box {
     margin-top: 15px;
@@ -207,6 +195,19 @@ body {
 .btn-registrar:hover {
     background: #005aa7;
 }
+.preview-container {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-img {
+  width: 120px;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 
 /* Responsividad */
 @media (max-width: 900px) {
@@ -223,4 +224,5 @@ body {
     .main-content {
         padding: 15px;
     }
+    
 }
