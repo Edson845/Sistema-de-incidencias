@@ -1,5 +1,4 @@
 import pool from '../db.js';
-import { predecirPrioridad,entrenarConNuevoEjemplo } from '../utils/nlp.js';
 export async function getTicketsUsuario(req, res) {
   try {
     const rolesUsuario = req.user?.rol || []; // array de roles
@@ -66,11 +65,13 @@ export const crearTicket = async (req, res) => {
     const usuarioCrea = req.user?.dni;
 
     if (!titulo || !descripcion || !idCategoria) {
-      return res.status(400).json({ mensaje: 'Todos los campos obligatorios deben completarse' });
+      return res.status(400).json({
+        mensaje: 'Todos los campos obligatorios deben completarse'
+      });
     }
 
-    // 🧠 Predecir prioridad automáticamente
-    const prioridad = predecirPrioridad(descripcion);
+    // TODO: Implementar predicción de prioridad con NLP
+    const prioridad = 3; // Prioridad media por defecto
 
     // 📁 Archivos adjuntos
     const archivos = req.files && req.files.length > 0
@@ -96,7 +97,7 @@ export const crearTicket = async (req, res) => {
     res.json({
       mensaje: '✅ Ticket creado correctamente',
       idTicket: result.insertId,
-      prioridad,
+      prioridad, // ← ya llega como número (1–5)
       archivosGuardados: archivos
     });
 
@@ -108,7 +109,6 @@ export const crearTicket = async (req, res) => {
     });
   }
 };
-
 export async function actualizarTicket(req, res) {
   const { id } = req.params;
   const { titulo, descripcion, estado } = req.body;
@@ -117,11 +117,106 @@ export async function actualizarTicket(req, res) {
       'UPDATE ticket SET tituloTicket = ?, descTicket = ?, idEstado = ? WHERE idTicket = ?',
       [titulo, descripcion, estado, id]
     );
-    if (descripcion && prioridad) {
-      entrenarConNuevoEjemplo(descripcion, prioridad);
-    }
+    // TODO: Implementar entrenamiento del modelo NLP
     res.json({ mensaje: 'Ticket actualizado' });
   } catch (error) {
+    res.status(500).json({ mensaje: error.message });
+  }
+}
+
+// Nuevos endpoints para estadísticas
+export async function getTicketsPorEstado(req, res) {
+  try {
+    const [rows] = await pool.query(`
+      SELECT idEstado as estado, COUNT(*) as cantidad
+      FROM ticket
+      GROUP BY idEstado
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error al obtener tickets por estado:', error);
+    res.status(500).json({ mensaje: error.message });
+  }
+}
+
+export async function getTicketsPorMes(req, res) {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        DATE_FORMAT(fechaCreacion, '%Y-%m') as mes,
+        COUNT(*) as cantidad
+      FROM ticket
+      WHERE fechaCreacion >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+      GROUP BY DATE_FORMAT(fechaCreacion, '%Y-%m')
+      ORDER BY mes ASC
+    `);
+
+    const resultado = rows.reduce((acc, row) => {
+      const fecha = new Date(row.mes + '-01');
+      const nombreMes = fecha.toLocaleString('es-ES', { month: 'long' });
+      acc[nombreMes] = row.cantidad;
+      return acc;
+    }, {});
+
+    res.json(resultado);
+  } catch (error) {
+    console.error('Error al obtener tickets por mes:', error);
+    res.status(500).json({ mensaje: error.message });
+  }
+}
+
+export async function getEstadisticasGenerales(req, res) {
+  try {
+    // 1. Obtener todos los tickets
+    const [tickets] = await pool.query('SELECT idEstado, fechaCreacion FROM ticket');
+    
+    console.log('Tickets obtenidos:', tickets); // Debug
+    
+    // 2. Procesar estadísticas
+    const estadoConteo = {
+      0: 0, // Cerrados
+      1: 0, // Nuevos
+      2: 0  // En Proceso
+    };
+    
+    const mesConteo = {};
+    let resueltosHoy = 0;
+    const hoy = new Date().toISOString().split('T')[0];
+    
+    tickets.forEach(ticket => {
+      // Contar por estado
+      const estado = ticket.idEstado;
+      estadoConteo[estado] = (estadoConteo[estado] || 0) + 1;
+      
+      // Contar por mes
+      if (ticket.fechaCreacion) {
+        const fecha = new Date(ticket.fechaCreacion);
+        const nombreMes = fecha.toLocaleString('es-ES', { month: 'long' });
+        mesConteo[nombreMes] = (mesConteo[nombreMes] || 0) + 1;
+      }
+      
+      // Contar resueltos hoy
+      if (estado === 0 && ticket.fechaCreacion?.split('T')[0] === hoy) {
+        resueltosHoy++;
+      }
+    });
+
+    // 3. Formatear resultados
+    const porEstado = [
+      { estado: 1, cantidad: estadoConteo[1] || 0 }, // Nuevos
+      { estado: 2, cantidad: estadoConteo[2] || 0 }, // En Proceso
+      { estado: 0, cantidad: estadoConteo[0] || 0 }  // Cerrados
+    ];
+
+    console.log('Estadísticas procesadas:', { porEstado, ticketsPorMes: mesConteo, resueltosHoy }); // Debug
+
+    res.json({
+      porEstado,
+      ticketsPorMes: mesConteo,
+      resueltosHoy
+    });
+  } catch (error) {
+    console.error('Error al obtener estadísticas generales:', error);
     res.status(500).json({ mensaje: error.message });
   }
 }

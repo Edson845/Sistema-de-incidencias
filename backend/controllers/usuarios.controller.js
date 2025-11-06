@@ -37,31 +37,82 @@ export async function getUsuarios(req, res) {
 }
 
 export async function crearUsuario(req, res) {
-  const { dni, usuario, password, nombres, apellidos, correo, idCargo } = req.body;
-
-  if (!dni || !usuario || !password || !nombres || !apellidos || !correo) {
-    return res.status(400).json({ mensaje: 'Faltan datos obligatorios' });
-  }
-
   try {
+    console.log('Datos recibidos:', req.body);
+    const { dni, usuario, password, nombres, celular, apellidos, correo, idRol } = req.body;
+
+    // Validación de datos obligatorios
+    if (!dni || !usuario || !password || !nombres || !apellidos || !correo || !idRol) {
+      console.log('Faltan datos obligatorios:', { dni, usuario, nombres, apellidos, correo, idRol });
+      return res.status(400).json({ 
+        mensaje: 'Faltan datos obligatorios',
+        camposFaltantes: {
+          dni: !dni,
+          usuario: !usuario,
+          password: !password,
+          nombres: !nombres,
+          apellidos: !apellidos,
+          correo: !correo,
+          idRol: !idRol
+        }
+      });
+    }
+
     // Verificar si el usuario ya existe
     const [existe] = await pool.query('SELECT dni FROM usuario WHERE dni = ?', [dni]);
     if (existe.length > 0) {
+      console.log('Usuario ya existe:', dni);
       return res.status(409).json({ mensaje: 'El usuario ya existe' });
     }
 
+    // Verificar si el rol existe
+    const [rolExiste] = await pool.query('SELECT idrol FROM rol WHERE idrol = ?', [idRol]);
+    if (rolExiste.length === 0) {
+      return res.status(400).json({ 
+        mensaje: 'El rol seleccionado no existe',
+        detalles: `No se encontró el rol con ID ${idRol}`
+      });
+    }
+
+    // Hashear contraseña
     const hashedPass = await bcrypt.hash(password, 10);
+    console.log('Password hasheado correctamente');
 
-    await pool.query(
-      `INSERT INTO usuario (dni, usuario, password, nombres, apellidos, correo, idCargo)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [dni, usuario, hashedPass, nombres, apellidos, correo, idCargo || null]
-    );
+    // Iniciar transacción
+    await pool.query('START TRANSACTION');
 
-    res.status(201).json({ mensaje: 'Usuario creado exitosamente' });
+    try {
+      // Insertar usuario
+      await pool.query(
+        `INSERT INTO usuario (dni, usuario, password, celular, nombres, apellidos, correo)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [dni, usuario, hashedPass, celular || null, nombres, apellidos, correo]
+      );
+
+      // Insertar rol de usuario
+      await pool.query(
+        'INSERT INTO rolusuario (dni, idrol) VALUES (?, ?)',
+        [dni, idRol]
+      );
+
+      // Confirmar transacción
+      await pool.query('COMMIT');
+      console.log('Usuario creado y rol asignado correctamente');
+      
+      res.status(201).json({ mensaje: 'Usuario creado exitosamente' });
+    } catch (err) {
+      // Revertir cambios si algo falla
+      await pool.query('ROLLBACK');
+      throw err;
+    }
   } catch (error) {
     console.error('Error al crear usuario:', error);
-    res.status(500).json({ mensaje: 'Error al crear usuario' });
+    res.status(500).json({ 
+      mensaje: 'Error al crear usuario',
+      detalles: error.message,
+      sqlMessage: error.sqlMessage,
+      sqlState: error.sqlState
+    });
   }
 }
 
@@ -106,5 +157,48 @@ export async function actualizarUsuario(req, res) {
   } catch (error) {
     console.error('Error al actualizar usuario:', error);
     res.status(500).json({ mensaje: 'Error al actualizar usuario' });
+  }
+}
+
+export async function obtenerRoles(req, res) {
+  try {
+    const [rows] = await pool.query(`SELECT idrol, nombreRol FROM rol ORDER BY idrol`);
+    res.status(200).json(rows || []);
+  } catch (error) {
+    console.error('Error al obtener roles:', error);
+    res.status(500).json({ mensaje: 'Error al obtener roles' });
+  }
+}
+
+export async function eliminarUsuario(req, res) {
+  const { id } = req.params;
+
+  try {
+    // Iniciamos una transacción para asegurar la consistencia
+    await pool.query('START TRANSACTION');
+
+    try {
+      // Primero eliminamos las referencias en la tabla rolusuario
+      await pool.query('DELETE FROM rolusuario WHERE dni = ?', [id]);
+      
+      // Luego eliminamos el usuario
+      const [result] = await pool.query('DELETE FROM usuario WHERE dni = ?', [id]);
+      
+      if (result.affectedRows === 0) {
+        await pool.query('ROLLBACK');
+        return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+      }
+
+      // Si todo sale bien, confirmamos los cambios
+      await pool.query('COMMIT');
+      res.status(200).json({ mensaje: 'Usuario eliminado correctamente' });
+    } catch (err) {
+      // Si hay algún error, revertimos los cambios
+      await pool.query('ROLLBACK');
+      throw err;
+    }
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ mensaje: 'Error al eliminar usuario' });
   }
 }

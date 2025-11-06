@@ -9,21 +9,33 @@ import ticketsRoutes from './routes/tickets.routes.js';
 import usuariosRoutes from './routes/usuarios.routes.js';
 import estadisticasRoutes from './routes/estadisticas.routes.js';
 import { verificarToken } from './middlewares/auth.middleware.js';
-import { cargarModelo } from './utils/nlp.js';
-cargarModelo();
 
 dotenv.config();
 
 const app = express();
 const upload = multer();
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:4200', // Permite tu app Angular
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  credentials: true,
+  maxAge: 600
+}));
 app.use(express.json());
 app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      connectSrc: ["'self'", "http://localhost:3000"],
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'", "http://localhost:3000", "http://localhost:4200"],
+        connectSrc: ["'self'", "http://localhost:3000", "http://localhost:4200"],
+        imgSrc: ["'self'", "data:", "blob:"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
+      }
     },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
   })
 );
 

@@ -1,0 +1,48 @@
+<div class="container">
+  <main class="main-content">
+    <div class="form-container">
+      <h3 class="form-title">Crear Nuevo Usuario</h3>
+
+      <form (ngSubmit)="crearUsuario()" (submit)="$event.preventDefault()" #usuarioForm="ngForm" class="user-form">
+
+        <label for="dni">DNI <span>*</span></label>
+        <input type="text" id="dni" name="dni" [(ngModel)]="usuario.dni" minlength="8" maxlength="8" required />
+
+        <label for="nombres">Nombres <span>*</span></label>
+        <input type="text" id="nombres" name="nombres" [(ngModel)]="usuario.nombres" required />
+
+        <label for="apellidos">Apellidos <span>*</span></label>
+        <input type="text" id="apellidos" name="apellidos" [(ngModel)]="usuario.apellidos" required />
+
+        <label for="correo">Correo <span>*</span></label>
+        <input type="email" id="correo" name="correo" [(ngModel)]="usuario.correo" required />
+
+        <label for="celular">Celular</label>
+        <input type="text" id="celular" name="celular" [(ngModel)]="usuario.celular" />
+
+        <label for="idRol">Rol de Usuario</label>
+        <select id="idRol" name="idRol" [(ngModel)]="usuario.idRol" required>
+          <option value="">Seleccione un rol</option>
+          <option *ngFor="let r of roles" [value]="r.idrol">{{ r.nombreRol }}</option>
+        </select>
+
+        <label for="usuario">Nombre de usuario <span>*</span></label>
+        <input type="text" id="usuario" name="usuario" [(ngModel)]="usuario.usuario" required />
+
+        <label for="password">Contraseña <span>*</span></label>
+        <input type="password" id="password" name="password" [(ngModel)]="usuario.password" minlength="6" required />
+
+        <div class="button-group">
+          <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+          <button type="button" class="btn-registrar" (click)="crearUsuario()" [disabled]="!usuarioForm.form.valid || loading">
+            {{ loading ? 'Creando...' : 'Crear Usuario' }}
+          </button>
+        </div>
+        <pre *ngIf="error">{{ error }}</pre>
+        <pre *ngIf="loading">Procesando...</pre>
+
+        <div *ngIf="error" class="mensaje error" style="margin-top:12px">{{ error }}</div>
+      </form>
+    </div>
+  </main>
+</div>

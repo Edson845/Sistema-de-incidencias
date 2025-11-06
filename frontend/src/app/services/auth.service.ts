@@ -31,14 +31,15 @@ export class AuthService {
   }
 
   // 🔹 Devuelve información básica del usuario
-  get obtenerDatosUsuario(): { nombre: string; rol: string } | null {
+  get obtenerDatosUsuario(): { nombre: string; email: string; rol: string } | null {
     const token = this.obtenerToken(); 
     if (!token) return null;
 
     try {
       const decoded: any = jwtDecode(token);
       return {
-        nombre: decoded.nombre || decoded.username || decoded.email || 'Usuario',
+        nombre: decoded.nombre || decoded.username || 'Usuario',
+        email: decoded.email || '',
         rol: decoded.rol || decoded.role || 'Empleado'
       };
     } catch (error) {

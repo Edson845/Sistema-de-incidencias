@@ -29,8 +29,8 @@
     <!-- GRÁFICOS -->
     <div class="charts-grid">
       <div class="chart-card">
-        <h4>Tickets según complejidad</h4>
-        <canvas
+        <h4>Tickets por Estado</h4>
+        <canvas *ngIf="pieChartData"
           baseChart
           [data]="pieChartData"
           [options]="pieChartOptions"
@@ -39,8 +39,8 @@
       </div>
 
       <div class="chart-card">
-        <h4>Tickets generados durante el mes</h4>
-        <canvas
+        <h4>Evolución de Tickets por Mes</h4>
+        <canvas *ngIf="lineChartData && lineChartData.datasets && lineChartData.datasets.length > 0"
           baseChart
           [data]="lineChartData"
           [options]="lineChartOptions"
@@ -49,27 +49,14 @@
       </div>
     </div>
 
-    <!-- TABLA -->
-    <div class="tabla-card">
-      <h3>Listado de Tickets</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Título</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let ticket of tickets">
-            <td>{{ ticket.id }}</td>
-            <td>{{ ticket.titulo }}</td>
-            <td>{{ ticket.estado }}</td>
-            <td>{{ ticket.fecha | date }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Botón de reporte (solo admin) -->
+    <div class="text-center mt-4">
+      <button *ngIf="authService.tieneRol('admin')" 
+              class="btn btn-primary" 
+              (click)="hacerReporte()"
+              style="padding: 8px 16px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Generar Reporte
+      </button>
     </div>
   </main>
 </div>

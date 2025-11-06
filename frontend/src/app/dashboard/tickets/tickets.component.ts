@@ -2,8 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environments';
+import { AuthService } from '../../services/auth.service';
+import { EstadisticasService } from '../../services/estadisticas.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-tickets',
@@ -13,7 +16,6 @@ import { environment } from '../../environments/environments';
   styleUrls: ['./tickets.component.css']
 })
 export class TicketsComponent implements OnInit {
-
   tickets: any[] = [];
   resumen = {
     nuevos: 0,
@@ -25,19 +27,28 @@ export class TicketsComponent implements OnInit {
 
   // 🔹 Gráficos
   pieChartData: ChartConfiguration<'pie'>['data'] = {
-    labels: ['Alta', 'Media', 'Baja'],
-    datasets: [{ data: [0, 0, 0], backgroundColor: ['#ef4444', '#f59e0b', '#22c55e'] }]
+    labels: ['Nuevos', 'En Proceso', 'Cerrados'],
+    datasets: [{ 
+      data: [0, 0, 0], 
+      backgroundColor: ['#f59e0b', '#2563eb', '#22c55e']
+    }]
   };
 
   pieChartOptions: ChartOptions<'pie'> = {
     responsive: true,
-    plugins: { legend: { position: 'bottom' } }
+    plugins: { 
+      legend: { position: 'bottom' },
+      title: {
+        display: true,
+        text: 'Distribución de Tickets por Estado'
+      }
+    }
   };
 
   lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
     datasets: [{
-      label: 'Tickets por mes',
+      label: 'Cantidad de Tickets',
       data: [],
       borderColor: '#2563eb',
       backgroundColor: 'rgba(37, 99, 235, 0.2)',
@@ -48,65 +59,205 @@ export class TicketsComponent implements OnInit {
 
   lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
-    plugins: { legend: { display: false } }
+    plugins: { 
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Tendencia Mensual de Tickets'
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    }
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient, 
+    public authService: AuthService,
+    private estadisticasService: EstadisticasService
+  ) { }
 
   ngOnInit(): void {
-    this.cargarTickets();
+    this.cargarEstadisticas();
   }
 
-  cargarTickets(): void {
-    // 📡 Reemplaza esta URL si tu API es diferente
-    this.http.get<any[]>(`${environment.apiUrl}/resumen`).subscribe({
-      next: (data) => {
-        this.tickets = data;
-        this.generarResumen();
-        this.actualizarGraficos();
+  cargarEstadisticas(): void {
+    const token = this.authService.obtenerToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+
+    // Obtener tickets y estadísticas
+    this.http.get<any>(`${environment.apiUrl}/tickets/estadisticas/generales`, { headers }).subscribe({
+      next: (data: any) => {
+        console.log('Datos recibidos:', data); // Para debug
+        
+        // Actualizar contadores de resumen
+        const porEstado = data.porEstado || [];
+        this.resumen = {
+          nuevos: porEstado.find((e: any) => e.estado === 1)?.cantidad || 0,
+          promedioSolucion: '40 min',
+          respuestasUsuarios: porEstado.find((e: any) => e.estado === 2)?.cantidad || 0,
+          resueltosHoy: data.resueltosHoy || 0,
+          total: porEstado.reduce((sum: number, e: any) => sum + e.cantidad, 0)
+        };
+        
+        // Actualizar gráfico de pie con datos de estado
+        const estadoData = {
+          nuevos: porEstado.find((e: any) => e.estado === 1)?.cantidad || 0,
+          enProceso: porEstado.find((e: any) => e.estado === 2)?.cantidad || 0,
+          cerrados: porEstado.find((e: any) => e.estado === 0)?.cantidad || 0
+        };
+
+        // Para debug
+        console.log('Estado Data:', estadoData);
+        console.log('Tickets por mes:', data.ticketsPorMes);
+
+        // Actualizar gráfico de pie
+        this.pieChartData = {
+          labels: ['Nuevos', 'En Proceso', 'Cerrados'],
+          datasets: [{
+            data: [estadoData.nuevos, estadoData.enProceso, estadoData.cerrados],
+            backgroundColor: ['#f59e0b', '#2563eb', '#22c55e']
+          }]
+        };
+
+        // Actualizar gráfico de línea con datos mensuales
+        if (data.ticketsPorMes) {
+          const meses = Object.keys(data.ticketsPorMes);
+          const cantidades = Object.values(data.ticketsPorMes) as number[];
+          
+          // Para debug
+          console.log('Meses:', meses);
+          console.log('Cantidades:', cantidades);
+
+          this.lineChartData = {
+            labels: meses,
+            datasets: [{
+              label: 'Cantidad de Tickets',
+              data: cantidades,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.2)',
+              fill: true,
+              tension: 0.4
+            }]
+          };
+        }
       },
       error: (err) => {
         console.error('Error al obtener tickets:', err);
+        this.generarResumen(); // Generar resumen con datos vacíos como respaldo
       }
     });
   }
 
   generarResumen(): void {
     const total = this.tickets.length;
-    const nuevos = this.tickets.filter(t => t.estado?.toLowerCase() === 'nuevo').length;
-    const resueltos = this.tickets.filter(t => t.estado?.toLowerCase() === 'cerrado').length;
 
+    // Contar 'nuevos' como tickets con estado == 1
+    const nuevos = this.tickets.filter(t => t.estado === 1).length;
+
+    // Contar resueltos (estado == 0)
+    const resueltos = this.tickets.filter(t => t.estado === 0).length;
+
+    // Contar resueltos hoy
     const hoy = new Date().toISOString().split('T')[0];
-    const resueltosHoy = this.tickets.filter(t => t.fecha === hoy && t.estado?.toLowerCase() === 'cerrado').length;
+    const resueltosHoy = this.tickets.filter(t => 
+      t.fecha?.split('T')[0] === hoy && t.estado === 0
+    ).length;
 
     this.resumen = {
       nuevos,
       promedioSolucion: '40 min',
-      respuestasUsuarios: 5,
+      respuestasUsuarios: resueltos,
       resueltosHoy,
       total
     };
   }
 
-  actualizarGraficos(): void {
-    // 🔹 PieChart - tickets por nivel de prioridad (si existe campo)
-    const alta = this.tickets.filter(t => t.prioridad === 'Alta').length;
-    const media = this.tickets.filter(t => t.prioridad === 'Media').length;
-    const baja = this.tickets.filter(t => t.prioridad === 'Baja').length;
+  actualizarEstadisticas(data: any): void {
+    // Actualizar gráfico de pastel con datos por estado
+    if (data.porEstado) {
+      const estadoData = data.porEstado.reduce((acc: any, item: any) => {
+        const estado = (item.estado || '').toString().toLowerCase();
+        if (estado === 'pendiente' || estado === '1' || estado === 'nuevo') {
+          acc.pendiente = (acc.pendiente || 0) + item.cantidad;
+        } else if (estado === 'en proceso' || estado === '2') {
+          acc.enProceso = (acc.enProceso || 0) + item.cantidad;
+        } else if (estado === 'cerrado' || estado === '0' || estado === 'resuelto') {
+          acc.cerrado = (acc.cerrado || 0) + item.cantidad;
+        }
+        return acc;
+      }, {});
 
-    this.pieChartData.datasets[0].data = [alta, media, baja];
+      this.pieChartData.datasets[0].data = [
+        estadoData.pendiente || 0,
+        estadoData.enProceso || 0,
+        estadoData.cerrado || 0
+      ];
+    }
 
-    // 🔸 LineChart - tickets creados por mes
-    const conteoPorMes: { [key: string]: number } = {};
+    // Actualizar gráfico de línea con datos mensuales
+    if (data.generales?.ticketsPorMes) {
+      const meses = Object.keys(data.generales.ticketsPorMes);
+      const cantidades = Object.values(data.generales.ticketsPorMes);
+      
+      // Ordenar meses cronológicamente
+      const mesesOrdenados = meses.sort((a, b) => {
+        const fechaA = new Date(a + ' 1, 2025');
+        const fechaB = new Date(b + ' 1, 2025');
+        return fechaA.getTime() - fechaB.getTime();
+      });
 
-    this.tickets.forEach(t => {
-      if (t.fecha) {
-        const mes = new Date(t.fecha).toLocaleString('es-ES', { month: 'short' });
-        conteoPorMes[mes] = (conteoPorMes[mes] || 0) + 1;
+      this.lineChartData.labels = mesesOrdenados;
+      this.lineChartData.datasets[0].data = mesesOrdenados.map(mes => 
+        data.generales.ticketsPorMes[mes] || 0
+      );
+    } else {
+      // Fallback: Calcular datos mensuales desde tickets
+      const conteoPorMes = this.tickets.reduce((acc: any, ticket) => {
+        if (ticket.fecha) {
+          const fecha = new Date(ticket.fecha);
+          const mes = fecha.toLocaleString('es-ES', { month: 'long' });
+          acc[mes] = (acc[mes] || 0) + 1;
+        }
+        return acc;
+      }, {});
+
+      const mesesOrdenados = Object.keys(conteoPorMes).sort((a, b) => {
+        const fechaA = new Date(a + ' 1, 2025');
+        const fechaB = new Date(b + ' 1, 2025');
+        return fechaA.getTime() - fechaB.getTime();
+      });
+
+      this.lineChartData.labels = mesesOrdenados;
+      this.lineChartData.datasets[0].data = mesesOrdenados.map(mes => 
+        conteoPorMes[mes] || 0
+      );
+    }
+  }
+
+  // REPORTE: solo para admins — trae usuarios con rol admin (usa endpoint protegido)
+  reporteAdmins: any[] = [];
+  reporteVisible = false;
+
+  hacerReporte() {
+    const token = this.authService.obtenerToken();
+    if (!token) return alert('Debes iniciar sesión');
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    this.estadisticasService.getUsuariosPorRol().subscribe({
+      next: (res) => {
+        this.reporteAdmins = res.filter((r: any) => (r.rol || '').toLowerCase() === 'admin');
+        this.reporteVisible = true;
+      },
+      error: (err) => {
+        console.error('Error al generar reporte:', err);
+        alert('No autorizado para generar el reporte o error del servidor');
       }
     });
-
-    this.lineChartData.labels = Object.keys(conteoPorMes);
-    this.lineChartData.datasets[0].data = Object.values(conteoPorMes);
   }
 }
