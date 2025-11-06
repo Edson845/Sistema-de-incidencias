@@ -42,8 +42,9 @@
           <td>{{ usuario.idCargo }}</td>
           <td>{{ usuario.usuario }}</td>
           <td>
-            <button class="btn-ver" (click)="verDetalle(usuario.id)">👁 Ver</button>
-            <button class="btn-editar" (click)="editarUsuario(usuario.id)">✏️ Editar</button>
+            <button class="btn-ver" (click)="verDetalle(usuario.dni)">👁 Ver</button>
+            <button class="btn-editar" (click)="editarUsuario(usuario.dni)">✏️ Editar</button>
+            <button class="btn-eliminar" (click)="eliminarUsuario(usuario.dni)">🗑️ Eliminar</button>
           </td>
         </tr>
       </tbody>

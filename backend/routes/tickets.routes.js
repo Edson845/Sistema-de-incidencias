@@ -8,7 +8,10 @@ import {
   obtenerCategorias,
   getTodosTickets,
   crearTicket,
-  actualizarTicket
+  actualizarTicket,
+  getTicketsPorEstado,
+  getTicketsPorMes,
+  getEstadisticasGenerales
 } from '../controllers/tickets.controller.js';
 
 const router = express.Router();
@@ -43,5 +46,10 @@ router.get('/categorias', verificarToken, obtenerCategorias);
 router.post('/',verificarToken,verificarRol(['usuario','tecnico', 'admin']),upload.array('archivos', 5),crearTicket);
 
 router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualizarTicket);
+
+// Rutas para estadísticas
+router.get('/estadisticas/por-estado', verificarToken, getTicketsPorEstado);
+router.get('/estadisticas/por-mes', verificarToken, getTicketsPorMes);
+router.get('/estadisticas/generales', verificarToken, getEstadisticasGenerales);
 
 export default router;

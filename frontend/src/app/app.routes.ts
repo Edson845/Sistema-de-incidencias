@@ -7,14 +7,15 @@ import { TicketsComponent } from './dashboard/tickets/tickets.component';
 import { TicketsListComponent } from './tickets/list/tickets-list.component';
 import { TicketsCreateComponent } from './tickets/create/tickets-create.component';
 import { TicketsDetailsComponent } from './tickets/details/tickets-details.component';
+
 import { UsuariosListComponent } from './usuarios/list/usuarios-list.component';
 import { UsuariosDetailComponent } from './usuarios/detail/usuarios-detail.component';
 import { UsuariosEditComponent } from './usuarios/edit/usuarios-edit.component';
-// import { EstadisticasComponent } from './estadisticas/estadisticas.component';
+import { UsuariosCreateComponent } from './usuarios/create/usuarios-create.component';
 
 export const routes: Routes = [
   // 🔹 Página inicial
-  { path: '', redirectTo: 'login', pathMatch: 'full' }, // ✅ sin "/"
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
 
   // 🔹 Login (sin sidebar)
   { path: 'login', component: LoginComponent },
@@ -24,26 +25,27 @@ export const routes: Routes = [
     path: '',
     component: LayoutComponent,
     children: [
+
+      // Dashboard
       { path: 'dashboard', component: TicketsComponent },
 
-      // Tickets
+      // ✅ Tickets
       { path: 'tickets', component: TicketsListComponent },
       { path: 'tickets/nuevo', component: TicketsCreateComponent },
-      { path: 'tickets/id', component: TicketsDetailsComponent },
+      { path: 'tickets/:id', component: TicketsDetailsComponent },  // ✅ CORREGIDO
 
-      // Usuarios
+      // ✅ Usuarios
       { path: 'usuarios', component: UsuariosListComponent },
-      { path: 'usuarios/:id', component: UsuariosDetailComponent },
+      { path: 'usuarios/nuevo', component: UsuariosCreateComponent },
       { path: 'usuarios/editar/:id', component: UsuariosEditComponent },
+      { path: 'usuarios/:id', component: UsuariosDetailComponent },
 
-      // Estadísticas
-      // { path: 'estadisticas', component: EstadisticasComponent },
 
-      // Redirección por defecto dentro del layout
+      // Redirect interno del layout
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 
   // 🔹 Cualquier otra ruta → login
-  { path: '**', redirectTo: 'login' } // ✅ sin "/"
+  { path: '**', redirectTo: 'login' }
 ];

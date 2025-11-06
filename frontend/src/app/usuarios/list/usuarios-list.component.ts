@@ -43,15 +43,30 @@ export class UsuariosListComponent implements OnInit {
   });
 }
   agregarUsuario() {
-    this.router.navigate(['/usuarios/nuevo']);
+    this.router.navigate(['usuarios/nuevo']);
   }
 
-  verDetalle(id: number) {
-    this.router.navigate(['usuarios/:id', id]);
+  verDetalle(dni: string) {
+    this.router.navigate(['/usuarios', dni]);
   }
 
-  editarUsuario(id: number) {
-    this.router.navigate(['/usuarios/editar', id]);
+  editarUsuario(dni: string) {
+    this.router.navigate(['/usuarios/editar', dni]);
+  }
+
+  eliminarUsuario(dni: string) {
+    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+      this.usuariosService.eliminarUsuario(dni).subscribe({
+        next: () => {
+          console.log('Usuario eliminado:', dni);
+          this.cargarUsuarios(); // Recargar la lista de usuarios
+        },
+        error: (err) => {
+          console.error('Error al eliminar usuario:', err);
+          this.error = err.error?.mensaje || 'Error al eliminar usuario';
+        }
+      });
+    }
   }
 
   // 🔍 Filtro básico en memoria
