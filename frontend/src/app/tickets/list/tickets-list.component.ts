@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TicketsService } from '../../services/tickets.service';
 import { AuthService } from '../../services/auth.service'; // <-- servicio para obtener rol
+import { SocketService } from '../../services/socket.service'; // ajustar ruta
 
 @Component({
   selector: 'app-tickets-list',
@@ -21,17 +23,26 @@ export class TicketsListComponent implements OnInit {
   error = '';
 
   rolUsuario: string = ''; // <-- rol del usuario actual
-
+  private subs = new Subscription();
   constructor(
     private ticketsService: TicketsService,
     private authService: AuthService, // <-- inyectamos el servicio de auth
-    private router: Router
+    private router: Router,
+    private socketService: SocketService
+
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     // Obtener el rol del usuario desde el servicio
     this.rolUsuario = this.authService.roles[0];
     this.cargarTickets();
+    this.subs.add(
+      this.socketService.on<any>('nuevo-ticket').subscribe(ticket => {
+        // lógica: recargar lista o insertar al inicio
+        this.ticketsFiltrados.unshift(ticket);
+        // opcional: mantener tamaño máximo o aplicar filtro
+      })
+    );
   }
 
   cargarTickets() {
@@ -49,7 +60,9 @@ export class TicketsListComponent implements OnInit {
       }
     });
   }
-
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
   filtrarTickets() {
     const filtroLower = this.filtro.toLowerCase();
     this.ticketsFiltrados = this.tickets.filter(t =>
