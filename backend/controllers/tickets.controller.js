@@ -1,4 +1,7 @@
 import pool from '../db.js';
+import { getIO } from '../socket.js';
+import { obtenerPrioridad } from '../services/nlp.service.js';
+
 export async function getTicketsUsuario(req, res) {
   try {
     const rolesUsuario = req.user?.rol || []; // array de roles
@@ -70,16 +73,24 @@ export const crearTicket = async (req, res) => {
       });
     }
 
-    // TODO: Implementar predicción de prioridad con NLP
-    const prioridad = 3; // Prioridad media por defecto
+    // ✅ PRIORIDAD POR NLP
+    let idPrioridad = 3;
 
-    // 📁 Archivos adjuntos
+    try {
+      idPrioridad = await obtenerPrioridad(descripcion); // ✅ AQUÍ FALTABA el await
+      console.log("🎯 Prioridad NLP:", idPrioridad);
+    } catch (err) {
+      console.error("⚠️ Error al predecir prioridad:", err.message);
+    }
+
+    // ✅ ARCHIVOS ADJUNTOS
     const archivos = req.files && req.files.length > 0
       ? req.files.map((file) => file.filename)
       : [];
+
     const adjunto = archivos.length > 0 ? archivos.join(',') : null;
 
-    // 💾 Guardar en la base de datos
+    // ✅ INSERT EN LA BD
     const [result] = await pool.query(
       `INSERT INTO ticket (
         tituloTicket,
@@ -91,13 +102,36 @@ export const crearTicket = async (req, res) => {
         idPrioridad,
         adjunto
       ) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?)`,
-      [titulo, descripcion, usuarioCrea, idCategoria, 1, prioridad, adjunto]
+
+      [
+        titulo,
+        descripcion,
+        usuarioCrea,
+        idCategoria,
+        1,          // estado inicial
+        idPrioridad,  // prioridad del NLP
+        adjunto
+      ]
     );
+
+    // ✅ Construir el objeto del ticket para sockets
+    const ticketEmitido = {
+      idTicket: result.insertId,
+      titulo,
+      descripcion,
+      usuarioCrea,
+      idPrioridad,
+      adjunto
+    };
+
+    // ✅ Emitir al socket SIN ERROR
+    const io = getIO();
+    io.emit('nuevo-ticket', ticketEmitido);
 
     res.json({
       mensaje: '✅ Ticket creado correctamente',
       idTicket: result.insertId,
-      prioridad, // ← ya llega como número (1–5)
+      idPrioridad,
       archivosGuardados: archivos
     });
 
@@ -112,17 +146,25 @@ export const crearTicket = async (req, res) => {
 export async function actualizarTicket(req, res) {
   const { id } = req.params;
   const { titulo, descripcion, estado } = req.body;
+
   try {
     await pool.query(
       'UPDATE ticket SET tituloTicket = ?, descTicket = ?, idEstado = ? WHERE idTicket = ?',
       [titulo, descripcion, estado, id]
     );
-    // TODO: Implementar entrenamiento del modelo NLP
+
+    const io = getIO();
+    io.emit('ticket-actualizado', {
+      idTicket: id,
+      estado
+    });
+
     res.json({ mensaje: 'Ticket actualizado' });
   } catch (error) {
     res.status(500).json({ mensaje: error.message });
   }
 }
+
 
 // Nuevos endpoints para estadísticas
 export async function getTicketsPorEstado(req, res) {

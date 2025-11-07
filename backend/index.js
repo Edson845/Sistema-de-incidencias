@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import multer from 'multer';
+import http from 'http';
+import { initSocket } from './socket.js';
 
 import authRoutes from './routes/auth.routes.js';
 import ticketsRoutes from './routes/tickets.routes.js';
@@ -14,6 +16,8 @@ dotenv.config();
 
 const app = express();
 const upload = multer();
+const server = http.createServer(app);
+const io = initSocket(server);
 app.use(cors({
   origin: 'http://localhost:4200', // Permite tu app Angular
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -46,7 +50,20 @@ app.use('/api/tickets', verificarToken,ticketsRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
 
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor backend escuchando en el puerto ${PORT}`);
+// Arrancar solo el servidor HTTP (evita llamar a app.listen y server.listen al mismo puerto)
+server.listen(PORT, () => {
+  console.log(`Servidor escuchando en puerto ${PORT}`);
+});
+
+// Manejar errores del servidor (p. ej. EADDRINUSE)
+server.on('error', (err) => {
+  if (err && err.code === 'EADDRINUSE') {
+    console.error(`Error: Puerto ${PORT} ya está en uso. Asegúrate de que no haya otra instancia corriendo o cambia el PORT.`);
+    process.exit(1);
+  } else {
+    console.error('Error del servidor:', err);
+    process.exit(1);
+  }
 });

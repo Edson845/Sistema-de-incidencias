@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
@@ -6,7 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environments';
 import { AuthService } from '../../services/auth.service';
 import { EstadisticasService } from '../../services/estadisticas.service';
-import { forkJoin } from 'rxjs';
+import { io, Socket } from "socket.io-client";
 
 @Component({
   selector: 'app-tickets',
@@ -15,7 +15,9 @@ import { forkJoin } from 'rxjs';
   templateUrl: './tickets.component.html',
   styleUrls: ['./tickets.component.css']
 })
-export class TicketsComponent implements OnInit {
+export class TicketsComponent implements OnInit, OnDestroy {
+  private socket!: Socket;
+
   tickets: any[] = [];
   resumen = {
     nuevos: 0,
@@ -84,6 +86,10 @@ export class TicketsComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarEstadisticas();
+    this.iniciarSockets();
+  }
+  ngOnDestroy(): void {
+    if (this.socket) this.socket.disconnect();
   }
 
   cargarEstadisticas(): void {
@@ -240,10 +246,53 @@ export class TicketsComponent implements OnInit {
     }
   }
 
+  iniciarSockets() {
+    this.socket = io(environment.socketUrl, {
+      transports: ['websocket'],
+      autoConnect: true
+    });
+
+    console.log("✅ Socket conectado al Dashboard");
+
+    // ✅ CUANDO SE CREA UN NUEVO TICKET
+    this.socket.on('nuevo-ticket', (ticket: any) => {
+      console.log("🟢 Nuevo ticket en tiempo real:", ticket);
+      
+      this.resumen.nuevos++;
+      this.resumen.total++;
+
+      // actualizar gráfico pie
+      this.pieChartData.datasets[0].data[0] = this.resumen.nuevos;
+    });
+
+    // ✅ CUANDO SE ACTUALIZA UN TICKET (por ejemplo a resuelto)
+    this.socket.on('ticket-actualizado', (ticket: any) => {
+      console.log("🟡 Ticket actualizado en tiempo real:", ticket);
+
+      if (ticket.estado === 0) {
+        this.resumen.resueltosHoy++;
+        this.pieChartData.datasets[0].data[2]++; // cerrados
+      }
+      if (ticket.estado === 2) {
+        this.resumen.respuestasUsuarios++;
+        this.pieChartData.datasets[0].data[1]++; // en proceso
+      }
+    });
+    this.socket.on("nuevo-ticket", (ticket: any) => {
+    console.log("📌 Nuevo ticket detectado:", ticket);
+    this.cargarEstadisticas();
+    });
+
+    // Cuando se actualiza (cambia de estado, prioridad, etc.)
+    this.socket.on("ticket-actualizado", (ticket: any) => {
+      console.log("♻ Ticket actualizado detectado:", ticket);
+      this.cargarEstadisticas();
+    });
+  }
   // REPORTE: solo para admins — trae usuarios con rol admin (usa endpoint protegido)
   reporteAdmins: any[] = [];
   reporteVisible = false;
-
+  
   hacerReporte() {
     const token = this.authService.obtenerToken();
     if (!token) return alert('Debes iniciar sesión');
