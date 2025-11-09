@@ -397,4 +397,12 @@ select {
 .prioridad-muyalta {
   background: #b91c1c;
 }
+.order-select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: white;
+  width: 180px;
+  cursor: pointer;
+}
 

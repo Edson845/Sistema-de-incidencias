@@ -39,7 +39,7 @@ export class TicketsListComponent implements OnInit {
   herramientasSeleccionadas: string[] = [];
   tecnicoBuscado: string = '';
   herramientaBuscada: string = '';
-
+  ordenSeleccionado: string = '';
 
 
 
@@ -88,12 +88,43 @@ export class TicketsListComponent implements OnInit {
     this.subs.unsubscribe();
   }
   filtrarTickets() {
-    const filtroLower = this.filtro.toLowerCase();
-    this.ticketsFiltrados = this.tickets.filter(t =>
-      t.tituloTicket.toLowerCase().includes(filtroLower) ||
-      (t.usuarioCrea && t.usuarioCrea.toLowerCase().includes(filtroLower))
+  const texto = this.filtro.toLowerCase().trim();
+
+  this.ticketsFiltrados = this.tickets.filter(t => 
+    t.tituloTicket.toLowerCase().includes(texto) ||
+    t.descTicket.toLowerCase().includes(texto) ||
+    (t.nombreUsuario?.toLowerCase().includes(texto)) ||
+    (t.apellidoUsuario?.toLowerCase().includes(texto)) ||
+    (t.nombreTecnico?.toLowerCase().includes(texto)) ||
+    (t.apellidoTecnico?.toLowerCase().includes(texto)) ||
+    t.nombreCategoria?.toLowerCase().includes(texto) ||
+    this.estadoTexto(t.idEstado).toLowerCase().includes(texto)
+  );
+
+  this.ordenarTickets();
+}
+estadoTexto(estado: number): string {
+  return estado == 1 ? 'nuevo' :
+         estado == 2 ? 'abierto' :
+         estado == 3 ? 'pendiente' :
+         estado == 4 ? 'resuelto' : 'cerrado';
+}
+
+ordenarTickets() {
+  if (this.ordenSeleccionado === 'prioridad') {
+    this.ticketsFiltrados.sort((a, b) => b.idPrioridad - a.idPrioridad);
+  }
+
+  if (this.ordenSeleccionado === 'fecha') {
+    this.ticketsFiltrados.sort((a, b) =>
+      new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime()
     );
   }
+
+  if (this.ordenSeleccionado === 'estado') {
+    this.ticketsFiltrados.sort((a, b) => a.idEstado - b.idEstado); 
+  }
+}
   asignarTicket(idTicket: number) {
   this.ticketSeleccionado = idTicket;
   this.mostrarModalAsignar = true;
