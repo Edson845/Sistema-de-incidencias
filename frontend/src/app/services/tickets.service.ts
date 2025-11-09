@@ -8,15 +8,9 @@ export class TicketsService {
   private apiUrl = 'http://localhost:3000/api/tickets';
 
   constructor(private http: HttpClient ,private authService: AuthService) {}
-  
-  getTickets(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
-  }
   obtenerMisTickets(): Observable<any> {
   return this.http.get(`${this.apiUrl}/mios`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
+    headers: {Authorization: `Bearer ${localStorage.getItem('token')}`}
   });
   }
   getTecnicos() {
@@ -37,7 +31,9 @@ export class TicketsService {
     );
   }
   getTicket(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+    const token = this.authService.obtenerToken();
+    const headers = new HttpHeaders({Authorization: `Bearer ${token}`});
+    return this.http.get<any>(`${this.apiUrl}/${id}`, { headers });
   }
   obtenerCategorias(): Observable<any[]> {
     const token = localStorage.getItem('token');
@@ -47,11 +43,36 @@ export class TicketsService {
 
     return this.http.get<any[]>(`${this.apiUrl}/categorias`, { headers });
   }
+
   crearTicket(ticket: FormData): Observable<any> {
   const token = localStorage.getItem('token');
   const headers = new HttpHeaders({
     Authorization: `Bearer ${token}`
   });
-
+  
   return this.http.post(`${this.apiUrl}`, ticket, { headers });
-}}
+}
+getHerramientasByTicket(idTicket: number): Observable<string[]> {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.get<string[]>(`${this.apiUrl}/herramientas/${idTicket}`, { headers });
+}
+
+actualizarEstado(idTicket: number, nuevoEstado: number): Observable<any> {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.put(
+    `${this.apiUrl}/${idTicket}`,
+    { estado: nuevoEstado },
+    { headers }
+  );
+}
+
+
+}

@@ -1,14 +1,86 @@
-<div class="ticket-detail" *ngIf="!loading && ticket">
-  <h2>Ticket #{{ ticket.id }}</h2>
+<div class="det-container" *ngIf="!loading && ticket">
 
-  <p><strong>Título:</strong> {{ ticket.titulo }}</p>
-  <p><strong>Descripción:</strong> {{ ticket.descripcion }}</p>
-  <p><strong>Estado:</strong> {{ ticket.estado }}</p>
-  <p><strong>Prioridad:</strong> {{ ticket.prioridad }}</p>
-  <p><strong>Usuario:</strong> {{ ticket.usuario }}</p>
-  <p><strong>Fecha:</strong> {{ ticket.fecha | date: 'dd/MM/yyyy' }}</p>
+  <!-- Título -->
+  <h2 class="det-title">Detalles del Ticket #{{ ticket.idTicket }}</h2>
 
-  <button (click)="volver()">⬅ Volver</button>
+  <!-- Tarjeta general -->
+  <div class="det-card">
+
+    <div class="det-row">
+      <label>Título:</label>
+      <span>{{ ticket.tituloTicket }}</span>
+    </div>
+
+    <div class="det-row">
+      <label>Descripción:</label>
+      <span>{{ ticket.descTicket }}</span>
+    </div>
+
+    <div class="det-row">
+      <label>Estado:</label>
+      <span class="estado" [ngClass]="{
+        'st-nuevo': ticket.idEstado === 1,
+        'st-abierto': ticket.idEstado === 2,
+        'st-pendiente': ticket.idEstado === 3,
+        'st-resuelto': ticket.idEstado === 4,
+        'st-cerrado': ticket.idEstado === 0
+      }">{{ estadoNombre(ticket.idEstado) }}</span>
+    </div>
+
+    <div class="det-row">
+      <label>Usuario creador:</label>
+      <span>{{ ticket.nombreUsuario }} {{ ticket.apellidoUsuario }}</span>
+    </div>
+
+    <div class="det-row">
+      <label>Técnico asignado:</label>
+      <span>{{ ticket.nombreTecnico ? ticket.nombreTecnico + ' ' + ticket.apellidoTecnico : 'Sin asignar' }}</span>
+    </div>
+
+    <div class="det-row">
+      <label>Categoría:</label>
+      <span>{{ ticket.nombreCategoria }}</span>
+    </div>
+
+    <div class="det-row">
+      <label>Prioridad:</label>
+      <span class="prioridad">{{ ticket.nombrePrioridad }}</span>
+    </div>
+
+    <div class="det-row">
+      <label>Fecha creación:</label>
+      <span>{{ ticket.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+    </div>
+
+  </div>
+
+  <!-- Herramientas -->
+  <div class="det-card">
+    <h3>Herramientas usadas</h3>
+
+    <div *ngIf="herramientas.length > 0; else sinHerram">
+      <ul class="herr-list">
+        <li *ngFor="let h of herramientas">🛠 {{ h }}</li>
+      </ul>
+    </div>
+
+    <ng-template #sinHerram>
+      <p class="no-herr">No se registraron herramientas.</p>
+    </ng-template>
+  </div>
+
+  <!-- Acciones de estado -->
+  <div class="acciones">
+    <button class="btn pend" (click)="cambiarEstado(3)">Pendiente</button>
+    <button class="btn res" (click)="cambiarEstado(4)">Resuelto</button>
+    <button class="btn cerr" (click)="cambiarEstado(0)">Cerrado</button>
+  </div>
+
+  <!-- Volver -->
+  <button class="btn-volver" (click)="volver()">⬅ Volver</button>
+
 </div>
 
-<div *ngIf="loading" class="loading">Cargando ticket...</div>
+<div *ngIf="loading" class="loading">
+  Cargando ticket...
+</div>

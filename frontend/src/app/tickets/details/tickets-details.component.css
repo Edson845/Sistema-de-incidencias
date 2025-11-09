@@ -1,0 +1,112 @@
+.det-container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 25px;
+}
+
+.det-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2563eb;
+  font-weight: bold;
+  font-size: 26px;
+}
+
+.det-card {
+  background: #ffffff;
+  padding: 18px 22px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.det-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.det-row label {
+  font-weight: bold;
+  color: #374151;
+}
+
+.det-row span {
+  color: #111827;
+}
+
+/* Estados */
+.estado {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.st-nuevo { background: #d1fae5; color: #065f46; }
+.st-abierto { background: #bfdbfe; color: #1e3a8a; }
+.st-pendiente { background: #fef3c7; color: #92400e; }
+.st-resuelto { background: #bbf7d0; color: #065f46; }
+.st-cerrado { background: #e5e7eb; color: #374151; }
+
+/* Herramientas */
+.herr-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.no-herr {
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Botones de acciones */
+.acciones {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.pend { background: #f59e0b; }
+.res { background: #10b981; }
+.cerr { background: #ef4444; }
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+/* Botón volver */
+.btn-volver {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+  font-size: 16px;
+  transition: 0.2s ease;
+}
+
+.btn-volver:hover {
+  background: #1e40af;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+}

@@ -10,10 +10,16 @@
     <input
       type="text"
       [(ngModel)]="filtro"
-      placeholder="🔍 Buscar por título o usuario..."
+      placeholder="🔍 Buscar..."
       class="search-input"
       (input)="filtrarTickets()"
     />
+    <select *ngIf="rolUsuario === 'admin'" class="order-select" [(ngModel)]="ordenSeleccionado" (change)="ordenarTickets()">
+      <option value="">Ordenar por...</option>
+      <option value="prioridad">Prioridad</option>
+      <option value="fecha">Fecha</option>
+      <option value="estado">Estado</option>
+    </select>
   </div>
 
   <!-- Indicadores de carga o error -->
@@ -25,7 +31,6 @@
     <table class="tickets-tabla">
       <thead>
         <tr>
-          <th *ngIf="rolUsuario === 'admin'">ID</th>
           <th>Título</th>
           <th>Descripción</th>
           <th>Asignado A</th>
@@ -39,7 +44,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let t of ticketsFiltrados">
-          <td *ngIf="rolUsuario === 'admin'">{{ t.idTicket }}</td>
           <td>{{ t.tituloTicket }}</td>
           <td>{{ t.descTicket }}</td>
           <td>{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>

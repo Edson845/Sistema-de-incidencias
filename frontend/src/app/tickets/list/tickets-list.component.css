@@ -325,3 +325,84 @@ select {
   padding: 10px 18px;
   border-radius: 8px;
 }
+/* Ajustar tamaño general de la tabla */
+.tickets-tabla {
+  font-size: 0.85rem;
+}
+
+.tickets-tabla th,
+.tickets-tabla td {
+  padding: 6px 8px;
+}
+
+/* Encabezado azul más oscuro */
+.tickets-tabla thead {
+  background: #153e75; /* Azul fuerte y profesional */
+  color: white;
+}
+
+/* Hover más sutil */
+.tickets-tabla tr:hover {
+  background: #e6effa;
+}
+
+/* Contenedor más compacto */
+.tickets-container {
+  padding: 18px;
+}
+
+/* Botón agregar: azul más oscuro */
+.btn-agregar {
+  background: linear-gradient(135deg, #0b3c91, #0a3277);
+}
+
+.btn-agregar:hover {
+  background: linear-gradient(135deg, #0a3277, #08285e);
+}
+
+/* Mejor contraste en estados */
+.estado-abierto {
+  background: #0b4cc2;
+}
+
+.estado-nuevo {
+  background: #6d28d9;
+}
+
+.estado-pendiente {
+  background: #e77d00;
+}
+
+.estado-resuelto {
+  background: #198754;
+}
+
+.estado-cerrado {
+  background: #4b5563;
+}
+
+/* Prioridades mejor definidas */
+.prioridad-baja {
+  background: #6ee7b7;
+}
+
+.prioridad-media {
+  background: #facc15;
+}
+
+.prioridad-alta {
+  background: #f97316;
+}
+
+.prioridad-muyalta {
+  background: #b91c1c;
+}
+.order-select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: white;
+  width: 180px;
+  cursor: pointer;
+}
+

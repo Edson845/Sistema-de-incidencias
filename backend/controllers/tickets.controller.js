@@ -343,4 +343,38 @@ export async function asignarTicketConHerramientas(req, res) {
     res.status(500).json({ mensaje: 'Error al asignar ticket' });
   }
 }
+export async function getTicketPorId(req, res) {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT 
+        t.*,
+        u.nombres AS nombreUsuario,
+        u.apellidos AS apellidoUsuario,
+        ut.nombres AS nombreTecnico,
+        ut.apellidos AS apellidoTecnico,
+        c.nombreCategoria,
+        p.nombrePrioridad
+      FROM ticket t
+      LEFT JOIN usuario u ON t.usuarioCrea = u.dni
+      LEFT JOIN usuario ut ON t.asignadoA = ut.dni
+      LEFT JOIN categoria c ON t.idCategoria = c.idCategoria
+      LEFT JOIN prioridad p ON t.idPrioridad = p.idPrioridad
+      WHERE t.idTicket = ?
+      `,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Ticket no encontrado' });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('❌ Error en getTicketPorId:', error);
+    res.status(500).json({ mensaje: 'Error al obtener el ticket', error: error.message });
+  }
+}
 
