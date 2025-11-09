@@ -34,4 +34,5 @@ router.put('/:id', verificarToken, actualizarUsuario);
 // Eliminar usuario (solo admin)
 router.delete('/:id', verificarToken, verificarRol(['admin']), eliminarUsuario);
 
+
 export default router;

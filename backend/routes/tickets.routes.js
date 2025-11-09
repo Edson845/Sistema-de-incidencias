@@ -11,7 +11,9 @@ import {
   actualizarTicket,
   getTicketsPorEstado,
   getTicketsPorMes,
-  getEstadisticasGenerales
+  getEstadisticasGenerales,
+  getTecnicos,
+  asignarTicketConHerramientas
 } from '../controllers/tickets.controller.js';
 
 const router = express.Router();
@@ -51,5 +53,8 @@ router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualiza
 router.get('/estadisticas/por-estado', verificarToken, getTicketsPorEstado);
 router.get('/estadisticas/por-mes', verificarToken, getTicketsPorMes);
 router.get('/estadisticas/generales', verificarToken, getEstadisticasGenerales);
+router.get('/usuarios/tecnicos', verificarToken, verificarRol(['admin']), getTecnicos);
+router.put('/asignar/:id', verificarToken, verificarRol(['admin']), asignarTicketConHerramientas);
+
 
 export default router;

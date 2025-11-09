@@ -48,6 +48,7 @@ export class UsuariosService {
       })
     );
   }
+  
 
   // Registro público: usa la ruta /api/usuarios/registro en el backend
   registerUsuario(usuario: any): Observable<any> {

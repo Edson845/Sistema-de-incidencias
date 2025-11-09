@@ -17,15 +17,48 @@ export async function getTicketsUsuario(req, res) {
     let query = '';
     let params = [];
 
+    // JOIN común para todos
+    const camposSelect = `
+      SELECT 
+        t.*,
+
+        -- Usuario que creó el ticket
+        u.nombres AS nombreUsuario,
+        u.apellidos AS apellidoUsuario,
+
+        -- Técnico asignado
+        ut.nombres AS nombreTecnico,
+        ut.apellidos AS apellidoTecnico,
+
+        -- Categoría
+        c.nombreCategoria,
+
+        -- Prioridad
+        p.nombrePrioridad
+      FROM ticket t
+      LEFT JOIN usuario u ON t.usuarioCrea = u.dni
+      LEFT JOIN usuario ut ON t.asignadoA = ut.dni
+      LEFT JOIN categoria c ON t.idCategoria = c.idCategoria
+      LEFT JOIN prioridad p ON t.idPrioridad = p.idPrioridad
+    `;
+
     if (rol === 'admin') {
-      query = 'SELECT * FROM ticket';
-    } else if (rol === 'tecnico') {
+      query = camposSelect;
+    }
+
+    else if (rol === 'tecnico') {
       query = `
-        SELECT * FROM ticket 
-        WHERE usuarioCrea = ? OR asignadoA = ?`;
+        ${camposSelect}
+        WHERE t.usuarioCrea = ? OR t.asignadoA = ?
+      `;
       params = [idUsuario, idUsuario];
-    } else {
-      query = 'SELECT * FROM ticket WHERE usuarioCrea = ?';
+    }
+
+    else {
+      query = `
+        ${camposSelect}
+        WHERE t.usuarioCrea = ?
+      `;
       params = [idUsuario];
     }
 
@@ -262,3 +295,52 @@ export async function getEstadisticasGenerales(req, res) {
     res.status(500).json({ mensaje: error.message });
   }
 }
+export async function getTecnicos(req, res) {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+    u.dni AS dni,
+    u.nombres AS nombres,
+    u.apellidos AS apellidos,
+    u.usuario AS usuario
+    FROM usuario u
+    INNER JOIN rolusuario ru ON ru.dni = u.dni
+    INNER JOIN rol r ON r.idRol = ru.idRol
+    WHERE r.nombreRol = 'tecnico'
+    `);
+
+    res.json(rows);
+  } catch (error) {
+    console.error('❌ Error al obtener técnicos:', error);
+    res.status(500).json({ mensaje: error.message });
+  }
+}
+export async function asignarTicketConHerramientas(req, res) {
+  try {
+    const { id } = req.params;
+    const { asignadoA, herramientas } = req.body;
+
+    // Guardar asignación del técnico
+    await pool.query(
+      `UPDATE ticket SET asignadoA = ?, idEstado = 2 WHERE idTicket = ?`,
+      [asignadoA, id]
+    );
+
+    // Guardar herramientas (si hay)
+    if (herramientas && herramientas.length > 0) {
+      for (const herramienta of herramientas) {
+        await pool.query(
+          `INSERT INTO ticket_herramienta (idTicket, herramienta) VALUES (?, ?)`,
+          [id, herramienta]
+        );
+      }
+    }
+
+    res.json({ mensaje: 'Asignación realizada correctamente' });
+
+  } catch (err) {
+    console.error("Error en asignarTicketConHerramientas:", err);
+    res.status(500).json({ mensaje: 'Error al asignar ticket' });
+  }
+}
+

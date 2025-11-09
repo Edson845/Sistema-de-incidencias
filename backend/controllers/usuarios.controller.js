@@ -202,3 +202,4 @@ export async function eliminarUsuario(req, res) {
     res.status(500).json({ mensaje: 'Error al eliminar usuario' });
   }
 }
+

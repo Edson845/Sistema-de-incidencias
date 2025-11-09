@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class TicketsService {
   private apiUrl = 'http://localhost:3000/api/tickets';
 
-  constructor(private http: HttpClient) {}
-
+  constructor(private http: HttpClient ,private authService: AuthService) {}
+  
   getTickets(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
@@ -18,7 +19,23 @@ export class TicketsService {
     }
   });
   }
-  
+  getTecnicos() {
+  const token = this.authService.obtenerToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+    return this.http.get<any[]>(`${this.apiUrl}/usuarios/tecnicos`, { headers });
+  }
+  asignarTicket(idTicket: number, dniTecnico: string, herramientas: string[]) {
+    const token = this.authService.obtenerToken();
+    const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+    return this.http.put(`${this.apiUrl}/asignar/${idTicket}`,
+      { asignadoA: dniTecnico, herramientas },
+      { headers }
+    );
+  }
   getTicket(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
@@ -37,6 +54,4 @@ export class TicketsService {
   });
 
   return this.http.post(`${this.apiUrl}`, ticket, { headers });
-}
-
-}
+}}
