@@ -25,7 +25,7 @@
     <table class="tickets-tabla">
       <thead>
         <tr>
-          <th>ID</th>
+          <th *ngIf="rolUsuario === 'admin'">ID</th>
           <th>Título</th>
           <th>Descripción</th>
           <th>Asignado A</th>
@@ -39,46 +39,143 @@
       </thead>
       <tbody>
         <tr *ngFor="let t of ticketsFiltrados">
-          <td>{{ t.idTicket }}</td>
+          <td *ngIf="rolUsuario === 'admin'">{{ t.idTicket }}</td>
           <td>{{ t.tituloTicket }}</td>
           <td>{{ t.descTicket }}</td>
-          <td>{{ t.asignadoA }}</td>
+          <td>{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>
           <td>{{ t.fechaCreacion | date:'dd/MM/yyyy HH:mm'}}</td>
-          <td>{{ t.idCategoria }}</td>
-          <td>{{ t.idEstado }}</td>
-
-          <!-- Solo visible para admin -->
+          <td>{{ t.nombreCategoria }}</td>
+          <td>
+            <span
+              [ngClass]="{
+                'estado-nuevo': t.idEstado == 1,
+                'estado-abierto': t.idEstado == 2,
+                'estado-pendiente': t.idEstado == 3,
+                'estado-resuelto': t.idEstado == 4,
+                'estado-cerrado': t.idEstado == 0
+              }"
+            >
+              {{
+                t.idEstado == 1 ? 'Nuevo' :
+                t.idEstado == 2 ? 'Abierto' :
+                t.idEstado == 3 ? 'Pendiente' :
+                t.idEstado == 4 ? 'Resuelto' :
+                'Cerrado'
+              }}
+            </span>
+          </td>
           <td *ngIf="rolUsuario === 'admin'">
             <span
               [ngClass]="{
-                'prioridad-baja': t.idPrioridad == 1,
-                'prioridad-media': t.idPrioridad == 3,
-                'prioridad-alta': t.idPrioridad >= 4
+                'prioridad-baja': t.nombrePrioridad == 'Baja',
+                'prioridad-media': t.nombrePrioridad == 'Media',
+                'prioridad-alta': t.nombrePrioridad == 'Alta',
+                'prioridad-muyalta': t.nombrePrioridad == 'Muy Alta'
               }"
             >
-              {{ t.idPrioridad }}
+              {{ t.nombrePrioridad }}
             </span>
           </td>
-          <td *ngIf="rolUsuario === 'admin'">{{ t.usuarioCrea }}</td>
+          <td *ngIf="rolUsuario === 'admin'">{{ t.nombreUsuario }} {{ t.apellidoUsuario }}</td>
 
           <!-- Acciones -->
           <td>
             <button class="btn-ver" (click)="verTicket(t.idTicket)">👁 Ver</button>
-            <button class="btn-editar" (click)="editarTicket(t.idTicket)">✏️ Editar</button>
-
             <!-- Botón Asignar solo para admin -->
             <button
-              *ngIf="rolUsuario === 'admin'"
+              *ngIf="rolUsuario === 'admin' && !t.asignadoA"
               class="btn-asignar"
               (click)="asignarTicket(t.idTicket)"
             >
               🛠 Asignar
             </button>
+            <button  *ngIf="rolUsuario === 'admin'" class="btn-editar" 
+            (click)="editarTicket(t.idTicket)">✏️ Editar</button>
+
           </td>
         </tr>
       </tbody>
     </table>
   </div>
+  <div class="modal-overlay" *ngIf="mostrarModalAsignar">
+  <div class="modal">
+
+    <h3>Asignar Ticket</h3>
+
+    <!-- PESTAÑAS -->
+    <div class="tabs">
+      <button 
+        [class.active]="tabSeleccionada === 'tecnico'"
+        (click)="tabSeleccionada = 'tecnico'">
+        Técnico
+      </button>
+
+      <button 
+        [class.active]="tabSeleccionada === 'herramientas'"
+        (click)="tabSeleccionada = 'herramientas'">
+        Herramientas
+      </button>
+    </div>
+
+    <!-- ✅ TAB TÉCNICO -->
+    <div *ngIf="tabSeleccionada === 'tecnico'" class="tab-content">
+
+      <label>Buscar técnico:</label>
+      <input 
+        type="text"
+        [(ngModel)]="filtroTecnico"
+        placeholder="Escribe nombre o apellido..."
+        (input)="filtrarTecnicos()"
+        class="input-buscar"
+      />
+
+      <label>Selecciona un técnico:</label>
+      <select [(ngModel)]="tecnicoSeleccionado">
+      <option *ngFor="let t of tecnicosFiltrados" [value]="t.dni">
+          {{ t.nombres }} {{ t.apellidos }}
+        </option>
+      </select>
+    </div>
+
+    <!-- ✅ TAB HERRAMIENTAS -->
+    <div *ngIf="tabSeleccionada === 'herramientas'" class="tab-content">
+      <div class="herramientas-list">
+        <div *ngFor="let h of herramientasFiltradas">
+          <input type="checkbox"
+                 [checked]="herramientasSeleccionadas.includes(h)"
+                 (change)="toggleHerramienta(h)">
+          {{ h }}
+        </div>
+      </div>
+
+      <!-- ✅ AGREGAR NUEVA HERRAMIENTA -->
+      <div class="agregar-herramienta">
+        <input 
+          type="text"
+          [(ngModel)]="nuevaHerramienta"
+          placeholder="Nueva herramienta..."
+        />
+        <button (click)="agregarHerramienta()">➕</button>
+      </div>
+
+    </div>
+
+    <!-- ✅ Botones -->
+    <div class="modal-buttons">
+      <button class="btn-confirm"
+              (click)="confirmarAsignacion(tecnicoSeleccionado)">
+        ✅ Asignar
+      </button>
+
+      <button class="btn-cancelar" (click)="mostrarModalAsignar = false">
+        ❌ Cancelar
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
 
   <!-- Mensaje si no hay tickets -->
   <div *ngIf="!loading && ticketsFiltrados.length === 0" class="mensaje vacio">

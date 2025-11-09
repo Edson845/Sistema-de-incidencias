@@ -15,14 +15,38 @@ import { SocketService } from '../../services/socket.service'; // ajustar ruta
   templateUrl: './tickets-list.component.html',
   styleUrls: ['./tickets-list.component.css']
 })
+
 export class TicketsListComponent implements OnInit {
+
+
   tickets: any[] = [];
   ticketsFiltrados: any[] = [];
   filtro: string = '';
   loading = true;
   error = '';
+  ticketSeleccionado: number | null = null;
+  listaTecnicos: any[] = [];
+  tabSeleccionada = 'tecnico';
+  herramientas: string[] = ['Laptop', 'Router', 'Switch', 'Cable RJ45', 'Multímetro'];
+  filtroTecnico = '';
+  filtroHerramienta = '';
+  nuevaHerramienta = '';
+  tecnicos: any[] = [];
+  tecnicosFiltrados: any[] = [];
+  mostrarModalAsignar: boolean = false;
+  tecnicoSeleccionado: string = '';
+  herramientasFiltradas: string[] = [...this.herramientas];
+  herramientasSeleccionadas: string[] = [];
+  tecnicoBuscado: string = '';
+  herramientaBuscada: string = '';
+
+
+
+
 
   rolUsuario: string = ''; // <-- rol del usuario actual
+
+  
   private subs = new Subscription();
   constructor(
     private ticketsService: TicketsService,
@@ -31,7 +55,7 @@ export class TicketsListComponent implements OnInit {
     private socketService: SocketService
 
   ) {}
-
+  
   ngOnInit(): void {
     // Obtener el rol del usuario desde el servicio
     this.rolUsuario = this.authService.roles[0];
@@ -70,11 +94,85 @@ export class TicketsListComponent implements OnInit {
       (t.usuarioCrea && t.usuarioCrea.toLowerCase().includes(filtroLower))
     );
   }
+  asignarTicket(idTicket: number) {
+  this.ticketSeleccionado = idTicket;
+  this.mostrarModalAsignar = true;
+
+  this.herramientasSeleccionadas = [];
+
+  this.ticketsService.getTecnicos().subscribe({
+    next: (data) => {
+      console.log("✅ Técnicos cargados:", data);
+
+      this.tecnicos = data;
+      this.tecnicosFiltrados = [...data];  // ← IMPORTANTE
+
+      // Selección por defecto
+      if (this.tecnicosFiltrados.length > 0) {
+        this.tecnicoSeleccionado = this.tecnicosFiltrados[0].dni;
+      }
+    },
+    error: (err) => console.error("❌ Error al obtener técnicos:", err)
+  });
+}
+cerrarModal() {
+  this.mostrarModalAsignar = false;
+  this.herramientasSeleccionadas = [];
+  this.tecnicoSeleccionado = '';
+}
+filtrarHerramientas() {
+  const texto = this.filtroHerramienta.toLowerCase();
+  this.herramientasFiltradas = this.herramientas.filter(h =>
+    h.toLowerCase().includes(texto)
+  );
+}
+filtrarTecnicos() {
+  const texto = this.filtroTecnico.toLowerCase();
+  this.tecnicosFiltrados = this.tecnicos.filter(t =>
+    t.nombres.toLowerCase().includes(texto) ||
+    t.apellidos.toLowerCase().includes(texto)
+  );
+}
+// AGREGAR NUEVA HERRAMIENTA
+agregarHerramienta() {
+  const herramienta = this.nuevaHerramienta.trim();
+
+  if (!herramienta) return;
+
+  if (!this.herramientas.includes(herramienta)) {
+    this.herramientas.push(herramienta);
+  }
+
+  this.herramientasSeleccionadas.push(herramienta);
+  this.nuevaHerramienta = '';
+  this.filtrarHerramientas();
+}
+
+toggleHerramienta(h: string) {
+  if (this.herramientasSeleccionadas.includes(h)) {
+    this.herramientasSeleccionadas = this.herramientasSeleccionadas.filter(x => x !== h);
+  } else {
+    this.herramientasSeleccionadas.push(h);
+  }
+}
+
+confirmarAsignacion(dniTecnico: string) {
+  this.ticketsService.asignarTicket(
+    this.ticketSeleccionado!,
+    dniTecnico,
+    this.herramientasSeleccionadas
+  ).subscribe({
+    next: () => {
+      alert("✅ Ticket asignado correctamente");
+      this.mostrarModalAsignar = false;
+      this.cargarTickets();
+    },
+    error: (err) => console.error(err)
+  });
+}
+
 
   verTicket(id: number) {
-    this.router.navigate(['/tickets', id]);
-  }
-  asignarTicket(id: number) {
     this.router.navigate(['/tickets', id]);
   }
   editarTicket(id: number) {
@@ -85,3 +183,6 @@ export class TicketsListComponent implements OnInit {
     this.router.navigate(['/tickets/nuevo']);
   }
 }
+
+
+

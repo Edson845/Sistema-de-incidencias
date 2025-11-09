@@ -47,7 +47,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', verificarToken,ticketsRoutes);
-app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/usuarios',verificarToken, usuariosRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
 
 
