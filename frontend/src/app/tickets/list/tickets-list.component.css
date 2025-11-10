@@ -1,51 +1,60 @@
-/* Contenedor principal */
+/* CONTENEDOR PRINCIPAL */
 .tickets-container {
-  padding: 25px;
-  background: #f3f4f6;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
-/* Barra superior */
+/* BARRA SUPERIOR */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
-/* Botón agregar */
+/* BOTÓN AGREGAR */
 .btn-agregar {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: #1e3a8a;      /* Azul oscuro elegante */
   color: white;
   border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 9px 14px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
   transition: 0.2s ease-in-out;
 }
 
 .btn-agregar:hover {
-  transform: scale(1.04);
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  background: #172c6e;
 }
 
-/* Buscador */
+/* BUSCADOR */
 .search-input {
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  width: 260px;
-  transition: 0.2s;
+  padding: 9px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  width: 240px;
+  background: white;
 }
 
 .search-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 2px rgba(30,58,138,0.25);
 }
 
-/* Tabla */
+/* SELECT ORDEN */
+.order-select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  cursor: pointer;
+  width: 160px;
+}
+
+/* TABLA */
 .tabla-responsive {
   overflow-x: auto;
 }
@@ -53,110 +62,110 @@
 .tickets-tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   margin-top: 10px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
+/* ENCABEZADO */
 .tickets-tabla thead {
-  background: #1d4ed8;
+  background: #1e3a8a; /* Azul fuerte */
   color: white;
 }
 
 .tickets-tabla th {
-  padding: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.tickets-tabla td {
   padding: 10px;
-  border-bottom: 1px solid #e5e7eb;
 }
 
+/* CELDAS */
+.tickets-tabla td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* HOVER */
 .tickets-tabla tr:hover {
-  background: #f0f7ff;
+  background: #eef2ff;  /* Celestito como tu imagen */
 }
 
-/* Botones de acciones */
+/* BOTONES ACCIONES */
 .btn-ver,
 .btn-asignar,
 .btn-editar {
-  padding: 6px 10px;
+  padding: 5px 10px;
   border-radius: 6px;
   border: none;
   cursor: pointer;
   margin: 2px;
-  font-size: 0.85rem;
-  transition: 0.2s ease;
+  font-size: 0.82rem;
+  transition: 0.15s ease;
 }
 
+/* VER ⇒ azul celeste */
 .btn-ver {
-  background: #0ea5e9;
+  background: #3b82f6;
   color: white;
 }
-
 .btn-ver:hover {
-  background: #0284c7;
+  background: #2563eb;
 }
 
+/* ASIGNAR ⇒ verde */
 .btn-asignar {
   background: #10b981;
   color: white;
 }
-
 .btn-asignar:hover {
   background: #059669;
 }
 
+/* EDITAR ⇒ gris */
 .btn-editar {
-  background: #f59e0b;
+  background: #374151;
   color: white;
 }
-
 .btn-editar:hover {
-  background: #d97706;
+  background: #1f2937;
 }
 
-/* Estados */
+/* ESTADOS */
 .estado-nuevo {
-  background: #a78bfa;
-  padding: 4px 8px;
+  background: #7c3aed;
+  padding: 4px 7px;
   border-radius: 6px;
   color: white;
 }
-
 .estado-abierto {
-  background: #2563eb;
-  padding: 4px 8px;
+  background: #1e3a8a;
+  padding: 4px 7px;
   border-radius: 6px;
   color: white;
 }
-
 .estado-pendiente {
   background: #f59e0b;
-  padding: 4px 8px;
+  padding: 4px 7px;
   border-radius: 6px;
   color: white;
 }
-
 .estado-resuelto {
-  background: #22c55e;
-  padding: 4px 8px;
+  background: #16a34a;
+  padding: 4px 7px;
   border-radius: 6px;
   color: white;
 }
-
 .estado-cerrado {
   background: #6b7280;
-  padding: 4px 8px;
+  padding: 4px 7px;
   border-radius: 6px;
   color: white;
 }
 
-/* Prioridades */
+/* PRIORIDADES */
 .prioridad-baja {
   background: #86efac;
-  padding: 4px 8px;
+  padding: 4px 7px;
   border-radius: 5px;
   color: #064e3b;
   font-weight: 600;
@@ -164,7 +173,7 @@
 
 .prioridad-media {
   background: #fde047;
-  padding: 4px 8px;
+  padding: 4px 7px;
   border-radius: 5px;
   color: #92400e;
   font-weight: 600;
@@ -172,7 +181,7 @@
 
 .prioridad-alta {
   background: #fb923c;
-  padding: 4px 8px;
+  padding: 4px 7px;
   border-radius: 5px;
   color: white;
   font-weight: 600;
@@ -180,13 +189,13 @@
 
 .prioridad-muyalta {
   background: #dc2626;
-  padding: 4px 8px;
+  padding: 4px 7px;
   border-radius: 5px;
   color: white;
   font-weight: 600;
 }
 
-/* Mensajes */
+/* MENSAJES */
 .mensaje {
   text-align: center;
   padding: 14px;
@@ -194,60 +203,40 @@
   font-weight: 500;
 }
 
-.mensaje.info {
-  background: #dbeafe;
-  color: #1e40af;
-}
+/* ===================== */
+/* ==== MODAL TABS ===== */
+/* ===================== */
 
-.mensaje.error {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.mensaje.vacio {
-  background: #fef9c3;
-  color: #854d0e;
-}
-
-/* ----- MODAL PREMIUM (el que ya tuneaste) ----- */
+/* Fondo oscuro */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(5px);
+  background: rgba(0,0,0,0.45);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 999;
-  animation: fadeBg 0.25s ease;
 }
 
-@keyframes fadeBg {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
+/* Contenedor */
 .modal {
   background: white;
-  width: 450px;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-  animation: modalIn 0.25s ease;
+  width: 430px;
+  padding: 22px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
 }
 
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.90); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
+/* Título modal */
 .modal h3 {
   text-align: center;
-  font-size: 1.4rem;
-  color: #111827;
-  margin-bottom: 18px;
+  color: #1e3a8a;
+  margin-bottom: 15px;
+  font-size: 20px;
 }
 
+/* Tabs */
 .tabs {
   display: flex;
   gap: 8px;
@@ -256,153 +245,78 @@
 
 .tabs button {
   flex: 1;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  background: #e5e7eb;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f1f5f9;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  color: #1e3a8a;
 }
 
 .tabs button.active {
-  background: #2563eb;
+  background: #1e3a8a;
   color: white;
+  border-color: #1e3a8a;
 }
 
+/* Contenido */
 .tab-content {
-  background: #f9fafb;
+  background: #f8fafc;
   border: 1px solid #d1d5db;
-  border-radius: 10px;
-  padding: 15px;
-}
-
-.input-buscar,
-select {
-  width: 100%;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
-  border: 1px solid #d1d5db;
+}
+
+/* Inputs */
+.tab-content input,
+.tab-content select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
   margin-bottom: 10px;
+  background: white;
 }
 
+/* Lista herramientas */
 .herramientas-list {
-  max-height: 160px;
+  max-height: 150px;
   overflow-y: auto;
-  padding-right: 6px;
 }
 
+/* Nueva herramienta */
 .agregar-herramienta {
   display: flex;
   gap: 10px;
-  margin-top: 12px;
 }
 
 .agregar-herramienta button {
   background: #10b981;
   color: white;
-  border-radius: 8px;
+  border-radius: 6px;
   border: none;
-  padding: 0 15px;
+  padding: 5px 12px;
   cursor: pointer;
 }
 
+/* Botones modal */
 .modal-buttons {
   display: flex;
   justify-content: space-between;
-  margin-top: 18px;
+  margin-top: 16px;
 }
 
 .btn-confirm {
-  background: #2563eb;
+  background: #1e3a8a;
   color: white;
-  padding: 10px 18px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
 }
 
 .btn-cancelar {
-  background: #ef4444;
+  background: #dc2626;
   color: white;
-  padding: 10px 18px;
-  border-radius: 8px;
-}
-/* Ajustar tamaño general de la tabla */
-.tickets-tabla {
-  font-size: 0.85rem;
-}
-
-.tickets-tabla th,
-.tickets-tabla td {
-  padding: 6px 8px;
-}
-
-/* Encabezado azul más oscuro */
-.tickets-tabla thead {
-  background: #153e75; /* Azul fuerte y profesional */
-  color: white;
-}
-
-/* Hover más sutil */
-.tickets-tabla tr:hover {
-  background: #e6effa;
-}
-
-/* Contenedor más compacto */
-.tickets-container {
-  padding: 18px;
-}
-
-/* Botón agregar: azul más oscuro */
-.btn-agregar {
-  background: linear-gradient(135deg, #0b3c91, #0a3277);
-}
-
-.btn-agregar:hover {
-  background: linear-gradient(135deg, #0a3277, #08285e);
-}
-
-/* Mejor contraste en estados */
-.estado-abierto {
-  background: #0b4cc2;
-}
-
-.estado-nuevo {
-  background: #6d28d9;
-}
-
-.estado-pendiente {
-  background: #e77d00;
-}
-
-.estado-resuelto {
-  background: #198754;
-}
-
-.estado-cerrado {
-  background: #4b5563;
-}
-
-/* Prioridades mejor definidas */
-.prioridad-baja {
-  background: #6ee7b7;
-}
-
-.prioridad-media {
-  background: #facc15;
-}
-
-.prioridad-alta {
-  background: #f97316;
-}
-
-.prioridad-muyalta {
-  background: #b91c1c;
-}
-.order-select {
-  padding: 8px;
+  padding: 8px 16px;
   border-radius: 6px;
-  border: 1px solid #ccc;
-  background: white;
-  width: 180px;
-  cursor: pointer;
 }
-

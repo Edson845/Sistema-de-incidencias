@@ -54,13 +54,26 @@ export class UsuariosService {
   registerUsuario(usuario: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/registro`, usuario);
   }
-
+  obtenerOficinas(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get(`${this.apiUrl}/oficinas`, { headers });
+  }
   obtenerRoles(): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
     return this.http.get(`${this.apiUrl}/roles`, { headers });
+  }
+  obtenerCargos(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get(`${this.apiUrl}/cargos`, { headers });
   }
 
   eliminarUsuario(dni: string): Observable<any> {

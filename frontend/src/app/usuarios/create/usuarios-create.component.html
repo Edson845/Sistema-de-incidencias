@@ -5,44 +5,143 @@
 
       <form (ngSubmit)="crearUsuario()" (submit)="$event.preventDefault()" #usuarioForm="ngForm" class="user-form">
 
+        <!-- DNI -->
         <label for="dni">DNI <span>*</span></label>
-        <input type="text" id="dni" name="dni" [(ngModel)]="usuario.dni" minlength="8" maxlength="8" required />
-
+        <input 
+          type="text" 
+          id="dni" 
+          name="dni" 
+          [(ngModel)]="usuario.dni" 
+          minlength="8" 
+          maxlength="8" 
+          required
+          pattern="^[0-9]{8}$"
+          #dniCtrl="ngModel"
+          (input)="soloNumeros($event)"
+        />
+        <div class="error-msg" *ngIf="dniCtrl.invalid && dniCtrl.touched">
+          <p *ngIf="dniCtrl.errors?.['required']">El DNI es obligatorio.</p>
+          <p *ngIf="dniCtrl.errors?.['pattern']">El DNI debe tener 8 números.</p>
+        </div>
+      
+        <!-- NOMBRES -->
         <label for="nombres">Nombres <span>*</span></label>
-        <input type="text" id="nombres" name="nombres" [(ngModel)]="usuario.nombres" required />
-
+        <input type="text" id="nombres" name="nombres" [(ngModel)]="usuario.nombres" required #nomCtrl="ngModel" />
+        <div class="error-msg" *ngIf="nomCtrl.invalid && nomCtrl.touched">
+          <p>Este campo es obligatorio.</p>
+        </div>
+      
+        <!-- APELLIDOS -->
         <label for="apellidos">Apellidos <span>*</span></label>
-        <input type="text" id="apellidos" name="apellidos" [(ngModel)]="usuario.apellidos" required />
-
+        <input type="text" id="apellidos" name="apellidos" [(ngModel)]="usuario.apellidos" required #apeCtrl="ngModel" />
+        <div class="error-msg" *ngIf="apeCtrl.invalid && apeCtrl.touched">
+          <p>Este campo es obligatorio.</p>
+        </div>
+      
+        <!-- CORREO -->
         <label for="correo">Correo <span>*</span></label>
-        <input type="email" id="correo" name="correo" [(ngModel)]="usuario.correo" required />
-
+        <input 
+          type="email" 
+          id="correo" 
+          name="correo" 
+          [(ngModel)]="usuario.correo" 
+          required
+          placeholder="usuario@munisanroman.gob.pe"
+          pattern="^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$"
+          #correoCtrl="ngModel"
+        />
+        <div class="error-msg" *ngIf="correoCtrl.invalid && correoCtrl.touched">
+          <p *ngIf="correoCtrl.errors?.['required']">El correo es obligatorio.</p>
+          <p *ngIf="correoCtrl.errors?.['pattern']">
+            Debe ser un correo institucional que termine en <strong>@munisanroman.gob.pe</strong>
+          </p>
+        </div>
+      
+        <!-- CELULAR -->
         <label for="celular">Celular</label>
-        <input type="text" id="celular" name="celular" [(ngModel)]="usuario.celular" />
-
+        <input 
+          type="text" 
+          id="celular" 
+          name="celular" 
+          [(ngModel)]="usuario.celular" 
+          maxlength="9"
+          pattern="^[0-9]{9}$"
+          (input)="soloNumeros($event)"
+          #celCtrl="ngModel"
+        />
+        <div class="error-msg" *ngIf="celCtrl.invalid && celCtrl.touched">
+          <p>Debe tener exactamente 9 dígitos numéricos.</p>
+        </div>
+      
+        <!-- ROL -->
         <label for="idRol">Rol de Usuario</label>
-        <select id="idRol" name="idRol" [(ngModel)]="usuario.idRol" required>
+        <select id="idRol" name="idRol" [(ngModel)]="usuario.idRol" required #rolCtrl="ngModel">
           <option value="">Seleccione un rol</option>
           <option *ngFor="let r of roles" [value]="r.idrol">{{ r.nombreRol }}</option>
         </select>
-
+        <div class="error-msg" *ngIf="rolCtrl.invalid && rolCtrl.touched">
+          <p>Seleccione un rol.</p>
+        </div>
+      
+        <!-- CARGO -->
+        <label for="idCargo">Cargo de Usuario</label>
+        <select id="idCargo" name="idCargo" [(ngModel)]="usuario.idCargo" required #cargoCtrl="ngModel">
+          <option value="">Seleccione un cargo</option>
+          <option *ngFor="let c of cargos" [value]="c.idCargo">{{ c.nombreCargo }}</option>
+        </select>
+        <div class="error-msg" *ngIf="cargoCtrl.invalid && cargoCtrl.touched">
+          <p>Seleccione un cargo.</p>
+        </div>
+      
+        <!-- OFICINA -->
+        <label for="idOficina">Oficina de Usuario</label>
+        <select id="idOficina" name="idOficina" [(ngModel)]="usuario.idOficina" required #ofiCtrl="ngModel">
+          <option value="">Seleccione una oficina</option>
+          <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
+        </select>
+        <div class="error-msg" *ngIf="ofiCtrl.invalid && ofiCtrl.touched">
+          <p>Seleccione una oficina.</p>
+        </div>
+      
+        <!-- USUARIO -->
         <label for="usuario">Nombre de usuario <span>*</span></label>
-        <input type="text" id="usuario" name="usuario" [(ngModel)]="usuario.usuario" required />
-
+        <input type="text" id="usuario" name="usuario" [(ngModel)]="usuario.usuario" required #userCtrl="ngModel" />
+        <div class="error-msg" *ngIf="userCtrl.invalid && userCtrl.touched">
+          <p>Este campo es obligatorio.</p>
+        </div>
+      
+        <!-- PASSWORD -->
         <label for="password">Contraseña <span>*</span></label>
-        <input type="password" id="password" name="password" [(ngModel)]="usuario.password" minlength="6" required />
-
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          [(ngModel)]="usuario.password" 
+          minlength="6" 
+          required
+          #passCtrl="ngModel"
+        />
+        <div class="error-msg" *ngIf="passCtrl.invalid && passCtrl.touched">
+          <p *ngIf="passCtrl.errors?.['required']">La contraseña es obligatoria.</p>
+          <p *ngIf="passCtrl.errors?.['minlength']">Debe tener mínimo 6 caracteres.</p>
+        </div>
+      
+        <!-- BOTONES -->
         <div class="button-group">
           <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
-          <button type="button" class="btn-registrar" (click)="crearUsuario()" [disabled]="!usuarioForm.form.valid || loading">
+          <button 
+            type="submit" 
+            class="btn-registrar" 
+            [disabled]="!usuarioForm.form.valid || loading"
+          >
             {{ loading ? 'Creando...' : 'Crear Usuario' }}
           </button>
         </div>
-        <pre *ngIf="error">{{ error }}</pre>
-        <pre *ngIf="loading">Procesando...</pre>
-
+      
         <div *ngIf="error" class="mensaje error" style="margin-top:12px">{{ error }}</div>
+      
       </form>
+      
     </div>
   </main>
 </div>

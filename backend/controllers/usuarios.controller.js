@@ -39,11 +39,11 @@ export async function getUsuarios(req, res) {
 export async function crearUsuario(req, res) {
   try {
     console.log('Datos recibidos:', req.body);
-    const { dni, usuario, password, nombres, celular, apellidos, correo, idRol } = req.body;
+    const { dni, usuario, password, nombres, celular, apellidos, correo, idRol,idCargo,idOficina } = req.body;
 
     // Validación de datos obligatorios
-    if (!dni || !usuario || !password || !nombres || !apellidos || !correo || !idRol) {
-      console.log('Faltan datos obligatorios:', { dni, usuario, nombres, apellidos, correo, idRol });
+    if (!dni || !usuario || !password || !nombres || !apellidos || !correo || !idRol || !idCargo || !idOficina) {
+      console.log('Faltan datos obligatorios:', { dni, usuario, nombres, apellidos, correo, idRol, idCargo, idOficina });
       return res.status(400).json({ 
         mensaje: 'Faltan datos obligatorios',
         camposFaltantes: {
@@ -53,7 +53,9 @@ export async function crearUsuario(req, res) {
           nombres: !nombres,
           apellidos: !apellidos,
           correo: !correo,
-          idRol: !idRol
+          idRol: !idRol,
+          idCargo: !idCargo,
+          idOficina: !idOficina
         }
       });
     }
@@ -84,9 +86,9 @@ export async function crearUsuario(req, res) {
     try {
       // Insertar usuario
       await pool.query(
-        `INSERT INTO usuario (dni, usuario, password, celular, nombres, apellidos, correo)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [dni, usuario, hashedPass, celular || null, nombres, apellidos, correo]
+        `INSERT INTO usuario (dni, usuario, password, celular, nombres, apellidos, correo, idCargo, idOficina)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [dni, usuario, hashedPass, celular || null, nombres, apellidos, correo, idCargo, idOficina]
       );
 
       // Insertar rol de usuario
@@ -94,7 +96,16 @@ export async function crearUsuario(req, res) {
         'INSERT INTO rolusuario (dni, idrol) VALUES (?, ?)',
         [dni, idRol]
       );
+      correo = /^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$/;
+      celular = /^[0-9]{9}$/;
 
+      if (!correo.test(correo)) {
+        return res.status(400).json({ mensaje: 'Correo inválido, debe terminar en @munisanroman.gob.pe' });
+      }
+
+      if (!celular.test(celular)) {
+        return res.status(400).json({ mensaje: 'El celular debe tener exactamente 9 dígitos numéricos' });
+      }
       // Confirmar transacción
       await pool.query('COMMIT');
       console.log('Usuario creado y rol asignado correctamente');
@@ -167,6 +178,24 @@ export async function obtenerRoles(req, res) {
   } catch (error) {
     console.error('Error al obtener roles:', error);
     res.status(500).json({ mensaje: 'Error al obtener roles' });
+  }
+}
+export async function obtenerCargos(req, res) {
+  try {
+    const [rows] = await pool.query(`SELECT idCargo, nombreCargo FROM cargo ORDER BY idCargo`);
+    res.status(200).json(rows || []);
+  } catch (error) {
+    console.error('Error al obtener cargos:', error);
+    res.status(500).json({ mensaje: 'Error al obtener cargos' });
+  }
+}
+export async function obtenerOficinas(req, res) {
+  try {
+    const [rows] = await pool.query(`SELECT idOficina, nombreOficina FROM oficina ORDER BY idOficina`);
+    res.status(200).json(rows || []);
+  } catch (error) {
+    console.error('Error al obtener oficinas:', error);
+    res.status(500).json({ mensaje: 'Error al obtener oficinas' });
   }
 }
 

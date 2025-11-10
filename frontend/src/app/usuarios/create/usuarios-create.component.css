@@ -98,3 +98,19 @@ body {
 	.container { flex-direction: column; }
 	.main-content { padding: 15px; }
 }
+.error-msg {
+	margin-top: 4px;
+	padding: 6px 10px;
+	background: #fee2e2;
+	color: #b91c1c;
+	font-size: 13px;
+	border-radius: 6px;
+	border-left: 3px solid #dc2626;
+  }
+  
+  input.ng-invalid.ng-touched,
+  select.ng-invalid.ng-touched {
+	border-color: #dc2626;
+	background: #fef2f2;
+  }
+  

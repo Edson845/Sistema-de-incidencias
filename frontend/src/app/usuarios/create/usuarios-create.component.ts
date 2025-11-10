@@ -20,6 +20,8 @@ export class UsuariosCreateComponent implements OnInit {
     correo: '',
     celular: '',
     idRol: '',
+    idCargo:'',
+    idOficina:'',
     usuario: '',
     password: ''
   };
@@ -27,13 +29,27 @@ export class UsuariosCreateComponent implements OnInit {
   loading = false;
   error = '';
   roles: any[] = [];
+  cargos: any[] = [];
+  oficinas: any[] = [];
 
   constructor(private usuariosService: UsuariosService, private router: Router) {}
 
   ngOnInit(): void {
     this.cargarRoles();
+    this.cargarCargos();
+    this.cargarOficinas();
   }
-
+  
+  cargarCargos(){
+    this.usuariosService.obtenerCargos().subscribe({
+      next: (data) => {
+        this.cargos = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar Cargos:', err);
+      }
+    });
+  }
   cargarRoles() {
     this.usuariosService.obtenerRoles().subscribe({
       next: (data) => {
@@ -41,6 +57,16 @@ export class UsuariosCreateComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar roles:', err);
+      }
+    });
+  }
+  cargarOficinas(){
+    this.usuariosService.obtenerOficinas().subscribe({
+      next: (data) => {
+        this.oficinas = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar Oficinas:', err);
       }
     });
   }
@@ -75,7 +101,10 @@ export class UsuariosCreateComponent implements OnInit {
       }
     });
   }
-
+  soloNumeros(event: any) {
+    event.target.value = event.target.value.replace(/\D/g, '');
+  }
+  
   cancelar() {
     this.router.navigate(['/usuarios']);
   }
