@@ -83,6 +83,30 @@ export class UsuariosService {
     });
     return this.http.delete(`${this.apiUrl}/${dni}`, { headers });
   }
+  getPerfil() {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get<any>(`${this.apiUrl}/perfil`, { headers });
+  }
+
+  actualizarPerfil(data: any) {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.put(`${this.apiUrl}/perfil`,{headers});
+  }
+
+  actualizarAvatar(formData: FormData) {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.post(`${this.apiUrl}/perfil/avatar`, {headers});
+  }
+
 
 }
 

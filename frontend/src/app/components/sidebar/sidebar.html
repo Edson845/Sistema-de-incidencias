@@ -9,7 +9,7 @@
   </div>
 
   <div class="user-info" *ngIf="!isClosed">
-    <p>Bienvenido, <strong>{{ authService.obtenerDatosUsuario?.nombre || 'Invitado' }}</strong></p>
+    <p>Bienvenido, <strong routerLink="/usuario/perfil" >{{ authService.obtenerDatosUsuario?.nombre || 'Invitado' }}</strong></p>
     <select class="rol-select" disabled>
       <option>{{ authService.obtenerDatosUsuario?.rol || 'Sin Rol' }}</option>
     </select>

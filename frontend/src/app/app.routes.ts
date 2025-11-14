@@ -12,6 +12,7 @@ import { UsuariosListComponent } from './usuarios/list/usuarios-list.component';
 import { UsuariosDetailComponent } from './usuarios/detail/usuarios-detail.component';
 import { UsuariosEditComponent } from './usuarios/edit/usuarios-edit.component';
 import { UsuariosCreateComponent } from './usuarios/create/usuarios-create.component';
+import { Perfil } from './perfil/perfil';
 
 import { NotFound } from './components/not-found/not-found';
 
@@ -35,6 +36,7 @@ export const routes: Routes = [
       { path: 'usuarios/nuevo', component: UsuariosCreateComponent },
       { path: 'usuarios/editar/:id', component: UsuariosEditComponent },
       { path: 'usuarios/:id', component: UsuariosDetailComponent },
+      { path: 'usuario/perfil', component: Perfil },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

@@ -1,0 +1,36 @@
+<div class="perfil-container">
+  <h2>Mi Perfil</h2>
+
+  <div class="perfil-card">
+    <!-- Avatar -->
+    <div class="avatar-section">
+      <img [src]="avatarPreview || 'assets/default-avatar.png'" class="avatar-img">
+
+      <label class="upload-btn">
+        Cambiar Avatar
+        <input type="file" accept="image/*" (change)="seleccionarAvatar($event)">
+      </label>
+    </div>
+
+    <!-- Información -->
+    <div class="perfil-info">
+      <label>Correo (no editable)</label>
+      <input type="text" [value]="usuario.correo" disabled>
+
+      <label>Nombre de Usuario</label>
+      <input type="text" [(ngModel)]="editNombreUsuario">
+
+      <label>Nueva Contraseña</label>
+      <input type="password" [(ngModel)]="nuevaPassword">
+
+      <label>Confirmar Contraseña</label>
+      <input type="password" [(ngModel)]="confirmPassword">
+
+      <button class="btn-guardar" (click)="guardarCambios()" [disabled]="loading">
+        {{ loading ? 'Guardando...' : 'Guardar Cambios' }}
+      </button>
+
+      <p class="mensaje" *ngIf="mensaje">{{ mensaje }}</p>
+    </div>
+  </div>
+</div>
