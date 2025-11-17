@@ -1,0 +1,13 @@
+
+{
+  "scripts": {
+  "start-all": "node start_all.js",
+  "install-all": "node install_all.js"
+},
+
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+    
+  }
+  
+}

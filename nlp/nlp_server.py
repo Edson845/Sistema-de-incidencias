@@ -17,20 +17,20 @@ MODEL_PATH = os.path.join(BASE_DIR, 'nlp_model.joblib')        # Modelo entrenad
 # ==============================
 # 📂 CARGA Y VALIDACIÓN DE DATOS
 # ==============================
-print("🔍 Cargando datos desde:", DATA_PATH)
+print("Cargando datos desde:", DATA_PATH)
 
 try:
     with open(DATA_PATH, encoding='utf-8') as f:
         data = json.load(f)
 except FileNotFoundError:
-    raise FileNotFoundError(f"❌ No se encontró el archivo {DATA_PATH}")
+    raise FileNotFoundError(f"No se encontró el archivo {DATA_PATH}")
 except json.JSONDecodeError as e:
-    raise ValueError(f"❌ Error al leer el JSON: {e}")
+    raise ValueError(f"Error al leer el JSON: {e}")
 
 if not isinstance(data, list) or len(data) == 0:
-    raise ValueError("⚠️ El archivo JSON está vacío o no contiene una lista de incidencias.")
+    raise ValueError("El archivo JSON está vacío o no contiene una lista de incidencias.")
 
-print(f"✅ Total de registros cargados: {len(data)}")
+print(f"Total de registros cargados: {len(data)}")
 
 # ==============================
 # 🧹 PREPROCESAMIENTO AUTOMÁTICO
@@ -58,15 +58,15 @@ for item in data:
         texts.append(str(desc))
         labels.append(str(prio))
 
-print(f"📦 Datos válidos: {len(texts)} descripciones y {len(labels)} etiquetas")
+print(f"Datos válidos: {len(texts)} descripciones y {len(labels)} etiquetas")
 
 if not texts or not labels:
-    raise ValueError("⚠️ No se cargaron datos válidos. Revisa las claves del JSON (descripcion/prioridad/nivel).")
+    raise ValueError("No se cargaron datos válidos. Revisa las claves del JSON (descripcion/prioridad/nivel).")
 
 # ==============================
 # 🤖 ENTRENAMIENTO DEL MODELO
 # ==============================
-print("🚀 Entrenando modelo NLP...")
+print("Entrenando modelo NLP...")
 
 X_train, X_test, y_train, y_test = train_test_split(
     texts, labels, test_size=0.1, random_state=42
@@ -81,7 +81,7 @@ pipeline.fit(X_train, y_train)
 
 # Guardar modelo
 joblib.dump(pipeline, MODEL_PATH)
-print(f"💾 Modelo entrenado y guardado en: {MODEL_PATH}")
+print(f"Modelo entrenado y guardado en: {MODEL_PATH}")
 
 # ==============================
 # 🌐 API FLASK
@@ -91,7 +91,7 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return jsonify({
-        "mensaje": "✅ API NLP de Prioridad de Incidencias lista",
+        "mensaje": "API NLP de Prioridad de Incidencias lista",
         "endpoints": {
             "POST /priorizar": "Clasifica la prioridad de una descripción"
         }
@@ -112,7 +112,7 @@ def priorizar():
         return jsonify({'prioridad': pred}), 200
 
     except Exception as e:
-        print("❌ Error en /priorizar:", e)
+        print("Error en /priorizar:", e)
         return jsonify({'error': str(e)}), 500
 
 
@@ -120,5 +120,5 @@ def priorizar():
 # 🚀 EJECUCIÓN
 # ==============================
 if __name__ == '__main__':
-    print("🌍 Servidor Flask ejecutándose en http://localhost:5005")
+    print("Servidor Flask ejecutándose en http://localhost:5005")
     app.run(host='0.0.0.0', port=5005, debug=True)

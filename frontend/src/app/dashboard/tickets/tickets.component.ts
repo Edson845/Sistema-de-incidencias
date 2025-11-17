@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy  } from '@angular/core';
+import { Component, OnInit, OnDestroy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgChartsModule } from 'ng2-charts';
+import { FormsModule } from '@angular/forms';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environments';
@@ -8,16 +9,32 @@ import { AuthService } from '../../services/auth.service';
 import { EstadisticasService } from '../../services/estadisticas.service';
 import { io, Socket } from "socket.io-client";
 
+
 @Component({
   selector: 'app-tickets',
   standalone: true,
-  imports: [CommonModule, NgChartsModule],
+  imports: [CommonModule, NgChartsModule,FormsModule],
   templateUrl: './tickets.component.html',
   styleUrls: ['./tickets.component.css']
 })
 export class TicketsComponent implements OnInit, OnDestroy {
   private socket!: Socket;
 
+  tabActiva: 'pdf' | 'excel' = 'pdf';
+  modalAbierto = false;
+  filtros = {
+    fechaInicio: '',
+    fechaFin: '',
+    area: ''
+  };
+  listaAreas = [
+    "Sistemas",
+    "Logística",
+    "Mantenimiento",
+    "Almacén",
+    "Gerencia",
+    "Mesa de partes"
+  ];
   tickets: any[] = [];
   resumen = {
     nuevos: 0,
@@ -293,6 +310,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
   reporteAdmins: any[] = [];
   reporteVisible = false;
   
+  
   hacerReporte() {
     const token = this.authService.obtenerToken();
     if (!token) return alert('Debes iniciar sesión');
@@ -309,4 +327,22 @@ export class TicketsComponent implements OnInit, OnDestroy {
       }
     });
   }
+  abrirModal() {
+    this.modalAbierto = true;
+  }
+  
+  cerrarModal() {
+    this.modalAbierto = false;
+  }
+  
+  generarPDF() {
+    console.log("Generando PDF...");
+    // Llamas a tu backend
+  }
+  
+  generarExcel() {
+    console.log("Generando Excel...");
+    // Llamas a tu backend
+  }
 }
+

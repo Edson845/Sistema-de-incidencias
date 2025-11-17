@@ -51,12 +51,97 @@
 
     <!-- Botón de reporte (solo admin) -->
     <div class="text-center mt-4">
-      <button *ngIf="authService.tieneRol('admin')" 
-              class="btn btn-primary" 
-              (click)="hacerReporte()"
-              style="padding: 8px 16px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      <button 
+        *ngIf="authService.tieneRol('admin')" 
+        class="btn-reporte"
+        (click)="abrirModal()">
         Generar Reporte
       </button>
     </div>
+    
+
   </main>
 </div>
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="modalAbierto">
+  <div class="modal-container">
+
+    <div class="modal-header">
+      <h3>Generar Reporte</h3>
+      <button class="close-btn" (click)="cerrarModal()">✕</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button 
+        class="tab" 
+        [class.active]="tabActiva === 'pdf'" 
+        (click)="tabActiva = 'pdf'">
+        PDF
+      </button>
+
+      <button 
+        class="tab" 
+        [class.active]="tabActiva === 'excel'" 
+        (click)="tabActiva = 'excel'">
+        Excel
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- PDF -->
+      <div *ngIf="tabActiva === 'pdf'">
+        <p>Configura filtros para generar un reporte en PDF.</p>
+
+        <!-- Filtros -->
+        <div class="filtros">
+
+          <label>Fecha inicial</label>
+          <input type="date" [(ngModel)]="filtros.fechaInicio">
+
+          <label>Fecha final</label>
+          <input type="date" [(ngModel)]="filtros.fechaFin">
+
+          <label>Área (opcional)</label>
+          <select [(ngModel)]="filtros.area">
+            <option value="">Todas</option>
+            <option *ngFor="let a of listaAreas" [value]="a">{{ a }}</option>
+          </select>
+
+        </div>
+
+        <button class="btn-pdf" (click)="generarPDF()">Descargar PDF</button>
+      </div>
+
+      <!-- Excel -->
+      <div *ngIf="tabActiva === 'excel'">
+        <p>Configura filtros para generar un reporte en Excel.</p>
+
+        <!-- Filtros -->
+        <div class="filtros">
+
+          <label>Fecha inicial</label>
+          <input type="date" [(ngModel)]="filtros.fechaInicio">
+
+          <label>Fecha final</label>
+          <input type="date" [(ngModel)]="filtros.fechaFin">
+
+          <label>Área (opcional)</label>
+          <select [(ngModel)]="filtros.area">
+            <option value="">Todas</option>
+            <option *ngFor="let a of listaAreas" [value]="a">{{ a }}</option>
+          </select>
+
+        </div>
+
+        <button class="btn-excel" (click)="generarExcel()">Descargar Excel</button>
+      </div>
+
+
+    </div>
+
+  </div>
+</div>
+
+
