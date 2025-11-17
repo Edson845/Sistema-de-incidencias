@@ -14,7 +14,8 @@ import {
   getEstadisticasGenerales,
   getTecnicos,
   asignarTicketConHerramientas,
-  getTicketPorId
+  getTicketPorId,
+  obtenerTicketsDetallado
 } from '../controllers/tickets.controller.js';
 
 const router = express.Router();
@@ -47,6 +48,7 @@ router.get('/mios', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']
 router.get('/', verificarToken, verificarRol(['admin', 'tecnico']), getTodosTickets);
 router.get('/categorias', verificarToken, obtenerCategorias);
 router.post('/',verificarToken,verificarRol(['usuario','tecnico', 'admin']),upload.array('archivos', 5),crearTicket);
+router.get("/detallado", verificarToken, obtenerTicketsDetallado);
 router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualizarTicket);
 router.get('/:id', verificarToken, verificarRol(['usuario','tecnico','admin']), getTicketPorId);
 

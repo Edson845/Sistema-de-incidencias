@@ -1,6 +1,40 @@
 import pool from '../db.js';
 import { getIO } from '../socket.js';
 import { obtenerPrioridad } from '../services/nlp.service.js';
+export const obtenerTicketsDetallado = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        t.idTicket,
+        t.tituloTicket,
+        t.descTicket,
+        DATE(t.fechaCreacion) AS fechaCreacion,
+
+        c.nombreCategoria,
+        p.nombrePrioridad,
+        e.nombreEstado,
+
+        u.nombres AS nombreUsuario,
+        u.apellidos AS apellidoUsuario,
+
+        o.nombreOficina
+      FROM ticket t
+      LEFT JOIN categoria c ON t.idCategoria = c.idCategoria
+      LEFT JOIN prioridad p ON t.idPrioridad = p.idPrioridad
+      LEFT JOIN estado e ON t.idEstado = e.idEstado
+      LEFT JOIN usuario u ON t.usuarioCrea = u.dni
+      LEFT JOIN oficina o ON u.idOficina = o.idOficina
+    `);
+
+    res.json(rows);
+
+  } catch (error) {
+    console.error("Error al obtener tickets detallado:", error);
+    res.status(500).json({ message: "Error en el servidor", error });
+  }
+};
+
+
 
 export async function getTicketsUsuario(req, res) {
   try {
@@ -245,16 +279,9 @@ export async function getEstadisticasGenerales(req, res) {
     // 1. Obtener todos los tickets
     const [tickets] = await pool.query('SELECT idEstado, fechaCreacion FROM ticket');
     
-    console.log('Tickets obtenidos:', tickets); // Debug
-    
     // 2. Procesar estadísticas
-    const estadoConteo = {
-      0: 0, // Cerrados
-      1: 0, // Nuevos
-      2: 0  // En Proceso
-    };
-    
-    const mesConteo = {};
+    const estadoConteo = { 0: 0, 1: 0, 2: 0 };
+    const diaConteo = {};
     let resueltosHoy = 0;
     const hoy = new Date().toISOString().split('T')[0];
     
@@ -262,36 +289,37 @@ export async function getEstadisticasGenerales(req, res) {
       // Contar por estado
       const estado = ticket.idEstado;
       estadoConteo[estado] = (estadoConteo[estado] || 0) + 1;
-      
-      // Contar por mes
+    
+      // Contar por día
       if (ticket.fechaCreacion) {
-        const fecha = new Date(ticket.fechaCreacion);
-        const nombreMes = fecha.toLocaleString('es-ES', { month: 'long' });
-        mesConteo[nombreMes] = (mesConteo[nombreMes] || 0) + 1;
-      }
-      
-      // Contar resueltos hoy
-      if (estado === 0 && ticket.fechaCreacion?.split('T')[0] === hoy) {
-        resueltosHoy++;
+        const fechaStr = typeof ticket.fechaCreacion === 'string'
+          ? ticket.fechaCreacion
+          : ticket.fechaCreacion.toISOString
+            ? ticket.fechaCreacion.toISOString()
+            : String(ticket.fechaCreacion);
+        const fechaDia = fechaStr.split('T')[0];
+        diaConteo[fechaDia] = (diaConteo[fechaDia] || 0) + 1;
+    
+        // Contar resueltos hoy
+        if (estado === 0 && fechaDia === hoy) {
+          resueltosHoy++;
+        }
       }
     });
 
     // 3. Formatear resultados
     const porEstado = [
-      { estado: 1, cantidad: estadoConteo[1] || 0 }, // Nuevos
-      { estado: 2, cantidad: estadoConteo[2] || 0 }, // En Proceso
-      { estado: 0, cantidad: estadoConteo[0] || 0 }  // Cerrados
+      { estado: 1, cantidad: estadoConteo[1] || 0 },
+      { estado: 2, cantidad: estadoConteo[2] || 0 },
+      { estado: 0, cantidad: estadoConteo[0] || 0 }
     ];
-
-    console.log('Estadísticas procesadas:', { porEstado, ticketsPorMes: mesConteo, resueltosHoy }); // Debug
 
     res.json({
       porEstado,
-      ticketsPorMes: mesConteo,
+      ticketsPorDia: diaConteo,
       resueltosHoy
     });
   } catch (error) {
-    console.error('Error al obtener estadísticas generales:', error);
     res.status(500).json({ mensaje: error.message });
   }
 }

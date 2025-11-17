@@ -34,7 +34,8 @@
           baseChart
           [data]="pieChartData"
           [options]="pieChartOptions"
-          [type]="'pie'">
+          [type]="'pie'"
+          style="width:10px; height:10px;">
         </canvas>
       </div>
 
@@ -103,10 +104,10 @@
           <label>Fecha final</label>
           <input type="date" [(ngModel)]="filtros.fechaFin">
 
-          <label>Área (opcional)</label>
-          <select [(ngModel)]="filtros.area">
-            <option value="">Todas</option>
-            <option *ngFor="let a of listaAreas" [value]="a">{{ a }}</option>
+          <label>Oficina (opcional)</label>
+          <select [(ngModel)]="usuario.idOficina">
+            <option value="Todos">Todos</option>
+            <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
           </select>
 
         </div>
@@ -127,15 +128,16 @@
           <label>Fecha final</label>
           <input type="date" [(ngModel)]="filtros.fechaFin">
 
-          <label>Área (opcional)</label>
-          <select [(ngModel)]="filtros.area">
+          <label>Oficina (opcional)</label>
+          <select [(ngModel)]="usuario.idOficina">
             <option value="">Todas</option>
-            <option *ngFor="let a of listaAreas" [value]="a">{{ a }}</option>
+            <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
+          
           </select>
 
         </div>
 
-        <button class="btn-excel" (click)="generarExcel()">Descargar Excel</button>
+        <button class="btn-excel" (click)="generarExcel(oficinaSeleccionada)">Descargar Excel</button>
       </div>
 
 

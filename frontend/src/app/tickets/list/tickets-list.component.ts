@@ -126,6 +126,7 @@ ordenarTickets() {
   }
 }
   asignarTicket(idTicket: number) {
+    console.log("Botón presionado")
   this.ticketSeleccionado = idTicket;
   this.mostrarModalAsignar = true;
 
@@ -187,18 +188,47 @@ toggleHerramienta(h: string) {
   }
 }
 
+dniTecnicoCelular: string = ''; // Variable para almacenar el celular del técnico
 confirmarAsignacion(dniTecnico: string) {
+  if (!this.ticketSeleccionado) {
+    console.error('No hay ticket seleccionado');
+    return;
+  }
+
+  // Buscar el técnico para obtener su número de celular
+  const tecnico = this.tecnicos.find(t => t.dni === dniTecnico);
+  if (!tecnico) {
+    console.error('Técnico no encontrado');
+    return;
+  }
+
+  // 1️⃣ Asignar ticket en la base de datos
   this.ticketsService.asignarTicket(
-    this.ticketSeleccionado!,
+    this.ticketSeleccionado,
     dniTecnico,
     this.herramientasSeleccionadas
   ).subscribe({
     next: () => {
+      console.log('Ticket asignado en la base de datos');
+
+      // 2️⃣ Enviar WhatsApp al técnico
+      this.ticketsService.enviarWhatsApp(
+        tecnico.celular,
+        `Se te ha asignado el ticket #${this.ticketSeleccionado}`
+      ).subscribe({
+        next: () => console.log('WhatsApp enviado correctamente'),
+        error: (err) => console.error('Error enviando WhatsApp:', err)
+      });
+
+      // Cierre del modal y recarga
       alert("✅ Ticket asignado correctamente");
       this.mostrarModalAsignar = false;
       this.cargarTickets();
     },
-    error: (err) => console.error(err)
+    error: (err) => {
+      console.error('Error asignando ticket:', err);
+      alert('❌ Error al asignar el ticket');
+    }
   });
 }
 

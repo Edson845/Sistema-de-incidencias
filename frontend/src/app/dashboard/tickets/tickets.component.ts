@@ -8,7 +8,10 @@ import { environment } from '../../environments/environments';
 import { AuthService } from '../../services/auth.service';
 import { EstadisticasService } from '../../services/estadisticas.service';
 import { io, Socket } from "socket.io-client";
-
+import { UsuariosService } from '../../services/usuarios.service';
+import { TicketsService } from '../../services/tickets.service';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-tickets',
@@ -19,7 +22,7 @@ import { io, Socket } from "socket.io-client";
 })
 export class TicketsComponent implements OnInit, OnDestroy {
   private socket!: Socket;
-
+  oficinaSeleccionada: any; 
   tabActiva: 'pdf' | 'excel' = 'pdf';
   modalAbierto = false;
   filtros = {
@@ -27,15 +30,19 @@ export class TicketsComponent implements OnInit, OnDestroy {
     fechaFin: '',
     area: ''
   };
-  listaAreas = [
-    "Sistemas",
-    "Logística",
-    "Mantenimiento",
-    "Almacén",
-    "Gerencia",
-    "Mesa de partes"
-  ];
+  
+  usuario = {
+    idOficina:''
+  };
+  oficinas: any[] = [];
   tickets: any[] = [];
+  ticketsFiltrados: any[] = [];
+  ticketsDetallado: any[] = [];
+  loading = true;
+  error = '';
+
+
+
   resumen = {
     nuevos: 0,
     promedioSolucion: '—',
@@ -55,6 +62,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
 
   pieChartOptions: ChartOptions<'pie'> = {
     responsive: true,
+    aspectRatio: 1,
     plugins: { 
       legend: { position: 'bottom' },
       title: {
@@ -93,22 +101,72 @@ export class TicketsComponent implements OnInit, OnDestroy {
         }
       }
     }
+    
   };
 
   constructor(
     private http: HttpClient, 
     public authService: AuthService,
-    private estadisticasService: EstadisticasService
+    private estadisticasService: EstadisticasService,
+    private usuariosService: UsuariosService,
+    private ticketsService: TicketsService
   ) { }
 
   ngOnInit(): void {
     this.cargarEstadisticas();
     this.iniciarSockets();
+    this.cargarOficinas();
+    this.cargarTicketsDetallado();
   }
   ngOnDestroy(): void {
     if (this.socket) this.socket.disconnect();
   }
+  cargarTicketsDetallado() {
+    this.ticketsService.obtenerTicketsDetallado().subscribe({
+      next: (data) => {
+        this.ticketsDetallado = data;
+        console.log("Tickets detallado:", this.ticketsDetallado);
+      },
+      error: (err) => {
+        console.error("Error cargando tickets detallado:", err);
+      }
+    });
+  }
+  cargarOficinas(){
+    this.usuariosService.obtenerOficinas().subscribe({
+      next: (data) => {
+        this.oficinas = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar Oficinas:', err);
+      }
+    });
+  }
+  cargarTickets() {
+  this.loading = true;
 
+  this.ticketsService.obtenerMisTickets().subscribe({
+    next: (data: any[]) => {
+      console.log("📥 Datos recibidos del backend:", data);
+
+      if (!data || data.length === 0) {
+        console.warn("⚠ No llegaron tickets desde el backend.");
+      }
+
+      this.tickets = data || [];
+      this.ticketsFiltrados = [...this.tickets];
+      this.loading = false;
+
+      console.log("📌 Tickets cargados en el componente:", this.tickets);
+    },
+    error: (err) => {
+      console.error("❌ Error al cargar los tickets:", err);
+      this.error = "Error al cargar los tickets.";
+      this.loading = false;
+    }
+  });
+}
+  
   cargarEstadisticas(): void {
     const token = this.authService.obtenerToken();
     const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
@@ -116,7 +174,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
     // Obtener tickets y estadísticas
     this.http.get<any>(`${environment.apiUrl}/tickets/estadisticas/generales`, { headers }).subscribe({
       next: (data: any) => {
-        console.log('Datos recibidos:', data); // Para debug
+        console.log('Datos recibidos:', data); 
         
         // Actualizar contadores de resumen
         const porEstado = data.porEstado || [];
@@ -137,7 +195,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
 
         // Para debug
         console.log('Estado Data:', estadoData);
-        console.log('Tickets por mes:', data.ticketsPorMes);
+        console.log('Tickets por Dia:', data.ticketsPorDia);
 
         // Actualizar gráfico de pie
         this.pieChartData = {
@@ -149,16 +207,21 @@ export class TicketsComponent implements OnInit, OnDestroy {
         };
 
         // Actualizar gráfico de línea con datos mensuales
-        if (data.ticketsPorMes) {
-          const meses = Object.keys(data.ticketsPorMes);
-          const cantidades = Object.values(data.ticketsPorMes) as number[];
-          
+        if (data.ticketsPorDia) {
+          const dias = Object.keys(data.ticketsPorDia).sort((a, b) => {
+            // Ordena por fecha (DD/MM/YYYY)
+            const [da, ma, ya] = a.split('/');
+            const [db, mb, yb] = b.split('/');
+            return new Date(`${ya}-${ma}-${da}`).getTime() - new Date(`${yb}-${mb}-${db}`).getTime();
+          });
+          const cantidades = dias.map(dia => data.ticketsPorDia[dia]);
+        
           // Para debug
-          console.log('Meses:', meses);
+          console.log('Días:', dias);
           console.log('Cantidades:', cantidades);
-
+        
           this.lineChartData = {
-            labels: meses,
+            labels: dias,
             datasets: [{
               label: 'Cantidad de Tickets',
               data: cantidades,
@@ -340,9 +403,47 @@ export class TicketsComponent implements OnInit, OnDestroy {
     // Llamas a tu backend
   }
   
-  generarExcel() {
-    console.log("Generando Excel...");
-    // Llamas a tu backend
-  }
+  generarExcel(oficinaSeleccionada?: string) {
+  this.ticketsService.obtenerTicketsDetallado().subscribe({
+    next: (tickets: any[]) => {
+      if (!tickets || tickets.length === 0) {
+        alert("No hay tickets cargados.");
+        return;
+      }
+
+      // Filtrar por oficina si se selecciona
+      const datosFiltrados = oficinaSeleccionada
+        ? tickets.filter(ticket => ticket.nombreOficina === oficinaSeleccionada)
+        : tickets;
+
+      if (!datosFiltrados.length) {
+        alert("No hay datos para exportar.");
+        return;
+      }
+
+      // Preparar datos para Excel
+      const datosExcel = datosFiltrados.map(ticket => ({
+        ID: ticket.idTicket,
+        Título: ticket.tituloTicket,
+        Descripción: ticket.descTicket,
+        Estado: ticket.nombreEstado,
+        Prioridad: ticket.nombrePrioridad,
+        Categoría: ticket.nombreCategoria,
+        Usuario: `${ticket.nombreUsuario || ""} ${ticket.apellidoUsuario || ""}`.trim(),
+        FechaCreación: new Date(ticket.fechaCreacion).toLocaleDateString()
+      }));
+
+      // Generar Excel
+      const worksheet = XLSX.utils.json_to_sheet(datosExcel);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Tickets');
+      XLSX.writeFile(workbook, `Tickets_${new Date().toISOString().slice(0,10)}.xlsx`);
+    },
+    error: (err) => {
+      console.error("Error al obtener tickets:", err);
+      alert("No se pudieron cargar los tickets.");
+    }
+  });
 }
 
+}

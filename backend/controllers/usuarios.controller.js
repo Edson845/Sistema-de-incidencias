@@ -96,14 +96,14 @@ export async function crearUsuario(req, res) {
         'INSERT INTO rolusuario (dni, idrol) VALUES (?, ?)',
         [dni, idRol]
       );
-      correo = /^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$/;
-      celular = /^[0-9]{9}$/;
+      const correoRegex = /^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$/;
+      const celularRegex = /^[0-9]{9}$/;
 
-      if (!correo.test(correo)) {
+      if (!correoRegex.test(correo)) {
         return res.status(400).json({ mensaje: 'Correo inválido, debe terminar en @munisanroman.gob.pe' });
       }
 
-      if (!celular.test(celular)) {
+      if (!celularRegex.test(celular)) {
         return res.status(400).json({ mensaje: 'El celular debe tener exactamente 9 dígitos numéricos' });
       }
       // Confirmar transacción
@@ -203,26 +203,33 @@ export async function eliminarUsuario(req, res) {
   const { id } = req.params;
 
   try {
-    // Iniciamos una transacción para asegurar la consistencia
+    // Iniciamos transacción
     await pool.query('START TRANSACTION');
 
     try {
-      // Primero eliminamos las referencias en la tabla rolusuario
-      await pool.query('DELETE FROM rolusuario WHERE dni = ?', [id]);
-      
-      // Luego eliminamos el usuario
-      const [result] = await pool.query('DELETE FROM usuario WHERE dni = ?', [id]);
-      
-      if (result.affectedRows === 0) {
+      // Verificamos si el usuario existe
+      const [usuario] = await pool.query('SELECT * FROM usuario WHERE dni = ?', [id]);
+      if (usuario.length === 0) {
         await pool.query('ROLLBACK');
         return res.status(404).json({ mensaje: 'Usuario no encontrado' });
       }
 
-      // Si todo sale bien, confirmamos los cambios
+      // Reasignamos tickets creados por este usuario al usuario genérico
+      await pool.query(
+        'UPDATE ticket SET usuarioCrea = ? WHERE usuarioCrea = ?',
+        ['00000000', id]
+      );
+
+      // Eliminamos relaciones en rolusuario
+      await pool.query('DELETE FROM rolusuario WHERE dni = ?', [id]);
+
+      // Eliminamos el usuario original
+      await pool.query('DELETE FROM usuario WHERE dni = ?', [id]);
+
+      // Confirmamos transacción
       await pool.query('COMMIT');
-      res.status(200).json({ mensaje: 'Usuario eliminado correctamente' });
+      res.status(200).json({ mensaje: 'Usuario eliminado y tickets reasignados correctamente' });
     } catch (err) {
-      // Si hay algún error, revertimos los cambios
       await pool.query('ROLLBACK');
       throw err;
     }
@@ -231,4 +238,5 @@ export async function eliminarUsuario(req, res) {
     res.status(500).json({ mensaje: 'Error al eliminar usuario' });
   }
 }
+
 

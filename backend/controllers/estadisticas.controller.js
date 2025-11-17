@@ -55,11 +55,30 @@ export const getEstadisticasGenerales = async (req, res) => {
     const [ultimosTickets] = await pool.query('SELECT id, titulo, estado, fecha_creacion FROM tickets ORDER BY fecha_creacion DESC LIMIT 5');
     const [usuariosActivos] = await pool.query("SELECT COUNT(*) AS activos FROM usuarios WHERE estado = 'Activo'");
     const [resueltos] = await pool.query("SELECT COUNT(*) AS resueltos FROM tickets WHERE estado = 'Resuelto'");
+    const [ticketsPorDia] = await pool.query(`
+      SELECT DATE_FORMAT(fecha_creacion, '%d/%m/%Y') AS dia, COUNT(*) AS cantidad
+      FROM tickets
+      GROUP BY dia
+      ORDER BY fecha_creacion ASC
+    `);
+
+    // Convierte el array a objeto { 'DD/MM/YYYY': cantidad }
+    const ticketsPorDiaObj = {};
+    ticketsPorDia.forEach(row => {
+      ticketsPorDiaObj[row.dia] = row.cantidad;
+    });
 
     res.json({
       ultimosTickets,
       usuariosActivos: usuariosActivos[0].activos,
-      ticketsResueltos: resueltos[0].resueltos
+      ticketsResueltos: resueltos[0].resueltos,
+      ticketsPorDia: ticketsPorDiaObj
+    });
+    console.log('Respuesta enviada:', {
+      ultimosTickets,
+      usuariosActivos: usuariosActivos[0].activos,
+      ticketsResueltos: resueltos[0].resueltos,
+      ticketsPorDia: ticketsPorDiaObj
     });
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener estadísticas generales', error: error.message });

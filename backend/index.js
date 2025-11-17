@@ -11,6 +11,7 @@ import ticketsRoutes from './routes/tickets.routes.js';
 import usuariosRoutes from './routes/usuarios.routes.js';
 import estadisticasRoutes from './routes/estadisticas.routes.js';
 import { verificarToken } from './middlewares/auth.middleware.js';
+import whatsappRoutes from './routes/whatsapp.routes.js';
 
 dotenv.config();
 
@@ -49,6 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tickets', verificarToken,ticketsRoutes);
 app.use('/api/usuarios',verificarToken, usuariosRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
 
 
 const PORT = process.env.PORT || 3000;

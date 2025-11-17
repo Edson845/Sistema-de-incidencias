@@ -73,6 +73,22 @@ actualizarEstado(idTicket: number, nuevoEstado: number): Observable<any> {
     { headers }
   );
 }
+obtenerTicketsDetallado(): Observable<any[]> {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+    return this.http.get<any[]>(`${this.apiUrl}/detallado`, { headers });
+  }
+
+  // dentro de TicketsService
+enviarWhatsApp(numero: string, mensaje: string) {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+    return this.http.post<any[]>(`${this.apiUrl}/whatsapp`, { numero, mensaje }, { headers });
+  }
 
 
 }
