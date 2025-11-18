@@ -11,6 +11,12 @@ import { io, Socket } from "socket.io-client";
 import { UsuariosService } from '../../services/usuarios.service';
 import { TicketsService } from '../../services/tickets.service';
 import * as XLSX from 'xlsx';
+import * as pdfMake from "pdfmake/build/pdfmake";
+import * as pdfFonts from "pdfmake/build/vfs_fonts";
+const pdfMakeX: any = pdfMake;
+pdfMakeX.vfs = pdfFonts.vfs;
+
+
 import { saveAs } from 'file-saver';
 
 @Component({
@@ -398,11 +404,6 @@ export class TicketsComponent implements OnInit, OnDestroy {
     this.modalAbierto = false;
   }
   
-  generarPDF() {
-    console.log("Generando PDF...");
-    // Llamas a tu backend
-  }
-  
   generarExcel(oficinaSeleccionada?: string) {
   this.ticketsService.obtenerTicketsDetallado().subscribe({
     next: (tickets: any[]) => {
@@ -442,6 +443,90 @@ export class TicketsComponent implements OnInit, OnDestroy {
     error: (err) => {
       console.error("Error al obtener tickets:", err);
       alert("No se pudieron cargar los tickets.");
+    }
+  });
+}
+
+generarPdf(oficinaSeleccionada?: string) {
+  this.ticketsService.obtenerTicketsDetallado().subscribe({
+    next: (tickets: any[]) => {
+
+      if (!tickets || tickets.length === 0) {
+        alert("No hay tickets cargados.");
+        return;
+      }
+
+      // Filtrar por oficina
+      const datosFiltrados = oficinaSeleccionada
+        ? tickets.filter(t => t.nombreOficina === oficinaSeleccionada)
+        : tickets;
+
+      if (!datosFiltrados.length) {
+        alert("No hay datos para exportar.");
+        return;
+      }
+
+      // Preparar filas de la tabla
+      const filasTabla = datosFiltrados.map(t => ([
+        t.idTicket,
+        t.tituloTicket,
+        t.descTicket,
+        t.nombreEstado,
+        t.nombrePrioridad,
+        t.nombreCategoria,
+        `${t.nombreUsuario || ""} ${t.apellidoUsuario || ""}`.trim(),
+        new Date(t.fechaCreacion).toLocaleDateString()
+      ]));
+
+      // Estructura del PDF
+      const docDefinition: any = {
+        content: [
+          { text: "Reporte de Tickets", style: "header" },
+          { text: `Oficina: ${oficinaSeleccionada || "Todas"}`, margin: [0, 0, 0, 10] },
+
+          {
+            table: {
+              headerRows: 1,
+              widths: ["auto", "auto", "*", "auto", "auto", "auto", "*", "auto"],
+              body: [
+                [
+                  { text: "ID", style: "tableHeader" },
+                  { text: "Título", style: "tableHeader" },
+                  { text: "Descripción", style: "tableHeader" },
+                  { text: "Estado", style: "tableHeader" },
+                  { text: "Prioridad", style: "tableHeader" },
+                  { text: "Categoría", style: "tableHeader" },
+                  { text: "Usuario", style: "tableHeader" },
+                  { text: "Fecha", style: "tableHeader" }
+                ],
+                ...filasTabla
+              ]
+            }
+          }
+        ],
+
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            alignment: "center",
+            margin: [0, 0, 0, 10]
+          },
+          tableHeader: {
+            bold: true,
+            fillColor: "#eeeeee"
+          }
+        }
+      };
+
+      // Descargar PDF → NO devuelve nada
+      pdfMake.createPdf(docDefinition)
+        .download(`Tickets_${new Date().toISOString().slice(0,10)}.pdf`);
+    },
+
+    error: (err) => {
+      console.error("Error al obtener tickets:", err);
+      alert("No se pudieron cargar los datos.");
     }
   });
 }

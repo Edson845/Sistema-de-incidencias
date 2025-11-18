@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { TicketsService } from '../../services/tickets.service';
 import { AuthService } from '../../services/auth.service'; // <-- servicio para obtener rol
 import { SocketService } from '../../services/socket.service'; // ajustar ruta
+import { WhatsAppService } from '../../services/whatsapp.service'; // <-- servicio de WhatsApp
 
 @Component({
   selector: 'app-tickets-list',
@@ -52,7 +53,8 @@ export class TicketsListComponent implements OnInit {
     private ticketsService: TicketsService,
     private authService: AuthService, // <-- inyectamos el servicio de auth
     private router: Router,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private WhatsappService: WhatsAppService  // <-- inyectamos el servicio de WhatsApp
 
   ) {}
   
@@ -210,11 +212,12 @@ confirmarAsignacion(dniTecnico: string) {
   ).subscribe({
     next: () => {
       console.log('Ticket asignado en la base de datos');
+      console.log("🧩 Técnico completo:", tecnico);
+      console.log("📌 Numero del técnico:", tecnico.celular);
+      console.log("📌 Ticket seleccionado:", this.ticketSeleccionado);
 
       // 2️⃣ Enviar WhatsApp al técnico
-      this.ticketsService.enviarWhatsApp(
-        tecnico.celular,
-        `Se te ha asignado el ticket #${this.ticketSeleccionado}`
+      this.WhatsappService.enviarWhatsApp(tecnico.celular,`Se te ha asignado el ticket #${this.ticketSeleccionado}`
       ).subscribe({
         next: () => console.log('WhatsApp enviado correctamente'),
         error: (err) => console.error('Error enviando WhatsApp:', err)
