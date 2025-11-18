@@ -276,20 +276,18 @@ export async function getTicketsPorMes(req, res) {
 
 export async function getEstadisticasGenerales(req, res) {
   try {
-    // 1. Obtener todos los tickets
     const [tickets] = await pool.query('SELECT idEstado, fechaCreacion FROM ticket');
-    
-    // 2. Procesar estadísticas
-    const estadoConteo = { 0: 0, 1: 0, 2: 0 };
+
+    // Conteo dinámico por estado
+    const estadoConteo = {}; 
     const diaConteo = {};
     let resueltosHoy = 0;
     const hoy = new Date().toISOString().split('T')[0];
-    
+
     tickets.forEach(ticket => {
-      // Contar por estado
       const estado = ticket.idEstado;
       estadoConteo[estado] = (estadoConteo[estado] || 0) + 1;
-    
+
       // Contar por día
       if (ticket.fechaCreacion) {
         const fechaStr = typeof ticket.fechaCreacion === 'string'
@@ -297,32 +295,34 @@ export async function getEstadisticasGenerales(req, res) {
           : ticket.fechaCreacion.toISOString
             ? ticket.fechaCreacion.toISOString()
             : String(ticket.fechaCreacion);
+
         const fechaDia = fechaStr.split('T')[0];
         diaConteo[fechaDia] = (diaConteo[fechaDia] || 0) + 1;
-    
-        // Contar resueltos hoy
-        if (estado === 0 && fechaDia === hoy) {
+
+        // Resueltos hoy → en tu BD estado 4 = Resuelto
+        if (estado === 4 && fechaDia === hoy) {
           resueltosHoy++;
         }
       }
     });
 
-    // 3. Formatear resultados
-    const porEstado = [
-      { estado: 1, cantidad: estadoConteo[1] || 0 },
-      { estado: 2, cantidad: estadoConteo[2] || 0 },
-      { estado: 0, cantidad: estadoConteo[0] || 0 }
-    ];
+    // Convertir objeto dinámico a array
+    const porEstado = Object.keys(estadoConteo).map(key => ({
+      estado: Number(key),
+      cantidad: estadoConteo[key]
+    }));
 
     res.json({
       porEstado,
       ticketsPorDia: diaConteo,
       resueltosHoy
     });
+
   } catch (error) {
     res.status(500).json({ mensaje: error.message });
   }
 }
+
 export async function getTecnicos(req, res) {
   try {
     const [rows] = await pool.query(`
@@ -330,7 +330,8 @@ export async function getTecnicos(req, res) {
     u.dni AS dni,
     u.nombres AS nombres,
     u.apellidos AS apellidos,
-    u.usuario AS usuario
+    u.usuario AS usuario,
+    u.celular AS celular
     FROM usuario u
     INNER JOIN rolusuario ru ON ru.dni = u.dni
     INNER JOIN rol r ON r.idRol = ru.idRol

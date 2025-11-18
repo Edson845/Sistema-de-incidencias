@@ -59,10 +59,10 @@ export class TicketsComponent implements OnInit, OnDestroy {
 
   // 🔹 Gráficos
   pieChartData: ChartConfiguration<'pie'>['data'] = {
-    labels: ['Nuevos', 'En Proceso', 'Cerrados'],
+    labels: ['Nueva', 'Abierta', 'Proceso', 'Resuelto', 'Cerrada', 'No Procede'],
     datasets: [{ 
-      data: [0, 0, 0], 
-      backgroundColor: ['#f59e0b', '#2563eb', '#22c55e']
+      data: [0, 0, 0, 0, 0], 
+      backgroundColor: ['#f59e0b', '#2563eb', '#22c55e', '#6b7280', '#9ca3af']
     }]
   };
 
@@ -173,78 +173,84 @@ export class TicketsComponent implements OnInit, OnDestroy {
   });
 }
   
-  cargarEstadisticas(): void {
-    const token = this.authService.obtenerToken();
-    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+ cargarEstadisticas(): void {
+  const token = this.authService.obtenerToken();
+  const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
 
-    // Obtener tickets y estadísticas
-    this.http.get<any>(`${environment.apiUrl}/tickets/estadisticas/generales`, { headers }).subscribe({
-      next: (data: any) => {
-        console.log('Datos recibidos:', data); 
-        
-        // Actualizar contadores de resumen
-        const porEstado = data.porEstado || [];
-        this.resumen = {
-          nuevos: porEstado.find((e: any) => e.estado === 1)?.cantidad || 0,
-          promedioSolucion: '40 min',
-          respuestasUsuarios: porEstado.find((e: any) => e.estado === 2)?.cantidad || 0,
-          resueltosHoy: data.resueltosHoy || 0,
-          total: porEstado.reduce((sum: number, e: any) => sum + e.cantidad, 0)
-        };
-        
-        // Actualizar gráfico de pie con datos de estado
-        const estadoData = {
-          nuevos: porEstado.find((e: any) => e.estado === 1)?.cantidad || 0,
-          enProceso: porEstado.find((e: any) => e.estado === 2)?.cantidad || 0,
-          cerrados: porEstado.find((e: any) => e.estado === 0)?.cantidad || 0
-        };
+  this.http.get<any>(`${environment.apiUrl}/tickets/estadisticas/generales`, { headers }).subscribe({
+    next: (data: any) => {
 
-        // Para debug
-        console.log('Estado Data:', estadoData);
-        console.log('Tickets por Dia:', data.ticketsPorDia);
+      console.log("Datos recibidos:", data);
+      const porEstado = data.porEstado || [];
 
-        // Actualizar gráfico de pie
-        this.pieChartData = {
-          labels: ['Nuevos', 'En Proceso', 'Cerrados'],
+      // 🟦 MAPEO SEGURO PARA 6 ESTADOS
+      const contar = (id: number) =>
+        porEstado.find((e: any) => e.estado === id)?.cantidad || 0;
+
+      // 🟩 RESUMEN
+      this.resumen = {
+        nuevos: contar(1),
+        promedioSolucion: '40 min',
+        respuestasUsuarios: contar(2),
+        resueltosHoy: data.resueltosHoy || 0,
+        total: porEstado.reduce((sum: number, e: any) => sum + e.cantidad, 0)
+      };
+
+      // 🟧 GRÁFICO DE PIE PARA 6 ESTADOS
+      this.pieChartData = {
+        labels: ['Nueva', 'Abierta', 'Proceso', 'Resuelto', 'Cerrada', 'No Procede'],
+        datasets: [{
+          data: [
+            contar(1), // Nueva
+            contar(2), // Abierta
+            contar(3), // Proceso
+            contar(4), // Resuelto
+            contar(5), // Cerrada
+            contar(6)  // No Procede
+          ],
+          backgroundColor: [
+            '#f59e0b', // Nueva
+            '#2563eb', // Abierta
+            '#22c55e', // Proceso
+            '#6b7280', // Resuelto
+            '#9ca3af', // Cerrada
+            '#a855f7'  // No Procede
+          ]
+        }]
+      };
+
+      // 🟥 GRÁFICO DE LÍNEA (NO SE TOCA)
+      if (data.ticketsPorDia) {
+        const dias = Object.keys(data.ticketsPorDia).sort((a, b) => {
+          const [da, ma, ya] = a.split('/');
+          const [db, mb, yb] = b.split('/');
+          return new Date(`${ya}-${ma}-${da}`).getTime() -
+                 new Date(`${yb}-${mb}-${db}`).getTime();
+        });
+
+        const cantidades = dias.map(dia => data.ticketsPorDia[dia]);
+
+        this.lineChartData = {
+          labels: dias,
           datasets: [{
-            data: [estadoData.nuevos, estadoData.enProceso, estadoData.cerrados],
-            backgroundColor: ['#f59e0b', '#2563eb', '#22c55e']
+            label: 'Cantidad de Tickets',
+            data: cantidades,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.2)',
+            fill: true,
+            tension: 0.4
           }]
         };
-
-        // Actualizar gráfico de línea con datos mensuales
-        if (data.ticketsPorDia) {
-          const dias = Object.keys(data.ticketsPorDia).sort((a, b) => {
-            // Ordena por fecha (DD/MM/YYYY)
-            const [da, ma, ya] = a.split('/');
-            const [db, mb, yb] = b.split('/');
-            return new Date(`${ya}-${ma}-${da}`).getTime() - new Date(`${yb}-${mb}-${db}`).getTime();
-          });
-          const cantidades = dias.map(dia => data.ticketsPorDia[dia]);
-        
-          // Para debug
-          console.log('Días:', dias);
-          console.log('Cantidades:', cantidades);
-        
-          this.lineChartData = {
-            labels: dias,
-            datasets: [{
-              label: 'Cantidad de Tickets',
-              data: cantidades,
-              borderColor: '#2563eb',
-              backgroundColor: 'rgba(37, 99, 235, 0.2)',
-              fill: true,
-              tension: 0.4
-            }]
-          };
-        }
-      },
-      error: (err) => {
-        console.error('Error al obtener tickets:', err);
-        this.generarResumen(); // Generar resumen con datos vacíos como respaldo
       }
-    });
-  }
+
+    },
+    error: (err) => {
+      console.error('Error al obtener tickets:', err);
+      this.generarResumen();
+    }
+  });
+}
+
 
   generarResumen(): void {
     const total = this.tickets.length;
@@ -273,24 +279,48 @@ export class TicketsComponent implements OnInit, OnDestroy {
   actualizarEstadisticas(data: any): void {
     // Actualizar gráfico de pastel con datos por estado
     if (data.porEstado) {
-      const estadoData = data.porEstado.reduce((acc: any, item: any) => {
-        const estado = (item.estado || '').toString().toLowerCase();
-        if (estado === 'pendiente' || estado === '1' || estado === 'nuevo') {
-          acc.pendiente = (acc.pendiente || 0) + item.cantidad;
-        } else if (estado === 'en proceso' || estado === '2') {
-          acc.enProceso = (acc.enProceso || 0) + item.cantidad;
-        } else if (estado === 'cerrado' || estado === '0' || estado === 'resuelto') {
-          acc.cerrado = (acc.cerrado || 0) + item.cantidad;
-        }
-        return acc;
-      }, {});
+    const estadoData = data.porEstado.reduce((acc: any, item: any) => {
+      
+      const estado = (item.estado || '').toString().toLowerCase();
 
-      this.pieChartData.datasets[0].data = [
-        estadoData.pendiente || 0,
-        estadoData.enProceso || 0,
-        estadoData.cerrado || 0
-      ];
-    }
+      // --- NUEVOS ---
+      if (estado === 'nueva' || estado === 'nuevo' || estado === '1') {
+        acc.nuevos = (acc.nuevos || 0) + item.cantidad;
+      }
+
+      // --- ABIERTOS ---
+      else if (estado === 'abierta' || estado === '2') {
+        acc.abiertos = (acc.abiertos || 0) + item.cantidad;
+      }
+
+      // --- EN PROCESO ---
+      else if (estado === 'proceso' || estado === 'en proceso' || estado === '3') {
+        acc.enProceso = (acc.enProceso || 0) + item.cantidad;
+      }
+
+      // --- CERRADOS (Resuelto + Cerrada) ---
+      else if (estado === 'resuelto' || estado === 'cerrada' || estado === '4' || estado === '5') {
+        acc.cerrados = (acc.cerrados || 0) + item.cantidad;
+      }
+
+      // --- NO PROCEDE ---
+      else if (estado === 'no procede' || estado === '6') {
+        acc.noProcede = (acc.noProcede || 0) + item.cantidad;
+      }
+
+      return acc;
+
+    }, {});
+
+    this.pieChartData.datasets[0].data = [
+      estadoData.nuevos || 0,
+      estadoData.abiertos || 0,
+      estadoData.enProceso || 0,
+      estadoData.cerrados || 0,
+      estadoData.noProcede || 0
+    ];
+
+  }
 
     // Actualizar gráfico de línea con datos mensuales
     if (data.generales?.ticketsPorMes) {

@@ -3,7 +3,7 @@ import { enviarWhatsApp } from '../services/whatsapp.service.js';
 
 export async function enviarMensaje(req, res) {
   const { numero, mensaje } = req.body;
-
+  console.log("👉 Recibido:", req.body);
   if (!numero || !mensaje) {
     return res.status(400).json({ mensaje: 'Faltan parámetros' });
   }
