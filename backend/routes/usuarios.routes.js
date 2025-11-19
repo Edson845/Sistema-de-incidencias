@@ -8,7 +8,9 @@ import {
   obtenerRoles,
   eliminarUsuario,
   obtenerCargos,
-  obtenerOficinas
+  obtenerOficinas,
+  obtenerDepartamentos,
+  obtenerGerencias
 } from '../controllers/usuarios.controller.js';
 
 const router = express.Router();
@@ -25,6 +27,8 @@ router.get('/', verificarToken, verificarRol(['admin']), getUsuarios);
 router.get('/roles', obtenerRoles);
 router.get('/cargos', obtenerCargos);
 router.get('/oficinas', obtenerOficinas);
+router.get('/departamentos', obtenerDepartamentos);
+router.get('/gerencias', obtenerGerencias);
 
 // Crear usuario vía API (solo admin)
 router.post('/', verificarToken, verificarRol(['admin']), crearUsuario);

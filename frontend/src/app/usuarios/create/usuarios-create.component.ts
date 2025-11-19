@@ -22,6 +22,8 @@ export class UsuariosCreateComponent implements OnInit {
     idRol: '',
     idCargo:'',
     idOficina:'',
+    idDepartamento:'',
+    idGerencia:'',
     usuario: '',
     password: ''
   };
@@ -31,6 +33,15 @@ export class UsuariosCreateComponent implements OnInit {
   roles: any[] = [];
   cargos: any[] = [];
   oficinas: any[] = [];
+  mostrarOficinas = false;
+  mostrarRango = false;
+  rangeUnidad = '';
+  mostrarDepartamentos = false;
+  mostrarGerencias = false;
+  departamentos: any[] = [];
+  gerencias: any[] = [];
+  mostrarRangoUnidad = false;  // para asistente, secretario, técnico, personal
+
 
   constructor(private usuariosService: UsuariosService, private router: Router) {}
 
@@ -38,6 +49,8 @@ export class UsuariosCreateComponent implements OnInit {
     this.cargarRoles();
     this.cargarCargos();
     this.cargarOficinas();
+    this.cargarGerencias();
+    this.cargarDepartamentos();
   }
   
   cargarCargos(){
@@ -70,12 +83,33 @@ export class UsuariosCreateComponent implements OnInit {
       }
     });
   }
+  cargarGerencias(){
+    this.usuariosService.obtenerGerencias().subscribe({
+      next: (data) => {
+        this.gerencias = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar Oficinas:', err);
+      }
+    });
+  }
+  cargarDepartamentos(){
+    this.usuariosService.obtenerDepartamentos().subscribe({
+      next: (data) => {
+        this.departamentos = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar Oficinas:', err);
+      }
+    });
+  }
 
   crearUsuario() {
     console.log('Iniciando creación de usuario...', this.usuario);
     this.loading = true;
     this.error = '';
-
+    this.usuario.password = this.usuario.dni; // Establecer contraseña inicial como DNI
+    this.usuario.usuario = this.usuario.dni; // Establecer nombre de usuario como DNI
     if (!this.usuario.dni || !this.usuario.nombres || !this.usuario.apellidos || 
         !this.usuario.correo || !this.usuario.usuario || !this.usuario.password || !this.usuario.idRol) {
       console.error('Faltan campos requeridos:', this.usuario);
@@ -101,6 +135,56 @@ export class UsuariosCreateComponent implements OnInit {
       }
     });
   }
+  onCargoChange() {
+    const cargo = Number(this.usuario.idCargo);
+
+    // Reiniciar visibilidad
+    this.mostrarGerencias = false;
+    this.mostrarDepartamentos = false;
+    this.mostrarOficinas = false;
+    this.mostrarRangoUnidad = false;
+
+
+    if (cargo === 2) {  
+      this.mostrarGerencias = true;          // solo gerencia
+    }
+    else if (cargo === 3) { 
+      this.mostrarDepartamentos = true;      // solo departamentos
+    }
+    else if (cargo === 4) {  
+      this.mostrarOficinas = true;           // solo oficinas
+    }
+    else if ([5, 6, 7, 8].includes(cargo)) {  
+      this.mostrarRangoUnidad = true;
+      // asistente / secretario / técnico / personal
+    }
+  }
+  onRangoUnidadChange(rango: any) {
+    rango = Number(rango);
+  // Limpiar todo antes de asignar
+  this.usuario.idGerencia = "";
+  this.usuario.idDepartamento = "";
+  this.usuario.idOficina = "";
+
+  if (rango === 1) {
+    this.mostrarGerencias = true;
+    this.mostrarDepartamentos = false;
+    this.mostrarOficinas = false;
+  }
+
+  else if (rango === 2) {
+    this.mostrarGerencias = false;
+    this.mostrarDepartamentos = true;
+    this.mostrarOficinas = false;
+  }
+
+  else if (rango === 3) {
+    this.mostrarGerencias = false;
+    this.mostrarDepartamentos = false;
+    this.mostrarOficinas = true;
+  }
+}
+
   soloNumeros(event: any) {
     event.target.value = event.target.value.replace(/\D/g, '');
   }

@@ -83,49 +83,60 @@
           <p>Seleccione un rol.</p>
         </div>
       
-        <!-- CARGO -->
-        <label for="idCargo">Cargo de Usuario</label>
-        <select id="idCargo" name="idCargo" [(ngModel)]="usuario.idCargo" required #cargoCtrl="ngModel">
+        <!-- CARGO (CON EVENTO CHANGE) -->
+        <label for="idCargo">Cargo de Usuario <span>*</span></label>
+        <select 
+          id="idCargo" 
+          name="idCargo" 
+          [(ngModel)]="usuario.idCargo" 
+          (change)="onCargoChange()" 
+          required 
+          #cargoCtrl="ngModel"
+        >
           <option value="">Seleccione un cargo</option>
           <option *ngFor="let c of cargos" [value]="c.idCargo">{{ c.nombreCargo }}</option>
         </select>
         <div class="error-msg" *ngIf="cargoCtrl.invalid && cargoCtrl.touched">
           <p>Seleccione un cargo.</p>
         </div>
-      
-        <!-- OFICINA -->
-        <label for="idOficina">Oficina de Usuario</label>
-        <select id="idOficina" name="idOficina" [(ngModel)]="usuario.idOficina" required #ofiCtrl="ngModel">
-          <option value="">Seleccione una oficina</option>
-          <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
+        
+        <div *ngIf="mostrarRangoUnidad">
+        <label>¿A qué unidad pertenece?</label>
+        <select [(ngModel)]="rangeUnidad" name="rangeUnidad" (change)="onRangoUnidadChange(rangeUnidad)">
+          <option [value]="1">Gerencia</option>
+          <option [value]="2">Departamento</option>
+          <option [value]="3">Oficina</option>
         </select>
-        <div class="error-msg" *ngIf="ofiCtrl.invalid && ofiCtrl.touched">
-          <p>Seleccione una oficina.</p>
-        </div>
-      
-        <!-- USUARIO -->
-        <label for="usuario">Nombre de usuario <span>*</span></label>
-        <input type="text" id="usuario" name="usuario" [(ngModel)]="usuario.usuario" required #userCtrl="ngModel" />
-        <div class="error-msg" *ngIf="userCtrl.invalid && userCtrl.touched">
-          <p>Este campo es obligatorio.</p>
-        </div>
-      
-        <!-- PASSWORD -->
-        <label for="password">Contraseña <span>*</span></label>
-        <input 
-          type="password" 
-          id="password" 
-          name="password" 
-          [(ngModel)]="usuario.password" 
-          minlength="6" 
-          required
-          #passCtrl="ngModel"
-        />
-        <div class="error-msg" *ngIf="passCtrl.invalid && passCtrl.touched">
-          <p *ngIf="passCtrl.errors?.['required']">La contraseña es obligatoria.</p>
-          <p *ngIf="passCtrl.errors?.['minlength']">Debe tener mínimo 6 caracteres.</p>
-        </div>
-      
+      </div>
+
+        <!-- OFICINA (CONDICIONAL - para técnicos, asistentes, secretarias) -->
+         <div *ngIf="mostrarOficinas">
+            <label>Seleccione Oficina</label>
+            <select [(ngModel)]="usuario.idOficina" name="idOficina">
+              <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
+            </select>
+          </div>
+
+        
+
+        <!-- DEPARTAMENTO (CONDICIONAL - para jefes de área) -->
+         <div *ngIf="mostrarDepartamentos">
+            <label>Seleccione Sub Gerencia</label>
+            <select [(ngModel)]="usuario.idDepartamento" name="idDepartamento">
+              <option *ngFor="let d of departamentos" [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
+            </select>
+          </div>
+
+        
+
+        <!-- GERENCIA (CONDICIONAL - para gerentes/subgerentes) -->
+         <div *ngIf="mostrarGerencias">
+            <label>Seleccione Gerencia</label>
+            <select [(ngModel)]="usuario.idGerencia" name="idGerencia">
+              <option *ngFor="let g of gerencias" [value]="g.idGerencia">{{ g.nombreGerencia }}</option>
+            </select>
+          </div>
+        
         <!-- BOTONES -->
         <div class="button-group">
           <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>

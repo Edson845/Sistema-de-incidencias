@@ -61,6 +61,20 @@ export class UsuariosService {
     });
     return this.http.get(`${this.apiUrl}/oficinas`, { headers });
   }
+  obtenerDepartamentos(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get(`${this.apiUrl}/departamentos`, { headers });
+  }
+  obtenerGerencias(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.get(`${this.apiUrl}/gerencias`, { headers });
+  }
   obtenerRoles(): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({

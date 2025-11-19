@@ -39,11 +39,66 @@ export async function getUsuarios(req, res) {
 export async function crearUsuario(req, res) {
   try {
     console.log('Datos recibidos:', req.body);
-    const { dni, usuario, password, nombres, celular, apellidos, correo, idRol,idCargo,idOficina } = req.body;
+    //const { dni, usuario, password, nombres, celular, apellidos, correo, idRol,idCargo,idOficina,idDepartamento,idGerencia } = req.body;
+    
+    let { dni, usuario, password, nombres, celular, apellidos, correo, idRol, idCargo, idOficina, idDepartamento, idGerencia } = req.body;
 
+    // ================================
+    //   COMODINES
+    // ================================
+    const DEPARTAMENTO_VACIO = 45;
+    const OFICINA_VACIA = 48;
+
+    // ================================
+    //   REGLA 1: Solo GERENCIA
+    // ================================
+    if (idGerencia && !idDepartamento && !idOficina) {
+      idDepartamento = DEPARTAMENTO_VACIO;
+      idOficina = OFICINA_VACIA;
+      console.log("Solo gerencia recibido → asignando comodines.");
+    }
+
+    // ================================
+    //   REGLA 2: Solo DEPARTAMENTO
+    // ================================
+    if (idDepartamento && !idOficina) {
+      const [dep] = await pool.query(
+        "SELECT idGerencia FROM departamento WHERE idDepartamento = ?",
+        [idDepartamento]
+      );
+
+      if (dep.length > 0) {
+        idGerencia = dep[0].idGerencia;
+      }
+
+      idOficina = OFICINA_VACIA;
+
+      console.log("Solo departamento recibido → asignando gerencia y oficina vacía.");
+    }
+
+    // ================================
+    //   REGLA 3: Solo OFICINA
+    // ================================
+    if (idOficina) {
+      const [ofi] = await pool.query(
+        `SELECT o.idDepartamento, d.idGerencia
+         FROM oficina o
+         INNER JOIN departamento d ON d.idDepartamento = o.idDepartamento
+         WHERE o.idOficina = ?`,
+        [idOficina]
+      );
+
+      if (ofi.length > 0) {
+        idDepartamento = ofi[0].idDepartamento;
+        idGerencia = ofi[0].idGerencia;
+      }
+
+      console.log("Solo oficina recibido → asignando departamento y gerencia.");
+    }
+    
     // Validación de datos obligatorios
-    if (!dni || !usuario || !password || !nombres || !apellidos || !correo || !idRol || !idCargo || !idOficina) {
-      console.log('Faltan datos obligatorios:', { dni, usuario, nombres, apellidos, correo, idRol, idCargo, idOficina });
+    if (!dni || !usuario || !password || !nombres || !apellidos || !correo || !idRol || !idCargo || !idOficina || !idDepartamento || !idGerencia) {
+      console.log('Faltan datos obligatorios:', { dni, usuario, nombres, apellidos, correo, idRol, idCargo, idOficina, idDepartamento, idGerencia });
       return res.status(400).json({ 
         mensaje: 'Faltan datos obligatorios',
         camposFaltantes: {
@@ -55,7 +110,9 @@ export async function crearUsuario(req, res) {
           correo: !correo,
           idRol: !idRol,
           idCargo: !idCargo,
-          idOficina: !idOficina
+          idOficina: !idOficina,
+          idDepartamento: !idDepartamento,
+          idGerencia: !idGerencia
         }
       });
     }
@@ -86,9 +143,9 @@ export async function crearUsuario(req, res) {
     try {
       // Insertar usuario
       await pool.query(
-        `INSERT INTO usuario (dni, usuario, password, celular, nombres, apellidos, correo, idCargo, idOficina)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [dni, usuario, hashedPass, celular || null, nombres, apellidos, correo, idCargo, idOficina]
+        `INSERT INTO usuario (dni, usuario, password, celular, nombres, apellidos, correo, idCargo, idOficina, idDepartamento, idGerencia)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [dni, usuario, hashedPass, celular || null, nombres, apellidos, correo, idCargo, idOficina, idDepartamento, idGerencia]
       );
 
       // Insertar rol de usuario
@@ -196,6 +253,24 @@ export async function obtenerOficinas(req, res) {
   } catch (error) {
     console.error('Error al obtener oficinas:', error);
     res.status(500).json({ mensaje: 'Error al obtener oficinas' });
+  }
+}
+export async function obtenerDepartamentos(req, res) {
+  try {
+    const [rows] = await pool.query(`SELECT idDepartamento, nombreDepartamento FROM departamento ORDER BY idDepartamento`);
+    res.status(200).json(rows || []);
+  } catch (error) {
+    console.error('Error al obtener departamentos:', error);
+    res.status(500).json({ mensaje: 'Error al obtener departamentos' });
+  }
+}
+export async function obtenerGerencias(req, res) {
+  try {
+    const [rows] = await pool.query(`SELECT idGerencia, nombreGerencia FROM gerencias ORDER BY idGerencia`);
+    res.status(200).json(rows || []);
+  } catch (error) {
+    console.error('Error al obtener gerencias:', error);
+    res.status(500).json({ mensaje: 'Error al obtener gerencias' });
   }
 }
 
