@@ -11,9 +11,11 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   // 🔹 Inicia sesión y devuelve el token
-  login(correo: string, password: string): Observable<{ token: string }> {
-    return this.http.post<{ token: string }>(`${this.apiUrl}/login`, { correo, password });
+  login(identificador: string, password: string): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(`${this.apiUrl}/login`,{ identificador, password }
+    );
   }
+
 
   // 🔹 Guarda token en localStorage
   guardarToken(token: string): void {

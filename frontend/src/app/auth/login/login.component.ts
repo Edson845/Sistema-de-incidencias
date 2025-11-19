@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  email = '';
+  identificador = '';
   password = '';
   error = '';
   isLoading = false;
@@ -21,7 +21,7 @@ export class LoginComponent {
 
   login() {
     // Validaciones básicas
-    if (!this.email || !this.password) {
+    if (!this.identificador || !this.password) {
       this.error = 'Por favor, completa todos los campos.';
       return;
     }
@@ -29,16 +29,14 @@ export class LoginComponent {
     this.isLoading = true;
     this.error = '';
 
-    this.authService.login(this.email, this.password).subscribe({
+    this.authService.login(this.identificador, this.password).subscribe({
       next: (response: any) => {
         this.isLoading = false;
 
-        // Guarda token o usuario si viene en la respuesta
         if (response?.token) {
           localStorage.setItem('token', response.token);
         }
 
-        // Redirige al dashboard
         this.router.navigate(['/dashboard']);
       },
       error: err => {

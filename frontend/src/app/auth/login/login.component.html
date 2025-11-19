@@ -26,15 +26,8 @@
 
       <!-- Formulario Angular -->
       <form (ngSubmit)="login()" #loginForm="ngForm">
-        <label for="email">Correo Institucional</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          [(ngModel)]="email"
-          placeholder="Ingresa tu correo institucional"
-          required
-        >
+        <label for="identificador">Correo Institucional o Usuario</label>
+        <input type="text" [(ngModel)]="identificador" placeholder="Correo o Usuario" name="identificador" required>
 
         <label for="password">Contraseña</label>
         <input
