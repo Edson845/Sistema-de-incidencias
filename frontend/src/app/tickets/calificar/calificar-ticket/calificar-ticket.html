@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>Evaluación del Ticket</h2>
+
+<div mat-dialog-content>
+
+  <!-- ⭐ Vista para USUARIO -->
+  <div *ngIf="rol === 'usuario'">
+    <h3>Califique la atención recibida</h3>
+
+    <label>Puntuación:</label>
+    <select [(ngModel)]="calificacion" class="form-control">
+      <option [value]="1">1 - Muy mala</option>
+      <option [value]="2">2 - Mala</option>
+      <option [value]="3">3 - Regular</option>
+      <option [value]="4">4 - Buena</option>
+      <option [value]="5">5 - Excelente</option>
+    </select>
+
+    <label class="mt-3">Comentario:</label>
+    <textarea [(ngModel)]="comentario" class="form-control" rows="3"></textarea>
+  </div>
+
+  <!-- ⭐ Vista para TECNICO -->
+  <div *ngIf="rol === 'tecnico'">
+    <h3>Observaciones del Técnico</h3>
+
+    <label>Observación Técnica:</label>
+    <textarea [(ngModel)]="observacionTecnico" class="form-control" rows="4"></textarea>
+  </div>
+
+  <!-- ⭐ Vista para ADMIN -->
+  <div *ngIf="rol === 'admin'">
+    <h3>Resumen de evaluación</h3>
+
+    <p><strong>Puntuación del Usuario:</strong> {{ data.calificacion || 'Sin calificar' }}</p>
+    <p><strong>Comentario del Usuario:</strong> {{ data.comentario || 'Sin comentario' }}</p>
+    <p><strong>Observación Técnico:</strong> {{ data.observacionTecnico || 'Ninguna' }}</p>
+  </div>
+
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="cerrar()">Cancelar</button>
+
+  <button mat-flat-button color="primary" *ngIf="rol !== 'Admin'" (click)="guardar()">
+    Guardar
+  </button>
+</div>

@@ -1,115 +1,154 @@
+/* Contenedor principal */
 .perfil-container {
   padding: 25px;
   background: #f3f4f6;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  max-width: 800px;
-  margin: 20px auto;
-}
-
-h2 {
-  color: #153e75;
-  text-align: center;
-  margin-bottom: 25px;
-  font-weight: 600;
-}
-
-.perfil-card {
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  max-width: 650px;
+  margin: 30px auto;
+  animation: fadeIn 0.3s ease-in-out;
   display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Título */
+.perfil-container h2 {
+  text-align: center;
+  color: #153e75;
+  font-size: 24px;
+  font-weight: 700;
 }
 
 /* Avatar */
-.avatar-section {
-  flex: 1;
-  text-align: center;
-  min-width: 220px;
-}
-
-.avatar-img {
+.avatar {
   width: 140px;
   height: 140px;
   border-radius: 50%;
   border: 4px solid #153e75;
   object-fit: cover;
-  margin-bottom: 12px;
+  display: block;
+  margin: 0 auto 10px auto;
+  transition: transform 0.2s;
 }
 
-.upload-btn {
-  display: inline-block;
+.avatar:hover {
+  transform: scale(1.03);
+}
+
+/* Input de archivo */
+input[type="file"] {
+  margin: 0 auto;
+  display: block;
   background: #2563eb;
-  color: white;
-  padding: 8px 14px;
+  padding: 8px;
   border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s ease;
+  color: white;
 }
 
-.upload-btn:hover {
-  background: #1e40af;
-}
-
-.upload-btn input {
-  display: none;
-}
-
-/* Info */
-.perfil-info {
-  flex: 2;
+/* Cada campo del perfil */
+.perfil-container div {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 5px;
 }
 
-.perfil-info label {
+/* Labels */
+.perfil-container label {
   font-weight: 600;
-  color: #1f2937;
+  color: #374151;
 }
 
-.perfil-info input {
-  padding: 10px;
+/* Inputs */
+.perfil-container input[type="text"],
+.perfil-container input[type="email"],
+.perfil-container input[type="number"] {
+  padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
+  background: #f9fafb;
   outline: none;
-  transition: 0.2s;
+  transition: 0.25s ease;
 }
 
-.perfil-info input:focus {
+.perfil-container input:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
 }
 
-/* Botón */
-.btn-guardar {
-  background: #153e75;
-  color: white;
+/* Botones */
+button {
   padding: 10px 16px;
   border: none;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
+  width: 100%;
+  transition: 0.2s;
 }
 
-.btn-guardar:hover {
-  background: #0a3277;
+button:nth-child(1) {
+  background: #153e75;
+  color: white;
 }
 
-.btn-guardar:disabled {
+button:nth-child(1):hover {
+  background: #0f2c5a;
+}
+
+button:nth-child(2) {
+  background: #2563eb;
+  color: white;
+}
+
+button:nth-child(2):hover {
+  background: #1d4ed8;
+}
+
+button:nth-child(3) {
   background: #9ca3af;
-  cursor: not-allowed;
+  color: #fff;
 }
 
-/* Mensaje */
-.mensaje {
-  text-align: center;
-  margin-top: 15px;
-  font-weight: 500;
-  color: #153e75;
+button:nth-child(3):hover {
+  background: #6b7280;
+}
+
+/* Animación */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal {
+  background: #fff;
+  padding: 20px;
+  width: 350px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #0003;
+}
+
+.form-group {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }

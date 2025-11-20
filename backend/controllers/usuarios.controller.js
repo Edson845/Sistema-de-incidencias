@@ -1,5 +1,6 @@
 import pool from '../db.js';
 import bcrypt from 'bcrypt';
+import multer from 'multer';
 
 export async function getUsuario(req, res) {
   try {
@@ -183,7 +184,60 @@ export async function crearUsuario(req, res) {
     });
   }
 }
+export async function actualizarAvatar(req, res) {
+  try {
+    const dni = req.params.id;
 
+    // Obtener archivo como en tu sistema actual
+    const avatar = req.file ? req.file.filename : null;
+
+    if (!avatar) {
+      return res.status(400).json({ mensaje: 'No se envió ningún archivo' });
+    }
+
+    // Guardar solo el nombre o ruta en la BD
+    const avatarUrl = `/uploads/avatars/${avatar}`;
+
+    await pool.query(
+      `UPDATE usuario SET avatar = ? WHERE dni = ?`,
+      [avatarUrl, dni]
+    );
+
+    res.status(200).json({
+      mensaje: "Avatar actualizado correctamente",
+      avatar: avatarUrl
+    });
+
+  } catch (error) {
+    console.error("Error al actualizar avatar:", error);
+    res.status(500).json({ mensaje: "Error al subir el avatar" });
+  }
+}
+const storage = multer.diskStorage({
+  destination: 'uploads/avatars',
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+export const uploadAvatar = multer({ storage });
+
+export async function actualizarPerfil(req, res) {
+  try {
+    const dni = req.user.dni; // viene del token
+    const { usuario, correo, celular } = req.body;
+
+    await pool.query(
+      `UPDATE usuario SET usuario=?, correo=?, celular=? WHERE dni=?`,
+      [usuario, correo, celular, dni]
+    );
+
+    res.json({ mensaje: "Perfil actualizado correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al actualizar el perfil" });
+  }
+}
 export async function actualizarUsuario(req, res) {
   const { id } = req.params; // antes usabas req.params.dni
   const { nombres, apellidos, correo, idCargo, password } = req.body;
@@ -227,7 +281,41 @@ export async function actualizarUsuario(req, res) {
     res.status(500).json({ mensaje: 'Error al actualizar usuario' });
   }
 }
+export async function getPerfil(req, res) {
+  try {
+    // DNI viene del token verificado
+    const dni = req.user?.dni;
 
+    if (!dni) {
+      return res.status(401).json({ mensaje: 'No autorizado' });
+    }
+
+    const [rows] = await pool.query(
+      `SELECT 
+          dni,
+          usuario,
+          celular,
+          nombres,
+          apellidos,
+          correo,
+          idCargo,
+          avatar
+       FROM usuario
+       WHERE dni = ?`,
+      [dni]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json(rows[0]);
+
+  } catch (error) {
+    console.error('Error al obtener perfil:', error);
+    res.status(500).json({ mensaje: 'Error al obtener perfil' });
+  }
+}
 export async function obtenerRoles(req, res) {
   try {
     const [rows] = await pool.query(`SELECT idrol, nombreRol FROM rol ORDER BY idrol`);

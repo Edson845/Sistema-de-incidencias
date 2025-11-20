@@ -71,6 +71,7 @@
           <td *ngIf="rolUsuario === 'admin'">
             <span
               [ngClass]="{
+                'prioridad-muybaja': t.nombrePrioridad == 'Muy Baja',
                 'prioridad-baja': t.nombrePrioridad == 'Baja',
                 'prioridad-media': t.nombrePrioridad == 'Media',
                 'prioridad-alta': t.nombrePrioridad == 'Alta',
@@ -93,8 +94,11 @@
             >
               🛠 Asignar
             </button>
-            <button  *ngIf="rolUsuario === 'admin'" class="btn-editar" 
-            (click)="editarTicket(t.idTicket)">✏️ Editar</button>
+            <button  *ngIf="rolUsuario === 'usuario'" class="btn-editar" 
+            mat-flat-button color="accent" (click)="abrirEvaluacion(t.idTicket)">Calificar</button>
+
+            <button  *ngIf="rolUsuario === 'tecnico'" class="btn-editar" 
+            (click)="abrirEvaluacion(t.idTicket)">Cerrar</button>
 
           </td>
         </tr>

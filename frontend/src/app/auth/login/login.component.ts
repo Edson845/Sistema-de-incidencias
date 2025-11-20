@@ -36,6 +36,9 @@ export class LoginComponent {
         if (response?.token) {
           localStorage.setItem('token', response.token);
         }
+        if (response?.roles && response.roles.length > 0) {
+          localStorage.setItem('rol', response.roles[0].toLowerCase()); 
+        }
 
         this.router.navigate(['/dashboard']);
       },

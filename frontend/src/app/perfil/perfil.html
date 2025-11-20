@@ -1,36 +1,71 @@
 <div class="perfil-container">
+
   <h2>Mi Perfil</h2>
 
-  <div class="perfil-card">
-    <!-- Avatar -->
-    <div class="avatar-section">
-      <img [src]="avatarPreview || 'assets/default-avatar.png'" class="avatar-img">
+  <img 
+    [src]="perfil.avatarUrl || 'assets/preder.png'" 
+    class="avatar">
 
-      <label class="upload-btn">
-        Cambiar Avatar
-        <input type="file" accept="image/*" (change)="seleccionarAvatar($event)">
-      </label>
+  <input type="file" (change)="onFileSelected($event)" *ngIf="editMode">
+
+  <div>
+    <label>DNI:</label>
+    <span>{{ perfil.dni }}</span>
+  </div>
+
+  <div>
+    <label>Usuario:</label>
+    <input *ngIf="editMode" [(ngModel)]="perfil.usuario">
+    <span *ngIf="!editMode">{{ perfil.usuario }}</span>
+  </div>
+
+  <div>
+    <label>Nombres:</label>
+    <span>{{ perfil.nombres }} {{ perfil.apellidos }}</span>
+  </div>
+
+  <div>
+    <label>Correo:</label>
+    <input *ngIf="editMode" [(ngModel)]="perfil.correo">
+    <span *ngIf="!editMode">{{ perfil.correo }}</span>
+  </div>
+
+  <div>
+    <label>Celular:</label>
+    <input *ngIf="editMode" [(ngModel)]="perfil.celular">
+    <span *ngIf="!editMode">{{ perfil.celular }}</span>
+  </div>
+
+  <button *ngIf="!editMode" (click)="activarEdicion()">Editar</button>
+  <button *ngIf="!editMode" (click)="abrirModalContrasenia()">Cambiar contraseña</button>
+
+  <button *ngIf="editMode" (click)="actualizarPerfil()">Guardar</button>
+  <button *ngIf="editMode" (click)="cancelarEdicion()">Cancelar</button>
+
+</div>
+<!-- Modal Cambiar Contraseña -->
+<div class="modal-backdrop" *ngIf="modalContrasenia">
+  <div class="modal">
+    <h3>Cambiar Contraseña</h3>
+
+    <div class="form-group">
+      <label>Contraseña actual:</label>
+      <input type="password" [(ngModel)]="formContrasenia.actual">
     </div>
 
-    <!-- Información -->
-    <div class="perfil-info">
-      <label>Correo (no editable)</label>
-      <input type="text" [value]="usuario.correo" disabled>
+    <div class="form-group">
+      <label>Nueva contraseña:</label>
+      <input type="password" [(ngModel)]="formContrasenia.nueva">
+    </div>
 
-      <label>Nombre de Usuario</label>
-      <input type="text" [(ngModel)]="editNombreUsuario">
+    <div class="form-group">
+      <label>Confirmar nueva contraseña:</label>
+      <input type="password" [(ngModel)]="formContrasenia.confirmar">
+    </div>
 
-      <label>Nueva Contraseña</label>
-      <input type="password" [(ngModel)]="nuevaPassword">
-
-      <label>Confirmar Contraseña</label>
-      <input type="password" [(ngModel)]="confirmPassword">
-
-      <button class="btn-guardar" (click)="guardarCambios()" [disabled]="loading">
-        {{ loading ? 'Guardando...' : 'Guardar Cambios' }}
-      </button>
-
-      <p class="mensaje" *ngIf="mensaje">{{ mensaje }}</p>
+    <div class="modal-buttons">
+      <button (click)="cambiarContrasenia()">Cambiar</button>
+      <button (click)="cerrarModalContrasenia()">Cancelar</button>
     </div>
   </div>
 </div>

@@ -1,0 +1,76 @@
+/* ---------- CONTENEDOR DEL MODAL ---------- */
+:host {
+  display: block;
+  padding: 10px;
+  font-family: 'Roboto', sans-serif;
+}
+
+h2 {
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+/* ---------- LABELS ---------- */
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 10px;
+  color: #444;
+}
+
+/* ---------- SELECT Y TEXTAREA ---------- */
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  margin-top: 4px;
+  transition: border-color 0.3s ease;
+  outline: none;
+}
+
+select:focus,
+textarea:focus {
+  border-color: #3f51b5;
+}
+
+/* ---------- SECCIÓN ADMIN ---------- */
+p {
+  font-size: 14px;
+  margin: 6px 0;
+  color: #333;
+}
+
+p strong {
+  color: #000;
+}
+
+/* ---------- BOTONES ---------- */
+button[mat-button] {
+  color: #666;
+}
+
+button[mat-flat-button] {
+  font-weight: 600;
+}
+
+/* ---------- INTERIOR DEL DIALOG ---------- */
+.mat-dialog-content {
+  padding-top: 0;
+}
+
+.mat-dialog-actions {
+  padding: 10px;
+}

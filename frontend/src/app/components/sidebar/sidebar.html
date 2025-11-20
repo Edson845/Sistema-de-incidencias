@@ -50,11 +50,6 @@
 
   <!-- USUARIO -->
   <ng-container *ngIf="authService.tieneRol('usuario')">
-    <a routerLinkActive="active" class="menu-item" (click)="onMenuClick('dashboard')">
-      <i class="fas fa-home"></i>
-      <span *ngIf="!isClosed">Dashboard</span>
-    </a>
-
     <a routerLinkActive="active" class="menu-item" (click)="onMenuClick('tickets')">
       <i class="fas fa-ticket-alt"></i>
       <span *ngIf="!isClosed">Tickets</span>

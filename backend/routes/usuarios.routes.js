@@ -1,4 +1,5 @@
 import express from 'express';
+
 import { verificarToken, verificarRol } from '../middlewares/auth.middleware.js';
 import {
   getUsuario,
@@ -10,7 +11,10 @@ import {
   obtenerCargos,
   obtenerOficinas,
   obtenerDepartamentos,
-  obtenerGerencias
+  obtenerGerencias,
+  actualizarAvatar,
+  uploadAvatar,
+  getPerfil
 } from '../controllers/usuarios.controller.js';
 
 const router = express.Router();
@@ -34,6 +38,7 @@ router.get('/gerencias', obtenerGerencias);
 router.post('/', verificarToken, verificarRol(['admin']), crearUsuario);
 
 // Obtener un usuario por DNI (requiere token)
+router.get('/perfil', getPerfil);
 router.get('/:id', verificarToken, getUsuario);
 
 // Actualizar usuario (requiere token; permisos gestionados en verificarRol si es necesario)
@@ -41,6 +46,7 @@ router.put('/:id', verificarToken, actualizarUsuario);
 
 // Eliminar usuario (solo admin)
 router.delete('/:id', verificarToken, verificarRol(['admin']), eliminarUsuario);
+router.put('/usuario/avatar/:id', uploadAvatar.single('avatar'), actualizarAvatar);
 
 
 

@@ -8,6 +8,9 @@ import { TicketsService } from '../../services/tickets.service';
 import { AuthService } from '../../services/auth.service'; // <-- servicio para obtener rol
 import { SocketService } from '../../services/socket.service'; // ajustar ruta
 import { WhatsAppService } from '../../services/whatsapp.service'; // <-- servicio de WhatsApp
+import { CalificarTicket } from '../calificar/calificar-ticket/calificar-ticket';
+import { MatDialog } from '@angular/material/dialog';
+
 
 @Component({
   selector: 'app-tickets-list',
@@ -54,7 +57,8 @@ export class TicketsListComponent implements OnInit {
     private authService: AuthService, // <-- inyectamos el servicio de auth
     private router: Router,
     private socketService: SocketService,
-    private WhatsappService: WhatsAppService  // <-- inyectamos el servicio de WhatsApp
+    private WhatsappService: WhatsAppService,
+    private dialog: MatDialog  // <-- inyectamos el servicio de WhatsApp
 
   ) {}
   
@@ -235,13 +239,25 @@ confirmarAsignacion(dniTecnico: string) {
   });
 }
 
+  cerrarTicket(idTicket: number) {
 
+  }
   verTicket(id: number) {
     this.router.navigate(['/tickets', id]);
   }
-  editarTicket(id: number) {
-    this.router.navigate(['/tickets/detail', id]);
+  abrirEvaluacion(idTicket: number) {
+    const rol = localStorage.getItem('rol')|| ''.toLowerCase();
+    const dialogRef = this.dialog.open(CalificarTicket, {
+      width: '500px',
+      data: { idTicket, rol}
+    });
+
+    dialogRef.afterClosed().subscribe(res => {
+      console.log('Calificación cerrada:', res);
+      this.cargarTickets(); // si quieres refrescar
+    });
   }
+
 
   crearTicket() {
     this.router.navigate(['/tickets/nuevo']);
