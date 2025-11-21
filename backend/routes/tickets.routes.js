@@ -15,7 +15,8 @@ import {
   getTecnicos,
   asignarTicketConHerramientas,
   getTicketPorId,
-  obtenerTicketsDetallado
+  obtenerTicketsDetallado,
+  calificarTicket
 } from '../controllers/tickets.controller.js';
 
 const router = express.Router();
@@ -51,6 +52,7 @@ router.post('/',verificarToken,verificarRol(['usuario','tecnico', 'admin']),uplo
 router.get("/detallado", verificarToken, obtenerTicketsDetallado);
 router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualizarTicket);
 router.get('/:id', verificarToken, verificarRol(['usuario','tecnico','admin']), getTicketPorId);
+router.post('/calificar/:idTicket', verificarToken, upload.array('fotos', 5), calificarTicket);
 
 // Rutas para estadísticas
 router.get('/estadisticas/por-estado', verificarToken, getTicketsPorEstado);

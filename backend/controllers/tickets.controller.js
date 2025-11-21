@@ -129,6 +129,7 @@ export const obtenerCategorias = async (req, res) => {
     res.status(500).json({ mensaje: 'Error al obtener categorías' });
   }
 };
+
 export const crearTicket = async (req, res) => {
   try {
     const { titulo, descripcion, idCategoria } = req.body;
@@ -140,24 +141,22 @@ export const crearTicket = async (req, res) => {
       });
     }
 
-    // ✅ PRIORIDAD POR NLP
+    // 🔥 PRIORIDAD POR NLP
     let idPrioridad = 3;
-
     try {
-      idPrioridad = await obtenerPrioridad(descripcion); // ✅ AQUÍ FALTABA el await
+      idPrioridad = await obtenerPrioridad(descripcion); 
       console.log("🎯 Prioridad NLP:", idPrioridad);
     } catch (err) {
-      console.error("⚠️ Error al predecir prioridad:", err.message);
+      console.error("⚠️ Error NLP:", err.message);
     }
 
-    // ✅ ARCHIVOS ADJUNTOS
-    const archivos = req.files && req.files.length > 0
-      ? req.files.map((file) => file.filename)
+    // 🔥 ARCHIVOS
+    const archivos = req.files?.length > 0
+      ? req.files.map(file => file.filename)
       : [];
-
     const adjunto = archivos.length > 0 ? archivos.join(',') : null;
 
-    // ✅ INSERT EN LA BD
+    // 🔥 INSERT
     const [result] = await pool.query(
       `INSERT INTO ticket (
         tituloTicket,
@@ -169,65 +168,114 @@ export const crearTicket = async (req, res) => {
         idPrioridad,
         adjunto
       ) VALUES (?, ?, ?, NOW(), ?, ?, ?, ?)`,
-
       [
         titulo,
         descripcion,
         usuarioCrea,
         idCategoria,
         1,          // estado inicial
-        idPrioridad,  // prioridad del NLP
+        idPrioridad,
         adjunto
       ]
     );
 
-    // ✅ Construir el objeto del ticket para sockets
-    const ticketEmitido = {
-      idTicket: result.insertId,
-      titulo,
-      descripcion,
-      usuarioCrea,
-      idPrioridad,
-      adjunto
-    };
+    const idInsertado = result.insertId;
 
-    // ✅ Emitir al socket SIN ERROR
-    const io = getIO();
-    io.emit('nuevo-ticket', ticketEmitido);
+    // 🔥 Obtener ticket COMPLETO con joins
+    const [ticketCompleto] = await pool.query(`
+      SELECT 
+        t.idTicket,
+        t.tituloTicket,
+        t.descTicket,
+        t.fechaCreacion,
+        t.usuarioCrea,
+        t.idCategoria,
+        c.nombreCategoria,
+        t.idEstado,
+        e.nombreEstado,
+        t.idPrioridad,
+        p.nombrePrioridad,
+        t.adjunto
+      FROM ticket t
+      LEFT JOIN categoria c ON t.idCategoria = c.idCategoria
+      LEFT JOIN estado e ON t.idEstado = e.idEstado
+      LEFT JOIN prioridad p ON t.idPrioridad = p.idPrioridad
+      WHERE t.idTicket = ?
+    `, [idInsertado]);
 
+    // 🔥 ENVIAR AL SOCKET SIN ERROR
+    const io = getIO(); // <--- AQUÍ ES FUNDAMENTAL
+    io.emit("nuevo-ticket", ticketCompleto[0]);
+
+    // 🔥 RESPUESTA
     res.json({
-      mensaje: '✅ Ticket creado correctamente',
-      idTicket: result.insertId,
+      mensaje: "✅ Ticket creado correctamente",
+      idTicket: idInsertado,
       idPrioridad,
       archivosGuardados: archivos
     });
 
   } catch (error) {
-    console.error('❌ Error en crearTicket:', error);
+    console.error("❌ Error en crearTicket:", error);
     res.status(500).json({
-      mensaje: 'Error al crear ticket',
+      mensaje: "Error al crear ticket",
       error: error.message
     });
   }
 };
+
 export async function actualizarTicket(req, res) {
   const { id } = req.params;
   const { titulo, descripcion, estado } = req.body;
 
   try {
-    await pool.query(
-      'UPDATE ticket SET tituloTicket = ?, descTicket = ?, idEstado = ? WHERE idTicket = ?',
-      [titulo, descripcion, estado, id]
-    );
+    // -----------------------------
+    // Construir consulta dinámica
+    // -----------------------------
+    const campos = [];
+    const valores = [];
 
-    const io = getIO();
-    io.emit('ticket-actualizado', {
-      idTicket: id,
-      estado
-    });
+    if (titulo !== undefined) {
+      campos.push("tituloTicket = ?");
+      valores.push(titulo);
+    }
 
-    res.json({ mensaje: 'Ticket actualizado' });
+    if (descripcion !== undefined) {
+      campos.push("descTicket = ?");
+      valores.push(descripcion);
+    }
+
+    if (estado !== undefined) {
+      campos.push("idEstado = ?");
+      valores.push(estado);
+    }
+
+    // Si no hay nada que actualizar
+    if (campos.length === 0) {
+      return res.status(400).json({ mensaje: "No se enviaron campos para actualizar" });
+    }
+
+    // Añadir el id al final (para el WHERE)
+    valores.push(id);
+
+    const query = `UPDATE ticket SET ${campos.join(", ")} WHERE idTicket = ?`;
+
+    // Ejecutar query
+    await pool.query(query, valores);
+
+    // Emitir evento por socket si cambia el estado
+    if (estado !== undefined) {
+      const io = getIO();
+      io.emit('ticket-actualizado', {
+        idTicket: id,
+        estado
+      });
+    }
+
+    res.json({ mensaje: 'Ticket actualizado correctamente' });
+
   } catch (error) {
+    console.error("❌ Error al actualizar ticket:", error);
     res.status(500).json({ mensaje: error.message });
   }
 }
@@ -407,3 +455,73 @@ export async function getTicketPorId(req, res) {
   }
 }
 
+export async function calificarTicket(req, res) {
+  try {
+    const { idTicket } = req.params;
+    const { rol, calificacion, comentario, observacionTecnico } = req.body;
+    const dniUsuario = req.user?.dni;
+
+    // 📎 ARCHIVOS
+    const archivos = req.files?.length > 0
+      ? req.files.map(f => f.filename)
+      : [];
+
+    const adjunto = archivos.length > 0 ? archivos.join(",") : null;
+
+    console.log("📩 Datos recibidos:", req.body);
+    console.log("📎 Adjuntos:", archivos);
+
+    if (!rol) {
+      return res.status(400).json({ mensaje: "El rol es requerido" });
+    }
+
+    // -------------------------
+    // USUARIO CALIFICA
+    // -------------------------
+    if (rol === "usuario") {
+
+      if (!calificacion) {
+        return res.status(400).json({ mensaje: "La calificación es requerida" });
+      }
+
+      await pool.query(
+        `UPDATE ticket SET calificacion = ?, idestado = 5 WHERE idTicket = ?`,
+        [calificacion, idTicket]
+      );
+
+      await pool.query(
+        `INSERT INTO comentarios (dni_usuarioComenta, idTicket, contenido, adjunto, tipo)
+         VALUES (?, ?, ?, ?, 'comentario')`,
+        [dniUsuario, idTicket, comentario || "Sin comentario", adjunto]
+      );
+
+      return res.json({ ok: true, mensaje: "Calificación registrada" });
+    }
+
+    // -------------------------
+    // TÉCNICO AGREGA OBSERVACIÓN
+    // -------------------------
+    if (rol === "tecnico") {
+
+      await pool.query(
+        `UPDATE ticket SET idestado = 4 WHERE idTicket = ?`,
+        [idTicket]
+      );
+
+      await pool.query(
+        `INSERT INTO comentarios 
+          (dni_usuarioComenta, idTicket, contenido, adjunto, tipo)
+         VALUES (?, ?, ?, ?, 'observacion')`,
+        [dniUsuario, idTicket, observacionTecnico || "Sin observación", adjunto]
+      );
+
+      return res.json({ ok: true, mensaje: "Observación registrada" });
+    }
+
+    return res.status(400).json({ mensaje: "Rol no válido" });
+
+  } catch (error) {
+    console.error("❌ Error en calificarTicket:", error);
+    return res.status(500).json({ mensaje: "Error interno del servidor" });
+  }
+}

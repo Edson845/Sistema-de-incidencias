@@ -163,6 +163,13 @@
 }
 
 /* PRIORIDADES */
+.prioridad-muybaja {
+  background: #4ce082;
+  padding: 4px 7px;
+  border-radius: 5px;
+  color: #064e3b;
+  font-weight: 600;
+}
 .prioridad-baja {
   background: #86efac;
   padding: 4px 7px;

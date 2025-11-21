@@ -24,8 +24,20 @@
     <h3>Observaciones del Técnico</h3>
 
     <label>Observación Técnica:</label>
-    <textarea [(ngModel)]="observacionTecnico" class="form-control" rows="4"></textarea>
+    <textarea 
+      [(ngModel)]="observacionTecnico" 
+      class="form-control" 
+      rows="4">
+    </textarea>
+
+    <label class="mt-3">Adjuntar Archivos (Opcional):</label>
+    <input 
+      type="file" 
+      (change)="onFileSelected($event)"
+      multiple
+      class="form-control" />
   </div>
+
 
   <!-- ⭐ Vista para ADMIN -->
   <div *ngIf="rol === 'admin'">

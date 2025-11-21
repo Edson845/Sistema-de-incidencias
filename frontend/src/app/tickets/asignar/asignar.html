@@ -1,0 +1,78 @@
+<!-- MODAL ASIGNAR TICKET -->
+<div class="modal-overlay" *ngIf="mostrarModalAsignar">
+  <div class="modal">
+
+    <h3>Asignar Ticket</h3>
+
+    <!-- PESTAÑAS -->
+    <div class="tabs">
+      <button 
+        [class.active]="tabSeleccionada === 'tecnico'"
+        (click)="tabSeleccionada = 'tecnico'">
+        Técnico
+      </button>
+
+      <button 
+        [class.active]="tabSeleccionada === 'herramientas'"
+        (click)="tabSeleccionada = 'herramientas'">
+        Herramientas
+      </button>
+    </div>
+
+    <!-- TAB TÉCNICO -->
+    <div *ngIf="tabSeleccionada === 'tecnico'" class="tab-content">
+      <label>Buscar técnico:</label>
+      <input 
+        type="text"
+        [(ngModel)]="filtroTecnico"
+        placeholder="Escribe nombre o apellido..."
+        (input)="filtrarTecnicos()"
+        class="input-buscar"
+      />
+
+      <label>Selecciona un técnico:</label>
+      <select [(ngModel)]="tecnicoSeleccionado">
+        <option *ngFor="let t of tecnicosFiltrados" [value]="t.dni">
+          {{ t.nombres }} {{ t.apellidos }}
+        </option>
+      </select>
+    </div>
+
+    <!-- TAB HERRAMIENTAS -->
+    <div *ngIf="tabSeleccionada === 'herramientas'" class="tab-content">
+      <div class="herramientas-list">
+        <div *ngFor="let h of herramientasFiltradas">
+          <input type="checkbox"
+                 [checked]="herramientasSeleccionadas.includes(h)"
+                 (change)="toggleHerramienta(h)">
+          {{ h }}
+        </div>
+      </div>
+
+      <!-- AGREGAR NUEVA HERRAMIENTA -->
+      <div class="agregar-herramienta">
+        <input 
+          type="text"
+          [(ngModel)]="nuevaHerramienta"
+          placeholder="Nueva herramienta..."
+        />
+        <button (click)="agregarHerramienta()">➕</button>
+      </div>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="modal-buttons">
+      <button class="btn-confirm"
+              (click)="confirmarAsignacion(tecnicoSeleccionado)">
+        ✅ Asignar
+      </button>
+
+      <button class="btn-cancelar" (click)="mostrarModalAsignar = false">
+        ❌ Cancelar
+      </button>
+    </div>
+
+  </div> <!-- modal -->
+</div> <!-- modal-overlay -->
+
+

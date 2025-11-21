@@ -56,7 +56,7 @@
                 'estado-abierto': t.idEstado == 2,
                 'estado-pendiente': t.idEstado == 3,
                 'estado-resuelto': t.idEstado == 4,
-                'estado-cerrado': t.idEstado == 0
+                'estado-cerrado': t.idEstado == 5
               }"
             >
               {{
@@ -64,7 +64,8 @@
                 t.idEstado == 2 ? 'Abierto' :
                 t.idEstado == 3 ? 'Pendiente' :
                 t.idEstado == 4 ? 'Resuelto' :
-                'Cerrado'
+                t.idEstado == 5 ? 'Cerrado':
+                'desconocido'
               }}
             </span>
           </td>
@@ -94,99 +95,20 @@
             >
               🛠 Asignar
             </button>
-            <button  *ngIf="rolUsuario === 'usuario'" class="btn-editar" 
+            <button  *ngIf="rolUsuario === 'usuario' && t.idEstado === 4" class="btn-editar" 
             mat-flat-button color="accent" (click)="abrirEvaluacion(t.idTicket)">Calificar</button>
+            
+            <button  *ngIf="rolUsuario === 'tecnico' && t.idEstado == 2" class="btn-editar" 
+            (click)="solucionarTicket(t.idTicket)">Solucionar</button>
 
-            <button  *ngIf="rolUsuario === 'tecnico'" class="btn-editar" 
+            <button  *ngIf="rolUsuario === 'tecnico' && t.idEstado === 3" class="btn-editar" 
             (click)="abrirEvaluacion(t.idTicket)">Cerrar</button>
-
+             
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-  <div class="modal-overlay" *ngIf="mostrarModalAsignar">
-  <div class="modal">
 
-    <h3>Asignar Ticket</h3>
-
-    <!-- PESTAÑAS -->
-    <div class="tabs">
-      <button 
-        [class.active]="tabSeleccionada === 'tecnico'"
-        (click)="tabSeleccionada = 'tecnico'">
-        Técnico
-      </button>
-
-      <button 
-        [class.active]="tabSeleccionada === 'herramientas'"
-        (click)="tabSeleccionada = 'herramientas'">
-        Herramientas
-      </button>
-    </div>
-
-    <!-- ✅ TAB TÉCNICO -->
-    <div *ngIf="tabSeleccionada === 'tecnico'" class="tab-content">
-
-      <label>Buscar técnico:</label>
-      <input 
-        type="text"
-        [(ngModel)]="filtroTecnico"
-        placeholder="Escribe nombre o apellido..."
-        (input)="filtrarTecnicos()"
-        class="input-buscar"
-      />
-
-      <label>Selecciona un técnico:</label>
-      <select [(ngModel)]="tecnicoSeleccionado">
-      <option *ngFor="let t of tecnicosFiltrados" [value]="t.dni">
-          {{ t.nombres }} {{ t.apellidos }}
-        </option>
-      </select>
-    </div>
-
-    <!-- ✅ TAB HERRAMIENTAS -->
-    <div *ngIf="tabSeleccionada === 'herramientas'" class="tab-content">
-      <div class="herramientas-list">
-        <div *ngFor="let h of herramientasFiltradas">
-          <input type="checkbox"
-                 [checked]="herramientasSeleccionadas.includes(h)"
-                 (change)="toggleHerramienta(h)">
-          {{ h }}
-        </div>
-      </div>
-
-      <!-- ✅ AGREGAR NUEVA HERRAMIENTA -->
-      <div class="agregar-herramienta">
-        <input 
-          type="text"
-          [(ngModel)]="nuevaHerramienta"
-          placeholder="Nueva herramienta..."
-        />
-        <button (click)="agregarHerramienta()">➕</button>
-      </div>
-
-    </div>
-
-    <!-- ✅ Botones -->
-    <div class="modal-buttons">
-      <button class="btn-confirm"
-              (click)="confirmarAsignacion(tecnicoSeleccionado)">
-        ✅ Asignar
-      </button>
-
-      <button class="btn-cancelar" (click)="mostrarModalAsignar = false">
-        ❌ Cancelar
-      </button>
-    </div>
-
-  </div>
-</div>
-
-
-
-  <!-- Mensaje si no hay tickets -->
-  <div *ngIf="!loading && ticketsFiltrados.length === 0" class="mensaje vacio">
-    No se encontraron tickets.
-  </div>
-</div>
+ 
+  

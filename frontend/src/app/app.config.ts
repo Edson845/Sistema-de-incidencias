@@ -9,20 +9,19 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(
-      withInterceptors([
-        (req, next) => {
-          const token = localStorage.getItem('token');
-          if (token) {
-            const cloned = req.clone({
-              setHeaders: { Authorization: `Bearer ${token}` }
-            });
-            console.log('✅ Token agregado al header desde app.config.ts');
-            return next(cloned);
-          }
-          console.warn('⚠️ No se encontró token');
-          return next(req);
+    withInterceptors([
+      (req, next) => {
+        const token = localStorage.getItem('token');
+
+        if (token) {
+          req = req.clone({
+            setHeaders: { Authorization: `Bearer ${token}` }
+          });
         }
-      ])
-    ),
+
+        return next(req);
+      }
+    ])
+  ),
   ],
 };

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
@@ -9,118 +9,75 @@ export class UsuariosService {
 
   constructor(private http: HttpClient) {}
 
+  // Obtener lista de usuarios
   getUsuarios(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
-    return this.http.get(`${this.apiUrl}`, { headers });
+    return this.http.get(`${this.apiUrl}`);
   }
 
+  // Obtener un usuario por ID
   getUsuario(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
+  // Actualizar usuario
   actualizarUsuario(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, data);
   }
-  createUsuario(usuario: any): Observable<any> {
-    console.log('Enviando petición de creación:', usuario);
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('No hay token de autenticación');
-      return new Observable(subscriber => {
-        subscriber.error({ error: { mensaje: 'No hay token de autenticación' } });
-      });
-    }
-    
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
 
-    return this.http.post(`${this.apiUrl}`, usuario, { headers }).pipe(
-      tap(response => console.log('Respuesta del servidor:', response)),
-      catchError(error => {
-        console.error('Error en la petición:', error);
-        throw error;
+  // Crear usuario
+  createUsuario(usuario: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}`, usuario).pipe(
+      tap(res => console.log('Respuesta del servidor:', res)),
+      catchError(err => {
+        console.error('Error en petición:', err);
+        return throwError(() => err);
       })
     );
   }
-  
 
-  // Registro público: usa la ruta /api/usuarios/registro en el backend
+  // Registro público
   registerUsuario(usuario: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/registro`, usuario);
   }
+
+  // Obtener listados auxiliares
   obtenerOficinas(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.get(`${this.apiUrl}/oficinas`, { headers });
+    return this.http.get(`${this.apiUrl}/oficinas`);
   }
+
   obtenerDepartamentos(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.get(`${this.apiUrl}/departamentos`, { headers });
+    return this.http.get(`${this.apiUrl}/departamentos`);
   }
+
   obtenerGerencias(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.get(`${this.apiUrl}/gerencias`, { headers });
+    return this.http.get(`${this.apiUrl}/gerencias`);
   }
+
   obtenerRoles(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.get(`${this.apiUrl}/roles`, { headers });
+    return this.http.get(`${this.apiUrl}/roles`);
   }
+
   obtenerCargos(): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.get(`${this.apiUrl}/cargos`, { headers });
+    return this.http.get(`${this.apiUrl}/cargos`);
   }
 
+  // Eliminar usuario
   eliminarUsuario(dni: string): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.delete(`${this.apiUrl}/${dni}`, { headers });
-  }
-  getPerfil() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.get<any>(`${this.apiUrl}/perfil`, { headers });
+    return this.http.delete(`${this.apiUrl}/${dni}`);
   }
 
-  actualizarPerfil(data: any) {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.put(`${this.apiUrl}/perfil`,{headers});
+  // Obtener perfil del usuario logueado
+  getPerfil(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/perfil`);
   }
 
-  actualizarAvatar(formData: FormData) {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.post(`${this.apiUrl}/perfil/avatar`, {headers});
+  // Actualizar perfil
+  actualizarPerfil(data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/perfil`, data);
   }
 
-
+  // Actualizar avatar
+  actualizarAvatar(formData: FormData): Observable<any> {
+    return this.http.put(`${this.apiUrl}/perfil/avatar`, formData);
+  }
 }
-

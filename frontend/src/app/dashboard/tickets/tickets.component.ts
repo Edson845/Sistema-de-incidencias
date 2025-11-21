@@ -13,6 +13,18 @@ import { TicketsService } from '../../services/tickets.service';
 import * as XLSX from 'xlsx';
 import * as pdfMake from "pdfmake/build/pdfmake";
 import * as pdfFonts from "pdfmake/build/vfs_fonts";
+
+//materials
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDialogModule } from '@angular/material/dialog';
+
 const pdfMakeX: any = pdfMake;
 pdfMakeX.vfs = pdfFonts.vfs;
 
@@ -22,13 +34,14 @@ import { saveAs } from 'file-saver';
 @Component({
   selector: 'app-tickets',
   standalone: true,
-  imports: [CommonModule, NgChartsModule,FormsModule],
+  imports: [CommonModule, NgChartsModule,FormsModule,MatButtonModule,MatIconModule,MatToolbarModule,MatCardModule,MatTabsModule,MatFormFieldModule,MatInputModule,MatSelectModule,MatDialogModule],
   templateUrl: './tickets.component.html',
   styleUrls: ['./tickets.component.css']
 })
 export class TicketsComponent implements OnInit, OnDestroy {
   private socket!: Socket;
   oficinaSeleccionada: any; 
+  tabActivaIndex: number = 0; // Empieza en la primera pestaña (índice 0)
   tabActiva: 'pdf' | 'excel' = 'pdf';
   modalAbierto = false;
   filtros = {
