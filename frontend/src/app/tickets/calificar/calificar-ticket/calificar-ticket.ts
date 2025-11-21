@@ -20,18 +20,23 @@ export class CalificarTicket {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<CalificarTicket>
-  ) {}
+  ) {this.rol = (data?.rol ?? '').toLowerCase(); }
 
   ngOnInit() {
-    this.rol = (this.data?.rol ?? '').toLowerCase();  // <--- evita null
+    //this.rol = (this.data?.rol ?? '').toLowerCase();  // <--- evita null
     console.log("ROL RECIBIDO EN MODAL:", this.rol);
   }
-
+  adjunto: File[] = [];
+  onFileSelected(event: any) {
+    this.adjunto = Array.from(event.target.files);
+    console.log("📎 Archivos seleccionados por técnico:", this.adjunto);
+  }
   guardar() {
-    let payload: any = {};
+    let payload: any = {rol : this.rol};
 
     if (this.rol === 'usuario') {
       payload = {
+        rol: this.rol,
         calificacion: this.calificacion,
         comentario: this.comentario
       };
@@ -39,7 +44,9 @@ export class CalificarTicket {
 
     if (this.rol === 'tecnico') {
       payload = {
-        observacionTecnico: this.observacionTecnico
+        rol: this.rol,
+        observacionTecnico: this.observacionTecnico,
+        adjunto: this.adjunto
       };
     }
 
@@ -49,4 +56,7 @@ export class CalificarTicket {
   cerrar() {
     this.dialogRef.close();
   }
+
+  
+
 }

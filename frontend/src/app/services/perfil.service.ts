@@ -1,43 +1,36 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PerfilService {
 
-  private apiUrl = 'http://localhost:3000/api/usuarios'; // Ajusta tu URL según tu backend
+  private apiUrl = 'http://localhost:3000/api/usuarios';
 
   constructor(private http: HttpClient) {}
+
   // Cambiar contraseña
   cambiarContrasenia(data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/cambiar-contrasenia`, data);
   }
-  getPerfil() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.get<any>(`${this.apiUrl}/perfil`, { headers });
+
+  // Obtener datos del perfil
+  getPerfil(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/perfil`);
   }
 
-  actualizarPerfil(data: any) {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-    return this.http.put(`${this.apiUrl}/perfil`, data, { headers });
+  // Actualizar perfil
+  actualizarPerfil(data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/perfil`, data);
   }
 
-
-  actualizarAvatar(dni: string, archivo: File) {
+  // Actualizar avatar
+  actualizarAvatar(dni: string, archivo: File): Observable<any> {
     const fd = new FormData();
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`});
     fd.append('avatar', archivo);
-    return this.http.put(`${this.apiUrl}/usuario/avatar/${dni}`,fd,{headers});
+
+    return this.http.put(`${this.apiUrl}/usuario/avatar/${dni}`, fd);
   }
 }

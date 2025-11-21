@@ -1,149 +1,136 @@
-<div class="layout">
-  <main class="dashboard-container">
-  
-    <h2 class="titulo">Panel de Control</h2>
+<!-- DASHBOARD PRINCIPAL -->
+<mat-toolbar color="primary">
+  Panel de Control - Municipalidad de San Román
+</mat-toolbar>
 
-    <!-- TARJETAS PRINCIPALES -->
-    <div class="stats-grid">
-      <div class="stat-card azul">
-        <h3>Tickets Nuevos</h3>
-        <p>{{ resumen.nuevos }}</p>
-      </div>
+<div class="dashboard-container">
 
-      <div class="stat-card verde">
-        <h3>Tiempo promedio de solución</h3>
-        <p>{{ resumen.promedioSolucion }}</p>
-      </div>
+  <h2 class="titulo">Resumen General</h2>
 
-      <div class="stat-card morado">
-        <h3>Tickets resueltos hoy</h3>
-        <p>{{ resumen.resueltosHoy }}</p>
-      </div>
+  <!-- TARJETAS PRINCIPALES -->
+  <div class="stats-grid">
+    <mat-card class="stat-card azul">
+      <mat-card-title>Tickets Nuevos</mat-card-title>
+      <mat-card-content>{{ resumen.nuevos }}</mat-card-content>
+    </mat-card>
 
-      <div class="stat-card gris">
-        <h3>Total de Tickets</h3>
-        <p>{{ resumen.total }}</p>
-      </div>
-    </div>
+    <mat-card class="stat-card azul-oscuro">
+      <mat-card-title>Tiempo promedio de solución</mat-card-title>
+      <mat-card-content>{{ resumen.promedioSolucion }}</mat-card-content>
+    </mat-card>
 
-    <!-- GRÁFICOS -->
-    <div class="charts-grid">
-      <div class="chart-card">
-        <h4>Tickets por Estado</h4>
+    <mat-card class="stat-card amarillo">
+      <mat-card-title>Tickets resueltos hoy</mat-card-title>
+      <mat-card-content>{{ resumen.resueltosHoy }}</mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card gris">
+      <mat-card-title>Total de Tickets</mat-card-title>
+      <mat-card-content>{{ resumen.total }}</mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div class="charts-grid">
+    <mat-card class="chart-card">
+      <mat-card-title>Tickets por Estado</mat-card-title>
+      <mat-card-content>
         <canvas *ngIf="pieChartData"
           baseChart
           [data]="pieChartData"
           [options]="pieChartOptions"
-          [type]="'pie'"
-          style="width:10px; height:10px;">
+          [type]="'pie'">
         </canvas>
-      </div>
+      </mat-card-content>
+    </mat-card>
 
-      <div class="chart-card">
-        <h4>Evolución de Tickets por Mes</h4>
+    <mat-card class="chart-card">
+      <mat-card-title>Evolución de Tickets por Mes</mat-card-title>
+      <mat-card-content>
         <canvas *ngIf="lineChartData && lineChartData.datasets && lineChartData.datasets.length > 0"
           baseChart
           [data]="lineChartData"
           [options]="lineChartOptions"
           [type]="'line'">
         </canvas>
-      </div>
-    </div>
-
-    <!-- Botón de reporte (solo admin) -->
-    <div class="text-center mt-4">
-      <button 
-        *ngIf="authService.tieneRol('admin')" 
-        class="btn-reporte"
-        (click)="abrirModal()">
-        Generar Reporte
-      </button>
-    </div>
-    
-
-  </main>
-</div>
-<!-- Modal -->
-<div class="modal-overlay" *ngIf="modalAbierto">
-  <div class="modal-container">
-
-    <div class="modal-header">
-      <h3>Generar Reporte</h3>
-      <button class="close-btn" (click)="cerrarModal()">✕</button>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tabs">
-      <button 
-        class="tab" 
-        [class.active]="tabActiva === 'pdf'" 
-        (click)="tabActiva = 'pdf'">
-        PDF
-      </button>
-
-      <button 
-        class="tab" 
-        [class.active]="tabActiva === 'excel'" 
-        (click)="tabActiva = 'excel'">
-        Excel
-      </button>
-    </div>
-
-    <div class="modal-body">
-
-      <!-- PDF -->
-      <div *ngIf="tabActiva === 'pdf'">
-        <p>Configura filtros para generar un reporte en PDF.</p>
-
-        <!-- Filtros -->
-        <div class="filtros">
-
-          <label>Fecha inicial</label>
-          <input type="date" [(ngModel)]="filtros.fechaInicio">
-
-          <label>Fecha final</label>
-          <input type="date" [(ngModel)]="filtros.fechaFin">
-
-          <label>Oficina (opcional)</label>
-          <select [(ngModel)]="usuario.idOficina">
-            <option value="Todos">Todos</option>
-            <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
-          </select>
-
-        </div>
-
-        <button class="btn-pdf" (click)="generarPdf(oficinaSeleccionada)">Descargar PDF</button>
-      </div>
-
-      <!-- Excel -->
-      <div *ngIf="tabActiva === 'excel'">
-        <p>Configura filtros para generar un reporte en Excel.</p>
-
-        <!-- Filtros -->
-        <div class="filtros">
-
-          <label>Fecha inicial</label>
-          <input type="date" [(ngModel)]="filtros.fechaInicio">
-
-          <label>Fecha final</label>
-          <input type="date" [(ngModel)]="filtros.fechaFin">
-
-          <label>Oficina (opcional)</label>
-          <select [(ngModel)]="usuario.idOficina">
-            <option value="">Todas</option>
-            <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
-          
-          </select>
-
-        </div>
-
-        <button class="btn-excel" (click)="generarExcel(oficinaSeleccionada)">Descargar Excel</button>
-      </div>
-
-
-    </div>
-
+      </mat-card-content>
+    </mat-card>
   </div>
+
+  <!-- Botón de reporte (solo admin) -->
+  <div class="text-center mt-4">
+    <button mat-raised-button color="primary" *ngIf="authService.tieneRol('admin')" (click)="abrirModal()">
+      Generar Reporte
+    </button>
+  </div>
+
 </div>
 
+<!-- MODAL GENERAR REPORTE -->
+<mat-dialog-content *ngIf="modalAbierto">
+  <mat-card class="modal-card">
 
+    <mat-card-header>
+      <mat-card-title>Generar Reporte</mat-card-title>
+      <button mat-icon-button (click)="cerrarModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+
+    <!-- Tabs PDF / Excel -->
+    <mat-tab-group [(selectedIndex)]="tabActivaIndex">
+      <mat-tab label="PDF">
+        <div class="filtros">
+          <mat-form-field appearance="fill">
+            <mat-label>Fecha inicial</mat-label>
+            <input matInput type="date" [(ngModel)]="filtros.fechaInicio">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Fecha final</mat-label>
+            <input matInput type="date" [(ngModel)]="filtros.fechaFin">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Oficina (opcional)</mat-label>
+            <mat-select [(ngModel)]="usuario.idOficina">
+              <mat-option value="Todos">Todos</mat-option>
+              <mat-option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <button mat-raised-button color="primary" (click)="generarPdf(oficinaSeleccionada)">
+          Descargar PDF
+        </button>
+      </mat-tab>
+
+      <mat-tab label="Excel">
+        <div class="filtros">
+          <mat-form-field appearance="fill">
+            <mat-label>Fecha inicial</mat-label>
+            <input matInput type="date" [(ngModel)]="filtros.fechaInicio">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Fecha final</mat-label>
+            <input matInput type="date" [(ngModel)]="filtros.fechaFin">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Oficina (opcional)</mat-label>
+            <mat-select [(ngModel)]="usuario.idOficina">
+              <mat-option value="">Todas</mat-option>
+              <mat-option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <button mat-raised-button color="accent" (click)="generarExcel(oficinaSeleccionada)">
+          Descargar Excel
+        </button>
+      </mat-tab>
+    </mat-tab-group>
+
+  </mat-card>
+</mat-dialog-content>
