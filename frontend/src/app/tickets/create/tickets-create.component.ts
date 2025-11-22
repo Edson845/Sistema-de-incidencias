@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TicketsService } from '../../services/tickets.service';
@@ -9,7 +10,9 @@ import { TicketsService } from '../../services/tickets.service';
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule  
+    FormsModule,
+    ReactiveFormsModule,
+    MatIconModule
   ],
   templateUrl: './tickets-create.component.html',
   styleUrls: ['./tickets-create.component.css']

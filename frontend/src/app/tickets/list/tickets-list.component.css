@@ -6,7 +6,7 @@
 
 /* ====== MODERN TOOLBAR ====== */
 .modern-toolbar {
-  background: #1e3a8a;
+  background: #0a3a6b;
   /* Azul profesional sólido */
   color: white;
   padding: 20px 40px;
@@ -55,7 +55,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #1e3a8a;
+  background: #0a3a6b;
   /* Azul sólido */
   color: white;
   border: none;
@@ -190,7 +190,7 @@
 }
 
 .modern-table thead {
-  background: #1e3a8a;
+  background: #0a3a6b;
   /* Azul sólido */
   color: white;
 }
@@ -303,7 +303,7 @@
 }
 
 .prioridad-muyalta {
-  background: #dc2626;
+  background: #f76565;
   color: white;
   border: 1px solid #b91c1c;
 }

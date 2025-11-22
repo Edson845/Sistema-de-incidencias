@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TicketsService } from '../../services/tickets.service';
+import { AuthService } from '../../services/auth.service';
+import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-tickets-details',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, HttpClientModule, FormsModule, MatIconModule],
   templateUrl: './tickets-details.component.html',
   styleUrls: ['./tickets-details.component.css']
 })
@@ -16,6 +18,7 @@ export class TicketsDetailsComponent implements OnInit {
 
   ticket: any = null;
   loading = true;
+  rolUsuario: string = '';
 
   herramientas: string[] = [];
   historial: any[] = [];
@@ -28,10 +31,18 @@ export class TicketsDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private ticketsService: TicketsService
+    private ticketsService: TicketsService,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
+    const datos = this.authService.obtenerDatosUsuario;
+    if (datos && datos.rol) {
+      this.rolUsuario = datos?.rol
+        ? String(datos.rol).toLowerCase()
+        : '';
+    }
+
     const idTicket = Number(this.route.snapshot.paramMap.get('id'));
 
     if (!idTicket) {
