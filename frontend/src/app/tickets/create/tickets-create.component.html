@@ -1,54 +1,63 @@
-<div class="container">
-  <main class="main-content">
-    <div class="form-container">
-      <h3 class="form-title">Registrando nuevo ticket</h3>
+<div class="create-container">
+  <div class="header-section">
+    <h2>Registrar Nuevo Ticket</h2>
+    <p class="subtitle">Complete los detalles del incidente para su atención</p>
+  </div>
 
-      <form [formGroup]="ticketForm" (ngSubmit)="registrarTicket()" class="ticket-form">
+  <form [formGroup]="ticketForm" (ngSubmit)="registrarTicket()" class="form-grid">
 
-        <!-- TÍTULO -->
-        <label for="titulo">Registre el título del incidente <span>*</span></label>
-        <input
-          type="text"
-          id="titulo"
-          formControlName="titulo"
-          placeholder="Ingrese el título del incidente"
-        />
+    <!-- SECCIÓN 1: DETALLES DEL INCIDENTE -->
+    <div class="form-section">
+      <h3>Detalles del Incidente</h3>
 
-        <!-- DESCRIPCIÓN -->
-        <label for="descripcion">Ingrese una breve descripción del problema <span>*</span></label>
-        <textarea
-          id="descripcion"
-          formControlName="descripcion"
-          maxlength="300"
-          placeholder="Máximo 300 caracteres"
-        ></textarea>
+      <div class="input-group">
+        <label for="titulo">Título del Incidente <span>*</span></label>
+        <input type="text" id="titulo" formControlName="titulo" placeholder="Ej: Falla en impresora de gerencia" />
+      </div>
 
-        <!-- CATEGORÍA -->
-        <label for="idCategoria">Seleccione la categoría del problema <span>*</span></label>
-        <select id="idCategoria" formControlName="idCategoria" class="form-select">
+      <div class="input-group">
+        <label for="descripcion">Descripción Detallada <span>*</span></label>
+        <textarea id="descripcion" formControlName="descripcion" maxlength="300"
+          placeholder="Describa el problema con el mayor detalle posible (Máx. 300 caracteres)" rows="4"></textarea>
+      </div>
+
+      <div class="input-group">
+        <label for="idCategoria">Categoría <span>*</span></label>
+        <select id="idCategoria" formControlName="idCategoria">
           <option value="">Seleccione una categoría</option>
           <option *ngFor="let cat of categorias" [value]="cat.idCategoria">
             {{ cat.nombreCategoria }}
           </option>
         </select>
-
-        <!-- 📸 Campo de archivo -->
-        <label for="adjunto">Adjunte una imagen o PDF (opcional)</label>
-        <input type="file" id="adjunto" accept=".jpg,.jpeg,.png,.pdf" (change)="onFileSelected($event)" />
-
-        <!-- 👁️ Vista previa si es imagen -->
-        <div class="preview-container" *ngIf="imagenPreview">
-          <p>Vista previa:</p>
-          <img [src]="imagenPreview" alt="Vista previa" class="preview-img" />
-        </div>
-
-        <!-- BOTONES -->
-        <div class="button-group">
-          <button type="button" class="btn-cancelar" (click)="ticketForm.reset()">Cancelar</button>
-          <button type="submit" class="btn-registrar">Registrar Ticket</button>
-        </div>
-      </form>
+      </div>
     </div>
-  </main>
-</div>
 
+    <!-- SECCIÓN 2: EVIDENCIA (OPCIONAL) -->
+    <div class="form-section">
+      <h3>Evidencia Adjunta</h3>
+
+      <div class="upload-area">
+        <label for="adjunto" class="upload-label">
+          <mat-icon>cloud_upload</mat-icon>
+          <span>Haga clic para adjuntar imagen o PDF</span>
+          <small>(Formatos permitidos: .jpg, .png, .pdf)</small>
+        </label>
+        <input type="file" id="adjunto" accept=".jpg,.jpeg,.png,.pdf" (change)="onFileSelected($event)"
+          class="file-input" />
+      </div>
+
+      <!-- Vista previa -->
+      <div class="preview-container" *ngIf="imagenPreview">
+        <p>Vista previa del archivo adjunto:</p>
+        <img [src]="imagenPreview" alt="Vista previa" class="preview-img" />
+      </div>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="actions-bar">
+      <button type="button" class="btn-cancel" (click)="ticketForm.reset()">Cancelar</button>
+      <button type="submit" class="btn-save">Registrar Ticket</button>
+    </div>
+
+  </form>
+</div>

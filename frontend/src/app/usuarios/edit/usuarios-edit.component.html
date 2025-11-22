@@ -1,19 +1,132 @@
-<div class="usuario-form">
-  <h2>Editar Usuario</h2>
+<div class="edit-container">
+  <div class="header-section">
+    <h2>Editar Usuario</h2>
+    <p class="subtitle">Actualice la información del usuario y gestione sus credenciales</p>
+  </div>
 
-  <label>Nombre</label>
-  <input [(ngModel)]="usuario.nombre" />
+  <div class="form-grid">
+    <!-- SECCIÓN 1: DATOS PERSONALES -->
+    <div class="form-section">
+      <h3>Información Personal</h3>
 
-  <label>Email</label>
-  <input [(ngModel)]="usuario.email" />
+      <div class="input-group">
+        <label>DNI (No editable)</label>
+        <input type="text" [(ngModel)]="usuario.dni" disabled class="input-disabled" />
+      </div>
 
-  <label>Rol</label>
-  <select [(ngModel)]="usuario.rol">
-    <option>admin</option>
-    <option>tecnico</option>
-    <option>usuario</option>
-  </select>
+      <div class="row">
+        <div class="input-group">
+          <label>Nombres</label>
+          <input type="text" [(ngModel)]="usuario.nombres" placeholder="Ingrese nombres" />
+        </div>
+        <div class="input-group">
+          <label>Apellidos</label>
+          <input type="text" [(ngModel)]="usuario.apellidos" placeholder="Ingrese apellidos" />
+        </div>
+      </div>
 
-  <button (click)="guardarCambios()">Guardar</button>
-  <p>{{ mensaje }}</p>
+      <div class="row">
+        <div class="input-group">
+          <label>Correo Electrónico</label>
+          <input type="email" [(ngModel)]="usuario.correo" placeholder="ejemplo@munisanroman.gob.pe" />
+        </div>
+        <div class="input-group">
+          <label>Celular</label>
+          <input type="text" [(ngModel)]="usuario.celular" (input)="soloNumeros($event)" maxlength="9"
+            placeholder="999999999" />
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: ROL Y CARGO -->
+    <div class="form-section">
+      <h3>Rol y Cargo</h3>
+
+      <div class="row">
+        <div class="input-group">
+          <label>Rol de Sistema</label>
+          <select [(ngModel)]="usuario.idRol">
+            <option value="" disabled>Seleccione un rol</option>
+            <option *ngFor="let rol of roles" [value]="rol.idrol">{{ rol.nombreRol }}</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Cargo Institucional</label>
+          <select [(ngModel)]="usuario.idCargo" (change)="onCargoChange()">
+            <option value="" disabled>Seleccione un cargo</option>
+            <option *ngFor="let cargo of cargos" [value]="cargo.idCargo">{{ cargo.nombreCargo }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Lógica condicional de dependencias (igual que en create) -->
+      <div class="conditional-fields">
+        <!-- Solo Gerencia -->
+        <div class="input-group" *ngIf="mostrarGerencias">
+          <label>Gerencia</label>
+          <select [(ngModel)]="usuario.idGerencia">
+            <option value="" disabled>Seleccione Gerencia</option>
+            <option *ngFor="let g of gerencias" [value]="g.idGerencia">{{ g.nombreGerencia }}</option>
+          </select>
+        </div>
+
+        <!-- Solo Departamento -->
+        <div class="input-group" *ngIf="mostrarDepartamentos">
+          <label>Departamento</label>
+          <select [(ngModel)]="usuario.idDepartamento">
+            <option value="" disabled>Seleccione Departamento</option>
+            <option *ngFor="let d of departamentos" [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
+          </select>
+        </div>
+
+        <!-- Solo Oficina -->
+        <div class="input-group" *ngIf="mostrarOficinas">
+          <label>Oficina</label>
+          <select [(ngModel)]="usuario.idOficina">
+            <option value="" disabled>Seleccione Oficina</option>
+            <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
+          </select>
+        </div>
+
+        <!-- Rango Unidad -->
+        <div class="input-group" *ngIf="mostrarRangoUnidad">
+          <label>Ubicación del Personal</label>
+          <select [(ngModel)]="rangeUnidad" (change)="onRangoUnidadChange(rangeUnidad)">
+            <option value="" disabled>Seleccione Ubicación</option>
+            <option value="1">Gerencia</option>
+            <option value="2">Departamento</option>
+            <option value="3">Oficina</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 3: SEGURIDAD (NUEVO) -->
+    <div class="form-section security-section">
+      <h3>Seguridad</h3>
+      <div class="security-alert">
+        <span class="icon">🔒</span>
+        <p>Solo ingrese una contraseña si desea restablecerla. De lo contrario, déjelo en blanco.</p>
+      </div>
+
+      <div class="input-group">
+        <label>Nueva Contraseña</label>
+        <input type="password" [(ngModel)]="usuario.password" placeholder="Dejar en blanco para mantener la actual"
+          autocomplete="new-password" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCIONES -->
+  <div class="actions-bar">
+    <button class="btn-cancel" (click)="cancelar()">Cancelar</button>
+    <button class="btn-save" (click)="guardarCambios()" [disabled]="loading">
+      {{ loading ? 'Guardando...' : 'Guardar Cambios' }}
+    </button>
+  </div>
+
+  <!-- MENSAJES -->
+  <div *ngIf="mensaje" class="mensaje-flotante" [ngClass]="tipoMensaje">
+    {{ mensaje }}
+  </div>
 </div>

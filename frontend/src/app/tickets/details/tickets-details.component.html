@@ -2,21 +2,46 @@
 
   <!-- Encabezado -->
   <div class="header-section">
-    <button class="btn-volver" (click)="volver()">⬅ Volver</button>
-    <h2 class="det-title">Detalles del Ticket #{{ ticket.idTicket }}</h2>
+    <button class="btn-volver" (click)="volver()">
+      <mat-icon>arrow_back</mat-icon> Volver
+    </button>
+    <div class="title-group">
+      <h2 class="det-title">Ticket #{{ ticket.idTicket }}</h2>
+      <span class="status-badge" [ngClass]="'status-' + ticket.idEstado">
+        {{ ticket.nombreEstado }}
+      </span>
+    </div>
   </div>
 
   <!-- Información del Ticket -->
   <div class="info-grid">
     <div class="info-card">
-      <label>Tipo de problema</label>
+      <label>Título</label>
+      <div class="info-value">{{ ticket.tituloTicket }}</div>
+    </div>
+
+    <div class="info-card">
+      <label>Categoría</label>
       <div class="info-value">{{ ticket.nombreCategoria }}</div>
     </div>
 
     <div class="info-card">
-      <label>Nivel del incidente</label>
-      <div class="info-value priority">{{ ticket.nombrePrioridad }}</div>
+      <label>Prioridad</label>
+      <div class="info-value priority" [ngClass]="'prioridad-' + ticket.nombrePrioridad.toLowerCase().replace(' ', '')">
+        {{ ticket.nombrePrioridad }}
+      </div>
     </div>
+
+    <div class="info-card">
+      <label>Solicitante</label>
+      <div class="info-value">{{ ticket.nombreUsuario }} {{ ticket.apellidoUsuario }}</div>
+    </div>
+  </div>
+
+  <!-- Descripción Completa -->
+  <div class="description-card">
+    <h3>Descripción del Problema</h3>
+    <p>{{ ticket.descTicket }}</p>
   </div>
 
   <!-- Agregar Nuevo Comentario -->
@@ -27,7 +52,9 @@
         class="comment-textarea" [disabled]="enviandoComentario"></textarea>
       <button class="btn-submit-comment" (click)="agregarComentario()"
         [disabled]="!nuevoComentario.trim() || enviandoComentario">
-        <span *ngIf="!enviandoComentario">📝 Agregar Comentario</span>
+        <span *ngIf="!enviandoComentario">
+          <mat-icon>send</mat-icon> Enviar Comentario
+        </span>
         <span *ngIf="enviandoComentario">Enviando...</span>
       </button>
     </div>
@@ -36,19 +63,19 @@
   <!-- Historial del Ticket -->
   <div class="timeline-section">
     <div class="timeline-header">
-      <h3 class="timeline-title">Historial del ticket</h3>
+      <h3 class="timeline-title">Historial de Actividad</h3>
 
       <!-- Filtros -->
       <div class="filter-buttons">
         <button class="filter-btn" [class.active]="filtroActivo === 'todos'" (click)="cambiarFiltro('todos')">
-          📋 Todos ({{ historial.length }})
+          Todos
         </button>
         <button class="filter-btn" [class.active]="filtroActivo === 'comentario'" (click)="cambiarFiltro('comentario')">
-          💬 Comentarios
+          Comentarios
         </button>
         <button class="filter-btn" [class.active]="filtroActivo === 'observacion'"
           (click)="cambiarFiltro('observacion')">
-          📝 Observaciones
+          Observaciones
         </button>
       </div>
     </div>
@@ -59,7 +86,6 @@
           <div class="date-box">
             <div class="month">{{ item.fechaCreacion | date:'MMM' }}</div>
             <div class="day">{{ item.fechaCreacion | date:'dd' }}</div>
-            <div class="year">{{ item.fechaCreacion | date:'yyyy' }}</div>
           </div>
         </div>
 
@@ -69,27 +95,25 @@
         </div>
 
         <div class="timeline-content">
-          <div class="timeline-badge" [ngClass]="getBadgeClass(item.tipo)">
-            {{ item.fechaCreacion | date:'HH:mm' }}
+          <div class="timeline-meta">
+            <span class="time">{{ item.fechaCreacion | date:'HH:mm' }}</span>
+            <span class="author">{{ item.nombres }} {{ item.apellidos }}</span>
+            <span class="role">({{ item.nombreRol }})</span>
           </div>
+
           <div class="timeline-card">
             <h4 class="timeline-status">{{ getStatusTitle(item.tipo) }}</h4>
             <p class="timeline-description">{{ item.contenido }}</p>
 
             <!-- Archivos Adjuntos -->
             <div class="attachments" *ngIf="item.adjunto">
-              <div class="attachment-label">📎 Archivos adjuntos:</div>
+              <div class="attachment-label"><mat-icon>attach_file</mat-icon> Adjuntos:</div>
               <div class="attachment-list">
                 <a *ngFor="let archivo of item.adjunto.split(',')" [href]="'http://localhost:3000/uploads/' + archivo"
                   target="_blank" class="attachment-link">
-                  📄 {{ archivo }}
+                  {{ archivo }}
                 </a>
               </div>
-            </div>
-
-            <div class="timeline-author" *ngIf="item.nombres">
-              {{ item.nombres }} {{ item.apellidos }}
-              <span class="author-role" *ngIf="item.nombreRol">({{ item.nombreRol }})</span>
             </div>
           </div>
         </div>
@@ -97,32 +121,37 @@
     </div>
 
     <ng-template #noHistorial>
-      <p class="no-historial">
-        {{ filtroActivo === 'todos' ? 'No hay historial disponible para este ticket.' : 'No hay ' + (filtroActivo ===
-        'comentario' ? 'comentarios' : 'observaciones') + ' disponibles.' }}
-      </p>
+      <div class="empty-state">
+        <mat-icon>history</mat-icon>
+        <p>No hay actividad registrada con este filtro.</p>
+      </div>
     </ng-template>
   </div>
 
   <!-- Herramientas -->
   <div class="det-card" *ngIf="herramientas.length > 0">
-    <h3>Herramientas usadas</h3>
-    <div>
-      <ul class="herr-list">
-        <li *ngFor="let h of herramientas">🛠 {{ h }}</li>
-      </ul>
-    </div>
+    <h3><mat-icon>build</mat-icon> Herramientas Utilizadas</h3>
+    <ul class="herr-list">
+      <li *ngFor="let h of herramientas">{{ h }}</li>
+    </ul>
   </div>
 
   <!-- Acciones de estado -->
-  <div class="acciones">
-    <button class="btn pend" (click)="cambiarEstado(3)">Pendiente</button>
-    <button class="btn res" (click)="cambiarEstado(4)">Resuelto</button>
-    <button class="btn cerr" (click)="cambiarEstado(0)">Cerrado</button>
+  <div class="acciones-footer" *ngIf="rolUsuario === 'tecnico' || rolUsuario === 'admin'">
+    <button class="btn-action btn-pend" (click)="cambiarEstado(3)">
+      <mat-icon>schedule</mat-icon> Marcar Pendiente
+    </button>
+    <button class="btn-action btn-res" (click)="cambiarEstado(4)">
+      <mat-icon>check_circle</mat-icon> Marcar Resuelto
+    </button>
+    <button class="btn-action btn-cerr" (click)="cambiarEstado(0)">
+      <mat-icon>lock</mat-icon> Cerrar Ticket
+    </button>
   </div>
 
 </div>
 
-<div *ngIf="loading" class="loading">
-  Cargando ticket...
+<div *ngIf="loading" class="loading-state">
+  <mat-icon class="spin">refresh</mat-icon>
+  <span>Cargando detalles...</span>
 </div>

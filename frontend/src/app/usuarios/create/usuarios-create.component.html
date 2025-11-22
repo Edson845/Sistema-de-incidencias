@@ -1,158 +1,144 @@
-<div class="container">
-  <main class="main-content">
-    <div class="form-container">
-      <h3 class="form-title">Crear Nuevo Usuario</h3>
+<div class="create-container">
+  <div class="header-section">
+    <h2>Crear Nuevo Usuario</h2>
+    <p class="subtitle">Complete la información para registrar un nuevo usuario en el sistema</p>
+  </div>
 
-      <form (ngSubmit)="crearUsuario()" (submit)="$event.preventDefault()" #usuarioForm="ngForm" class="user-form">
+  <form (ngSubmit)="crearUsuario()" (submit)="$event.preventDefault()" #usuarioForm="ngForm" class="form-grid">
 
-        <!-- DNI -->
-        <label for="dni">DNI <span>*</span></label>
-        <input 
-          type="text" 
-          id="dni" 
-          name="dni" 
-          [(ngModel)]="usuario.dni" 
-          minlength="8" 
-          maxlength="8" 
-          required
-          pattern="^[0-9]{8}$"
-          #dniCtrl="ngModel"
-          (input)="soloNumeros($event)"
-        />
-        <div class="error-msg" *ngIf="dniCtrl.invalid && dniCtrl.touched">
-          <p *ngIf="dniCtrl.errors?.['required']">El DNI es obligatorio.</p>
-          <p *ngIf="dniCtrl.errors?.['pattern']">El DNI debe tener 8 números.</p>
+    <!-- SECCIÓN 1: DATOS PERSONALES -->
+    <div class="form-section">
+      <h3>Información Personal</h3>
+
+      <div class="row">
+        <div class="input-group">
+          <label for="dni">DNI <span>*</span></label>
+          <input type="text" id="dni" name="dni" [(ngModel)]="usuario.dni" minlength="8" maxlength="8" required
+            pattern="^[0-9]{8}$" #dniCtrl="ngModel" (input)="soloNumeros($event)" placeholder="Ingrese DNI" />
+          <div class="error-msg" *ngIf="dniCtrl.invalid && dniCtrl.touched">
+            <span *ngIf="dniCtrl.errors?.['required']">El DNI es obligatorio</span>
+            <span *ngIf="dniCtrl.errors?.['pattern']">Debe tener 8 dígitos</span>
+          </div>
         </div>
-      
-        <!-- NOMBRES -->
-        <label for="nombres">Nombres <span>*</span></label>
-        <input type="text" id="nombres" name="nombres" [(ngModel)]="usuario.nombres" required #nomCtrl="ngModel" />
-        <div class="error-msg" *ngIf="nomCtrl.invalid && nomCtrl.touched">
-          <p>Este campo es obligatorio.</p>
+
+        <div class="input-group">
+          <label for="celular">Celular</label>
+          <input type="text" id="celular" name="celular" [(ngModel)]="usuario.celular" maxlength="9"
+            pattern="^[0-9]{9}$" (input)="soloNumeros($event)" #celCtrl="ngModel" placeholder="999999999" />
+          <div class="error-msg" *ngIf="celCtrl.invalid && celCtrl.touched">
+            <span>Debe tener 9 dígitos</span>
+          </div>
         </div>
-      
-        <!-- APELLIDOS -->
-        <label for="apellidos">Apellidos <span>*</span></label>
-        <input type="text" id="apellidos" name="apellidos" [(ngModel)]="usuario.apellidos" required #apeCtrl="ngModel" />
-        <div class="error-msg" *ngIf="apeCtrl.invalid && apeCtrl.touched">
-          <p>Este campo es obligatorio.</p>
-        </div>
-      
-        <!-- CORREO -->
-        <label for="correo">Correo <span>*</span></label>
-        <input 
-          type="email" 
-          id="correo" 
-          name="correo" 
-          [(ngModel)]="usuario.correo" 
-          required
-          placeholder="usuario@munisanroman.gob.pe"
-          pattern="^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$"
-          #correoCtrl="ngModel"
-        />
-        <div class="error-msg" *ngIf="correoCtrl.invalid && correoCtrl.touched">
-          <p *ngIf="correoCtrl.errors?.['required']">El correo es obligatorio.</p>
-          <p *ngIf="correoCtrl.errors?.['pattern']">
-            Debe ser un correo institucional que termine en <strong>@munisanroman.gob.pe</strong>
-          </p>
-        </div>
-      
-        <!-- CELULAR -->
-        <label for="celular">Celular</label>
-        <input 
-          type="text" 
-          id="celular" 
-          name="celular" 
-          [(ngModel)]="usuario.celular" 
-          maxlength="9"
-          pattern="^[0-9]{9}$"
-          (input)="soloNumeros($event)"
-          #celCtrl="ngModel"
-        />
-        <div class="error-msg" *ngIf="celCtrl.invalid && celCtrl.touched">
-          <p>Debe tener exactamente 9 dígitos numéricos.</p>
-        </div>
-      
-        <!-- ROL -->
-        <label for="idRol">Rol de Usuario</label>
-        <select id="idRol" name="idRol" [(ngModel)]="usuario.idRol" required #rolCtrl="ngModel">
-          <option value="">Seleccione un rol</option>
-          <option *ngFor="let r of roles" [value]="r.idrol">{{ r.nombreRol }}</option>
-        </select>
-        <div class="error-msg" *ngIf="rolCtrl.invalid && rolCtrl.touched">
-          <p>Seleccione un rol.</p>
-        </div>
-      
-        <!-- CARGO (CON EVENTO CHANGE) -->
-        <label for="idCargo">Cargo de Usuario <span>*</span></label>
-        <select 
-          id="idCargo" 
-          name="idCargo" 
-          [(ngModel)]="usuario.idCargo" 
-          (change)="onCargoChange()" 
-          required 
-          #cargoCtrl="ngModel"
-        >
-          <option value="">Seleccione un cargo</option>
-          <option *ngFor="let c of cargos" [value]="c.idCargo">{{ c.nombreCargo }}</option>
-        </select>
-        <div class="error-msg" *ngIf="cargoCtrl.invalid && cargoCtrl.touched">
-          <p>Seleccione un cargo.</p>
-        </div>
-        
-        <div *ngIf="mostrarRangoUnidad">
-        <label>¿A qué unidad pertenece?</label>
-        <select [(ngModel)]="rangeUnidad" name="rangeUnidad" (change)="onRangoUnidadChange(rangeUnidad)">
-          <option [value]="1">Gerencia</option>
-          <option [value]="2">Departamento</option>
-          <option [value]="3">Oficina</option>
-        </select>
       </div>
 
-        <!-- OFICINA (CONDICIONAL - para técnicos, asistentes, secretarias) -->
-         <div *ngIf="mostrarOficinas">
-            <label>Seleccione Oficina</label>
-            <select [(ngModel)]="usuario.idOficina" name="idOficina">
-              <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
-            </select>
+      <div class="row">
+        <div class="input-group">
+          <label for="nombres">Nombres <span>*</span></label>
+          <input type="text" id="nombres" name="nombres" [(ngModel)]="usuario.nombres" required #nomCtrl="ngModel"
+            placeholder="Ingrese nombres" />
+          <div class="error-msg" *ngIf="nomCtrl.invalid && nomCtrl.touched">
+            <span>Campo obligatorio</span>
           </div>
-
-        
-
-        <!-- DEPARTAMENTO (CONDICIONAL - para jefes de área) -->
-         <div *ngIf="mostrarDepartamentos">
-            <label>Seleccione Sub Gerencia</label>
-            <select [(ngModel)]="usuario.idDepartamento" name="idDepartamento">
-              <option *ngFor="let d of departamentos" [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
-            </select>
-          </div>
-
-        
-
-        <!-- GERENCIA (CONDICIONAL - para gerentes/subgerentes) -->
-         <div *ngIf="mostrarGerencias">
-            <label>Seleccione Gerencia</label>
-            <select [(ngModel)]="usuario.idGerencia" name="idGerencia">
-              <option *ngFor="let g of gerencias" [value]="g.idGerencia">{{ g.nombreGerencia }}</option>
-            </select>
-          </div>
-        
-        <!-- BOTONES -->
-        <div class="button-group">
-          <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
-          <button 
-            type="submit" 
-            class="btn-registrar" 
-            [disabled]="!usuarioForm.form.valid || loading"
-          >
-            {{ loading ? 'Creando...' : 'Crear Usuario' }}
-          </button>
         </div>
-      
-        <div *ngIf="error" class="mensaje error" style="margin-top:12px">{{ error }}</div>
-      
-      </form>
-      
+
+        <div class="input-group">
+          <label for="apellidos">Apellidos <span>*</span></label>
+          <input type="text" id="apellidos" name="apellidos" [(ngModel)]="usuario.apellidos" required #apeCtrl="ngModel"
+            placeholder="Ingrese apellidos" />
+          <div class="error-msg" *ngIf="apeCtrl.invalid && apeCtrl.touched">
+            <span>Campo obligatorio</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="correo">Correo Institucional <span>*</span></label>
+        <input type="email" id="correo" name="correo" [(ngModel)]="usuario.correo" required
+          placeholder="usuario@munisanroman.gob.pe" pattern="^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$"
+          #correoCtrl="ngModel" />
+        <div class="error-msg" *ngIf="correoCtrl.invalid && correoCtrl.touched">
+          <span *ngIf="correoCtrl.errors?.['required']">El correo es obligatorio</span>
+          <span *ngIf="correoCtrl.errors?.['pattern']">Debe terminar en @munisanroman.gob.pe</span>
+        </div>
+      </div>
     </div>
-  </main>
+
+    <!-- SECCIÓN 2: ROL Y CARGO -->
+    <div class="form-section">
+      <h3>Rol y Cargo</h3>
+
+      <div class="row">
+        <div class="input-group">
+          <label for="idRol">Rol de Sistema <span>*</span></label>
+          <select id="idRol" name="idRol" [(ngModel)]="usuario.idRol" required #rolCtrl="ngModel">
+            <option value="">Seleccione un rol</option>
+            <option *ngFor="let r of roles" [value]="r.idrol">{{ r.nombreRol }}</option>
+          </select>
+          <div class="error-msg" *ngIf="rolCtrl.invalid && rolCtrl.touched">
+            <span>Seleccione un rol</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="idCargo">Cargo Institucional <span>*</span></label>
+          <select id="idCargo" name="idCargo" [(ngModel)]="usuario.idCargo" (change)="onCargoChange()" required
+            #cargoCtrl="ngModel">
+            <option value="">Seleccione un cargo</option>
+            <option *ngFor="let c of cargos" [value]="c.idCargo">{{ c.nombreCargo }}</option>
+          </select>
+          <div class="error-msg" *ngIf="cargoCtrl.invalid && cargoCtrl.touched">
+            <span>Seleccione un cargo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campos Condicionales -->
+      <div class="conditional-fields">
+        <div class="input-group" *ngIf="mostrarGerencias">
+          <label>Gerencia</label>
+          <select [(ngModel)]="usuario.idGerencia" name="idGerencia">
+            <option *ngFor="let g of gerencias" [value]="g.idGerencia">{{ g.nombreGerencia }}</option>
+          </select>
+        </div>
+
+        <div class="input-group" *ngIf="mostrarDepartamentos">
+          <label>Sub Gerencia</label>
+          <select [(ngModel)]="usuario.idDepartamento" name="idDepartamento">
+            <option *ngFor="let d of departamentos" [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
+          </select>
+        </div>
+
+        <div class="input-group" *ngIf="mostrarOficinas">
+          <label>Oficina</label>
+          <select [(ngModel)]="usuario.idOficina" name="idOficina">
+            <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
+          </select>
+        </div>
+
+        <div class="input-group" *ngIf="mostrarRangoUnidad">
+          <label>Ubicación del Personal</label>
+          <select [(ngModel)]="rangeUnidad" name="rangeUnidad" (change)="onRangoUnidadChange(rangeUnidad)">
+            <option value="" disabled>Seleccione Ubicación</option>
+            <option [value]="1">Gerencia</option>
+            <option [value]="2">Departamento</option>
+            <option [value]="3">Oficina</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="actions-bar">
+      <button type="button" class="btn-cancel" (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="btn-save" [disabled]="!usuarioForm.form.valid || loading">
+        {{ loading ? 'Creando...' : 'Crear Usuario' }}
+      </button>
+    </div>
+
+    <!-- MENSAJE ERROR -->
+    <div *ngIf="error" class="mensaje-flotante error">
+      {{ error }}
+    </div>
+
+  </form>
 </div>
