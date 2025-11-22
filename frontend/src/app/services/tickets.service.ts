@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 export class TicketsService {
   private apiUrl = 'http://localhost:3000/api/tickets';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Obtener tickets del usuario
   obtenerMisTickets(): Observable<any> {
@@ -69,5 +69,10 @@ export class TicketsService {
   // Calificar Ticket
   calificarTicket(idTicket: number, data: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}/calificar/${idTicket}`, data);
+  }
+
+  // Obtener historial del ticket
+  getHistorialTicket(idTicket: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/historial/${idTicket}`);
   }
 }

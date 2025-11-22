@@ -17,12 +17,13 @@ export class TicketsDetailsComponent implements OnInit {
   loading = true;
 
   herramientas: string[] = [];
+  historial: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private ticketsService: TicketsService
-  ) {}
+  ) { }
 
   ngOnInit() {
     const idTicket = Number(this.route.snapshot.paramMap.get('id'));
@@ -34,6 +35,7 @@ export class TicketsDetailsComponent implements OnInit {
 
     this.cargarTicket(idTicket);
     this.cargarHerramientas(idTicket);
+    this.cargarHistorial(idTicket);
   }
 
   cargarTicket(id: number) {
@@ -62,12 +64,21 @@ export class TicketsDetailsComponent implements OnInit {
     });
   }
 
+  cargarHistorial(id: number) {
+    this.ticketsService.getHistorialTicket(id).subscribe({
+      next: (data) => {
+        this.historial = data;
+      },
+      error: (err) => console.error('Error al cargar historial', err)
+    });
+  }
+
   estadoNombre(id: number) {
     return id === 1 ? 'Nuevo' :
-           id === 2 ? 'Abierto' :
-           id === 3 ? 'Pendiente' :
-           id === 4 ? 'Resuelto' :
-           'Cerrado';
+      id === 2 ? 'Abierto' :
+        id === 3 ? 'Pendiente' :
+          id === 4 ? 'Resuelto' :
+            'Cerrado';
   }
 
   cambiarEstado(nuevo: number) {
@@ -78,6 +89,18 @@ export class TicketsDetailsComponent implements OnInit {
         next: () => this.ticket.idEstado = nuevo,
         error: (err) => console.error('Error al cambiar estado', err)
       });
+  }
+
+  getBadgeClass(tipo: string): string {
+    if (tipo === 'observacion') return 'badge-observacion';
+    if (tipo === 'comentario') return 'badge-comentario';
+    return 'badge-default';
+  }
+
+  getStatusTitle(tipo: string): string {
+    if (tipo === 'observacion') return 'Observación del Técnico';
+    if (tipo === 'comentario') return 'Comentario del Usuario';
+    return 'Actualización';
   }
 
   volver() {

@@ -525,3 +525,36 @@ export async function calificarTicket(req, res) {
     return res.status(500).json({ mensaje: "Error interno del servidor" });
   }
 }
+
+export async function getHistorialTicket(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Obtener comentarios y observaciones del ticket
+    const [comentarios] = await pool.query(
+      `
+      SELECT 
+        c.idComentario,
+        c.contenido,
+        c.adjunto,
+        c.tipo,
+        c.fechaCreacion,
+        u.nombres,
+        u.apellidos,
+        r.nombreRol
+      FROM comentarios c
+      LEFT JOIN usuario u ON c.dni_usuarioComenta = u.dni
+      LEFT JOIN rolusuario ru ON ru.dni = u.dni
+      LEFT JOIN rol r ON r.idRol = ru.idRol
+      WHERE c.idTicket = ?
+      ORDER BY c.fechaCreacion ASC
+      `,
+      [id]
+    );
+
+    res.json(comentarios);
+  } catch (error) {
+    console.error("❌ Error en getHistorialTicket:", error);
+    res.status(500).json({ mensaje: "Error al obtener historial del ticket" });
+  }
+}

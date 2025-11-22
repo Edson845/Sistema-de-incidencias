@@ -16,14 +16,16 @@ import {
   asignarTicketConHerramientas,
   getTicketPorId,
   obtenerTicketsDetallado,
-  calificarTicket
+  calificarTicket,
+  getHistorialTicket
 } from '../controllers/tickets.controller.js';
+
 
 const router = express.Router();
 
 
 const uploadDir = path.resolve('uploads');
-if (!fs.existsSync(uploadDir)) {fs.mkdirSync(uploadDir);}
+if (!fs.existsSync(uploadDir)) { fs.mkdirSync(uploadDir); }
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -48,10 +50,10 @@ const upload = multer({
 router.get('/mios', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), getTicketsUsuario);
 router.get('/', verificarToken, verificarRol(['admin', 'tecnico']), getTodosTickets);
 router.get('/categorias', verificarToken, obtenerCategorias);
-router.post('/',verificarToken,verificarRol(['usuario','tecnico', 'admin']),upload.array('archivos', 5),crearTicket);
+router.post('/', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), upload.array('archivos', 5), crearTicket);
 router.get("/detallado", verificarToken, obtenerTicketsDetallado);
 router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualizarTicket);
-router.get('/:id', verificarToken, verificarRol(['usuario','tecnico','admin']), getTicketPorId);
+router.get('/:id', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), getTicketPorId);
 router.post('/calificar/:idTicket', verificarToken, upload.array('fotos', 5), calificarTicket);
 
 // Rutas para estadísticas
@@ -60,6 +62,7 @@ router.get('/estadisticas/por-mes', verificarToken, getTicketsPorMes);
 router.get('/estadisticas/generales', verificarToken, getEstadisticasGenerales);
 router.get('/usuarios/tecnicos', verificarToken, verificarRol(['admin']), getTecnicos);
 router.put('/asignar/:id', verificarToken, verificarRol(['admin']), asignarTicketConHerramientas);
+router.get('/historial/:id', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), getHistorialTicket);
 
 
 export default router;

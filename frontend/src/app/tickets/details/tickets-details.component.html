@@ -1,72 +1,72 @@
 <div class="det-container" *ngIf="!loading && ticket">
 
-  <!-- Título -->
-  <h2 class="det-title">Detalles del Ticket #{{ ticket.idTicket }}</h2>
+  <!-- Encabezado -->
+  <div class="header-section">
+    <button class="btn-volver" (click)="volver()">⬅ Volver</button>
+    <h2 class="det-title">Detalles del Ticket #{{ ticket.idTicket }}</h2>
+  </div>
 
-  <!-- Tarjeta general -->
-  <div class="det-card">
-
-    <div class="det-row">
-      <label>Título:</label>
-      <span>{{ ticket.tituloTicket }}</span>
+  <!-- Información del Ticket -->
+  <div class="info-grid">
+    <div class="info-card">
+      <label>Tipo de problema</label>
+      <div class="info-value">{{ ticket.nombreCategoria }}</div>
     </div>
 
-    <div class="det-row">
-      <label>Descripción:</label>
-      <span>{{ ticket.descTicket }}</span>
+    <div class="info-card">
+      <label>Nivel del incidente</label>
+      <div class="info-value priority">{{ ticket.nombrePrioridad }}</div>
+    </div>
+  </div>
+
+  <!-- Historial del Ticket -->
+  <div class="timeline-section">
+    <h3 class="timeline-title">Historial del ticket</h3>
+
+    <div class="timeline" *ngIf="historial.length > 0; else noHistorial">
+      <div class="timeline-item" *ngFor="let item of historial; let i = index">
+        <div class="timeline-date">
+          <div class="date-box">
+            <div class="month">{{ item.fechaCreacion | date:'MMM' }}</div>
+            <div class="day">{{ item.fechaCreacion | date:'dd' }}</div>
+            <div class="year">{{ item.fechaCreacion | date:'yyyy' }}</div>
+          </div>
+        </div>
+
+        <div class="timeline-line">
+          <div class="timeline-dot"></div>
+          <div class="timeline-connector" *ngIf="i < historial.length - 1"></div>
+        </div>
+
+        <div class="timeline-content">
+          <div class="timeline-badge" [ngClass]="getBadgeClass(item.tipo)">
+            {{ item.fechaCreacion | date:'HH:mm' }}
+          </div>
+          <div class="timeline-card">
+            <h4 class="timeline-status">{{ getStatusTitle(item.tipo) }}</h4>
+            <p class="timeline-description">{{ item.contenido }}</p>
+            <div class="timeline-author" *ngIf="item.nombres">
+              {{ item.nombres }} {{ item.apellidos }}
+              <span class="author-role" *ngIf="item.nombreRol">({{ item.nombreRol }})</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="det-row">
-      <label>Estado:</label>
-      <span class="estado" [ngClass]="{
-        'st-nuevo': ticket.idEstado === 1,
-        'st-abierto': ticket.idEstado === 2,
-        'st-pendiente': ticket.idEstado === 3,
-        'st-resuelto': ticket.idEstado === 4,
-        'st-cerrado': ticket.idEstado === 0
-      }">{{ estadoNombre(ticket.idEstado) }}</span>
-    </div>
-
-    <div class="det-row">
-      <label>Usuario creador:</label>
-      <span>{{ ticket.nombreUsuario }} {{ ticket.apellidoUsuario }}</span>
-    </div>
-
-    <div class="det-row">
-      <label>Técnico asignado:</label>
-      <span>{{ ticket.nombreTecnico ? ticket.nombreTecnico + ' ' + ticket.apellidoTecnico : 'Sin asignar' }}</span>
-    </div>
-
-    <div class="det-row">
-      <label>Categoría:</label>
-      <span>{{ ticket.nombreCategoria }}</span>
-    </div>
-
-    <div class="det-row">
-      <label>Prioridad:</label>
-      <span class="prioridad">{{ ticket.nombrePrioridad }}</span>
-    </div>
-
-    <div class="det-row">
-      <label>Fecha creación:</label>
-      <span>{{ ticket.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
-    </div>
-
+    <ng-template #noHistorial>
+      <p class="no-historial">No hay historial disponible para este ticket.</p>
+    </ng-template>
   </div>
 
   <!-- Herramientas -->
-  <div class="det-card">
+  <div class="det-card" *ngIf="herramientas.length > 0">
     <h3>Herramientas usadas</h3>
-
-    <div *ngIf="herramientas.length > 0; else sinHerram">
+    <div>
       <ul class="herr-list">
         <li *ngFor="let h of herramientas">🛠 {{ h }}</li>
       </ul>
     </div>
-
-    <ng-template #sinHerram>
-      <p class="no-herr">No se registraron herramientas.</p>
-    </ng-template>
   </div>
 
   <!-- Acciones de estado -->
@@ -75,9 +75,6 @@
     <button class="btn res" (click)="cambiarEstado(4)">Resuelto</button>
     <button class="btn cerr" (click)="cambiarEstado(0)">Cerrado</button>
   </div>
-
-  <!-- Volver -->
-  <button class="btn-volver" (click)="volver()">⬅ Volver</button>
 
 </div>
 
