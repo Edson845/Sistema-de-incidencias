@@ -1,114 +1,136 @@
-<div class="tickets-container">
-  <h2>Gestión de Tickets</h2>
+<div class="tickets-page">
 
-  <!-- 🔹 Controles superiores -->
-  <div class="top-bar">
-    <!-- Botón agregar -->
-    <button class="btn-agregar" (click)="crearTicket()">➕ Nuevo Ticket</button>
-
-    <!-- Barra de búsqueda -->
-    <input
-      type="text"
-      [(ngModel)]="filtro"
-      placeholder="🔍 Buscar..."
-      class="search-input"
-      (input)="filtrarTickets()"
-    />
-    <select *ngIf="rolUsuario === 'admin'" class="order-select" [(ngModel)]="ordenSeleccionado" (change)="ordenarTickets()">
-      <option value="">Ordenar por...</option>
-      <option value="prioridad">Prioridad</option>
-      <option value="fecha">Fecha</option>
-      <option value="estado">Estado</option>
-    </select>
+  <!-- TOOLBAR MODERNO -->
+  <div class="modern-toolbar">
+    <div class="toolbar-left">
+      <mat-icon class="toolbar-icon">list_alt</mat-icon>
+      <h1 class="toolbar-title">Gestión de Tickets</h1>
+    </div>
   </div>
 
-  <!-- Indicadores de carga o error -->
-  <div *ngIf="loading" class="mensaje info">Cargando tickets...</div>
-  <div *ngIf="error" class="mensaje error">{{ error }}</div>
+  <div class="tickets-container">
 
-  <!-- Tabla de tickets -->
-  <div *ngIf="!loading && ticketsFiltrados.length > 0" class="tabla-responsive">
-    <table class="tickets-tabla">
-      <thead>
-        <tr>
-          <th>Título</th>
-          <th>Descripción</th>
-          <th>Asignado A</th>
-          <th>Fecha Creación</th>
-          <th>Categoría</th>
-          <th>Estado</th>
-          <th *ngIf="rolUsuario === 'admin'">Prioridad</th>
-          <th *ngIf="rolUsuario === 'admin'">Usuario</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let t of ticketsFiltrados">
-          <td>{{ t.tituloTicket }}</td>
-          <td>{{ t.descTicket }}</td>
-          <td>{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>
-          <td>{{ t.fechaCreacion | date:'dd/MM/yyyy HH:mm'}}</td>
-          <td>{{ t.nombreCategoria }}</td>
-          <td>
-            <span
-              [ngClass]="{
-                'estado-nuevo': t.idEstado == 1,
-                'estado-abierto': t.idEstado == 2,
-                'estado-pendiente': t.idEstado == 3,
-                'estado-resuelto': t.idEstado == 4,
-                'estado-cerrado': t.idEstado == 5
-              }"
-            >
-              {{
+    <!-- CONTROLES SUPERIORES -->
+    <div class="top-controls">
+      <button class="btn-nuevo" (click)="crearTicket()">
+        <mat-icon>add_circle</mat-icon>
+        Nuevo Ticket
+      </button>
+
+      <div class="search-group">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input type="text" [(ngModel)]="filtro" placeholder="Buscar tickets..." class="search-input"
+          (input)="filtrarTickets()" />
+      </div>
+
+      <select *ngIf="rolUsuario === 'admin'" class="order-select" [(ngModel)]="ordenSeleccionado"
+        (change)="ordenarTickets()">
+        <mat-icon>sort</mat-icon>
+        <option value="">Ordenar por...</option>
+        <option value="prioridad">Prioridad</option>
+        <option value="fecha">Fecha</option>
+        <option value="estado">Estado</option>
+      </select>
+    </div>
+
+    <!-- INDICADORES -->
+    <div *ngIf="loading" class="loading-state">
+      <mat-icon class="spin">refresh</mat-icon>
+      <span>Cargando tickets...</span>
+    </div>
+    <div *ngIf="error" class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- TABLA MODERNA -->
+    <div *ngIf="!loading && ticketsFiltrados.length > 0" class="table-card">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Asignado A</th>
+            <th>Fecha Creación</th>
+            <th>Categoría</th>
+            <th>Estado</th>
+            <th *ngIf="rolUsuario === 'admin'">Prioridad</th>
+            <th *ngIf="rolUsuario === 'admin'">Usuario</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of ticketsFiltrados" class="table-row">
+            <td class="td-title">{{ t.tituloTicket }}</td>
+            <td class="td-desc">{{ t.descTicket }}</td>
+            <td>{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>
+            <td>{{ t.fechaCreacion | date:'dd/MM/yyyy HH:mm'}}</td>
+            <td>
+              <span class="badge-categoria">{{ t.nombreCategoria }}</span>
+            </td>
+            <td>
+              <span class="badge-estado" [ngClass]="{
+                  'estado-nuevo': t.idEstado == 1,
+                  'estado-abierto': t.idEstado == 2,
+                  'estado-pendiente': t.idEstado == 3,
+                  'estado-resuelto': t.idEstado == 4,
+                  'estado-cerrado': t.idEstado == 5
+                }">
+                {{
                 t.idEstado == 1 ? 'Nuevo' :
                 t.idEstado == 2 ? 'Abierto' :
                 t.idEstado == 3 ? 'Pendiente' :
                 t.idEstado == 4 ? 'Resuelto' :
                 t.idEstado == 5 ? 'Cerrado':
-                'desconocido'
-              }}
-            </span>
-          </td>
-          <td *ngIf="rolUsuario === 'admin'">
-            <span
-              [ngClass]="{
-                'prioridad-muybaja': t.nombrePrioridad == 'Muy Baja',
-                'prioridad-baja': t.nombrePrioridad == 'Baja',
-                'prioridad-media': t.nombrePrioridad == 'Media',
-                'prioridad-alta': t.nombrePrioridad == 'Alta',
-                'prioridad-muyalta': t.nombrePrioridad == 'Muy Alta'
-              }"
-            >
-              {{ t.nombrePrioridad }}
-            </span>
-          </td>
-          <td *ngIf="rolUsuario === 'admin'">{{ t.nombreUsuario }} {{ t.apellidoUsuario }}</td>
+                'Desconocido'
+                }}
+              </span>
+            </td>
+            <td *ngIf="rolUsuario === 'admin'">
+              <span class="badge-prioridad" [ngClass]="{
+                  'prioridad-muybaja': t.nombrePrioridad == 'Muy Baja',
+                  'prioridad-baja': t.nombrePrioridad == 'Baja',
+                  'prioridad-media': t.nombrePrioridad == 'Media',
+                  'prioridad-alta': t.nombrePrioridad == 'Alta',
+                  'prioridad-muyalta': t.nombrePrioridad == 'Muy Alta'
+                }">
+                {{ t.nombrePrioridad }}
+              </span>
+            </td>
+            <td *ngIf="rolUsuario === 'admin'">{{ t.nombreUsuario }} {{ t.apellidoUsuario }}</td>
 
-          <!-- Acciones -->
-          <td>
-            <button class="btn-ver" (click)="verTicket(t.idTicket)">👁 Ver</button>
-            <!-- Botón Asignar solo para admin -->
-            <button
-              *ngIf="rolUsuario === 'admin' && !t.asignadoA"
-              class="btn-asignar"
-              (click)="asignarTicket(t.idTicket)"
-            >
-              🛠 Asignar
-            </button>
-            <button  *ngIf="rolUsuario === 'usuario' && t.idEstado === 4" class="btn-editar" 
-            mat-flat-button color="accent" (click)="abrirEvaluacion(t.idTicket)">Calificar</button>
-            
-            <button  *ngIf="rolUsuario === 'tecnico' && t.idEstado == 2" class="btn-editar" 
-            (click)="solucionarTicket(t.idTicket)">Solucionar</button>
+            <!-- ACCIONES -->
+            <td class="td-actions">
+              <button class="btn-action btn-ver" (click)="verTicket(t.idTicket)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button *ngIf="rolUsuario === 'admin' && !t.asignadoA" class="btn-action btn-asignar"
+                (click)="asignarTicket(t.idTicket)">
+                <mat-icon>assignment_ind</mat-icon>
+              </button>
+              <button *ngIf="rolUsuario === 'usuario' && t.idEstado === 4" class="btn-action btn-calificar"
+                (click)="abrirEvaluacion(t.idTicket)">
+                <mat-icon>star</mat-icon>
+              </button>
+              <button *ngIf="rolUsuario === 'tecnico' && t.idEstado == 2" class="btn-action btn-solucionar"
+                (click)="solucionarTicket(t.idTicket)">
+                <mat-icon>build</mat-icon>
+              </button>
+              <button *ngIf="rolUsuario === 'tecnico' && t.idEstado === 3" class="btn-action btn-cerrar"
+                (click)="abrirEvaluacion(t.idTicket)">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-            <button  *ngIf="rolUsuario === 'tecnico' && t.idEstado === 3" class="btn-editar" 
-            (click)="abrirEvaluacion(t.idTicket)">Cerrar</button>
-             
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- MENSAJE VACÍO -->
+    <div *ngIf="!loading && ticketsFiltrados.length === 0" class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>No se encontraron tickets</p>
+    </div>
+
   </div>
-
- 
-  
+</div>

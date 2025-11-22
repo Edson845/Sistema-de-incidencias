@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy} from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgChartsModule } from 'ng2-charts';
 import { FormsModule } from '@angular/forms';
@@ -24,23 +24,21 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
+import { ReporteModalComponent } from '../reporte-modal/reporte-modal.component';
 
 const pdfMakeX: any = pdfMake;
 pdfMakeX.vfs = pdfFonts.vfs;
 
-
-import { saveAs } from 'file-saver';
-
 @Component({
   selector: 'app-tickets',
   standalone: true,
-  imports: [CommonModule, NgChartsModule,FormsModule,MatButtonModule,MatIconModule,MatToolbarModule,MatCardModule,MatTabsModule,MatFormFieldModule,MatInputModule,MatSelectModule,MatDialogModule],
+  imports: [CommonModule, NgChartsModule, FormsModule, MatButtonModule, MatIconModule, MatToolbarModule, MatCardModule, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatDialogModule, ReporteModalComponent],
   templateUrl: './tickets.component.html',
   styleUrls: ['./tickets.component.css']
 })
 export class TicketsComponent implements OnInit, OnDestroy {
   private socket!: Socket;
-  oficinaSeleccionada: any; 
+  oficinaSeleccionada: any;
   tabActivaIndex: number = 0; // Empieza en la primera pestaña (índice 0)
   tabActiva: 'pdf' | 'excel' = 'pdf';
   modalAbierto = false;
@@ -49,9 +47,9 @@ export class TicketsComponent implements OnInit, OnDestroy {
     fechaFin: '',
     area: ''
   };
-  
+
   usuario = {
-    idOficina:''
+    idOficina: ''
   };
   oficinas: any[] = [];
   tickets: any[] = [];
@@ -73,8 +71,8 @@ export class TicketsComponent implements OnInit, OnDestroy {
   // 🔹 Gráficos
   pieChartData: ChartConfiguration<'pie'>['data'] = {
     labels: ['Nueva', 'Abierta', 'Proceso', 'Resuelto', 'Cerrada', 'No Procede'],
-    datasets: [{ 
-      data: [0, 0, 0, 0, 0], 
+    datasets: [{
+      data: [0, 0, 0, 0, 0],
       backgroundColor: ['#f59e0b', '#2563eb', '#22c55e', '#6b7280', '#9ca3af']
     }]
   };
@@ -82,7 +80,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
   pieChartOptions: ChartOptions<'pie'> = {
     responsive: true,
     aspectRatio: 1,
-    plugins: { 
+    plugins: {
       legend: { position: 'bottom' },
       title: {
         display: true,
@@ -105,7 +103,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
 
   lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
-    plugins: { 
+    plugins: {
       legend: { display: false },
       title: {
         display: true,
@@ -120,11 +118,11 @@ export class TicketsComponent implements OnInit, OnDestroy {
         }
       }
     }
-    
+
   };
 
   constructor(
-    private http: HttpClient, 
+    private http: HttpClient,
     public authService: AuthService,
     private estadisticasService: EstadisticasService,
     private usuariosService: UsuariosService,
@@ -151,7 +149,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
       }
     });
   }
-  cargarOficinas(){
+  cargarOficinas() {
     this.usuariosService.obtenerOficinas().subscribe({
       next: (data) => {
         this.oficinas = data;
@@ -162,107 +160,107 @@ export class TicketsComponent implements OnInit, OnDestroy {
     });
   }
   cargarTickets() {
-  this.loading = true;
+    this.loading = true;
 
-  this.ticketsService.obtenerMisTickets().subscribe({
-    next: (data: any[]) => {
-      console.log("📥 Datos recibidos del backend:", data);
+    this.ticketsService.obtenerMisTickets().subscribe({
+      next: (data: any[]) => {
+        console.log("📥 Datos recibidos del backend:", data);
 
-      if (!data || data.length === 0) {
-        console.warn("⚠ No llegaron tickets desde el backend.");
+        if (!data || data.length === 0) {
+          console.warn("⚠ No llegaron tickets desde el backend.");
+        }
+
+        this.tickets = data || [];
+        this.ticketsFiltrados = [...this.tickets];
+        this.loading = false;
+
+        console.log("📌 Tickets cargados en el componente:", this.tickets);
+      },
+      error: (err) => {
+        console.error("❌ Error al cargar los tickets:", err);
+        this.error = "Error al cargar los tickets.";
+        this.loading = false;
       }
+    });
+  }
 
-      this.tickets = data || [];
-      this.ticketsFiltrados = [...this.tickets];
-      this.loading = false;
+  cargarEstadisticas(): void {
+    const token = this.authService.obtenerToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
 
-      console.log("📌 Tickets cargados en el componente:", this.tickets);
-    },
-    error: (err) => {
-      console.error("❌ Error al cargar los tickets:", err);
-      this.error = "Error al cargar los tickets.";
-      this.loading = false;
-    }
-  });
-}
-  
- cargarEstadisticas(): void {
-  const token = this.authService.obtenerToken();
-  const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+    this.http.get<any>(`${environment.apiUrl}/tickets/estadisticas/generales`, { headers }).subscribe({
+      next: (data: any) => {
 
-  this.http.get<any>(`${environment.apiUrl}/tickets/estadisticas/generales`, { headers }).subscribe({
-    next: (data: any) => {
+        console.log("Datos recibidos:", data);
+        const porEstado = data.porEstado || [];
 
-      console.log("Datos recibidos:", data);
-      const porEstado = data.porEstado || [];
+        // 🟦 MAPEO SEGURO PARA 6 ESTADOS
+        const contar = (id: number) =>
+          porEstado.find((e: any) => e.estado === id)?.cantidad || 0;
 
-      // 🟦 MAPEO SEGURO PARA 6 ESTADOS
-      const contar = (id: number) =>
-        porEstado.find((e: any) => e.estado === id)?.cantidad || 0;
+        // 🟩 RESUMEN
+        this.resumen = {
+          nuevos: contar(1),
+          promedioSolucion: '40 min',
+          respuestasUsuarios: contar(2),
+          resueltosHoy: data.resueltosHoy || 0,
+          total: porEstado.reduce((sum: number, e: any) => sum + e.cantidad, 0)
+        };
 
-      // 🟩 RESUMEN
-      this.resumen = {
-        nuevos: contar(1),
-        promedioSolucion: '40 min',
-        respuestasUsuarios: contar(2),
-        resueltosHoy: data.resueltosHoy || 0,
-        total: porEstado.reduce((sum: number, e: any) => sum + e.cantidad, 0)
-      };
-
-      // 🟧 GRÁFICO DE PIE PARA 6 ESTADOS
-      this.pieChartData = {
-        labels: ['Nueva', 'Abierta', 'Proceso', 'Resuelto', 'Cerrada', 'No Procede'],
-        datasets: [{
-          data: [
-            contar(1), // Nueva
-            contar(2), // Abierta
-            contar(3), // Proceso
-            contar(4), // Resuelto
-            contar(5), // Cerrada
-            contar(6)  // No Procede
-          ],
-          backgroundColor: [
-            '#f59e0b', // Nueva
-            '#2563eb', // Abierta
-            '#22c55e', // Proceso
-            '#6b7280', // Resuelto
-            '#9ca3af', // Cerrada
-            '#a855f7'  // No Procede
-          ]
-        }]
-      };
-
-      // 🟥 GRÁFICO DE LÍNEA (NO SE TOCA)
-      if (data.ticketsPorDia) {
-        const dias = Object.keys(data.ticketsPorDia).sort((a, b) => {
-          const [da, ma, ya] = a.split('/');
-          const [db, mb, yb] = b.split('/');
-          return new Date(`${ya}-${ma}-${da}`).getTime() -
-                 new Date(`${yb}-${mb}-${db}`).getTime();
-        });
-
-        const cantidades = dias.map(dia => data.ticketsPorDia[dia]);
-
-        this.lineChartData = {
-          labels: dias,
+        // 🟧 GRÁFICO DE PIE PARA 6 ESTADOS
+        this.pieChartData = {
+          labels: ['Nueva', 'Abierta', 'Proceso', 'Resuelto', 'Cerrada', 'No Procede'],
           datasets: [{
-            label: 'Cantidad de Tickets',
-            data: cantidades,
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.2)',
-            fill: true,
-            tension: 0.4
+            data: [
+              contar(1), // Nueva
+              contar(2), // Abierta
+              contar(3), // Proceso
+              contar(4), // Resuelto
+              contar(5), // Cerrada
+              contar(6)  // No Procede
+            ],
+            backgroundColor: [
+              '#f59e0b', // Nueva
+              '#2563eb', // Abierta
+              '#22c55e', // Proceso
+              '#6b7280', // Resuelto
+              '#9ca3af', // Cerrada
+              '#a855f7'  // No Procede
+            ]
           }]
         };
-      }
 
-    },
-    error: (err) => {
-      console.error('Error al obtener tickets:', err);
-      this.generarResumen();
-    }
-  });
-}
+        // 🟥 GRÁFICO DE LÍNEA (NO SE TOCA)
+        if (data.ticketsPorDia) {
+          const dias = Object.keys(data.ticketsPorDia).sort((a, b) => {
+            const [da, ma, ya] = a.split('/');
+            const [db, mb, yb] = b.split('/');
+            return new Date(`${ya}-${ma}-${da}`).getTime() -
+              new Date(`${yb}-${mb}-${db}`).getTime();
+          });
+
+          const cantidades = dias.map(dia => data.ticketsPorDia[dia]);
+
+          this.lineChartData = {
+            labels: dias,
+            datasets: [{
+              label: 'Cantidad de Tickets',
+              data: cantidades,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.2)',
+              fill: true,
+              tension: 0.4
+            }]
+          };
+        }
+
+      },
+      error: (err) => {
+        console.error('Error al obtener tickets:', err);
+        this.generarResumen();
+      }
+    });
+  }
 
 
   generarResumen(): void {
@@ -276,7 +274,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
 
     // Contar resueltos hoy
     const hoy = new Date().toISOString().split('T')[0];
-    const resueltosHoy = this.tickets.filter(t => 
+    const resueltosHoy = this.tickets.filter(t =>
       t.fecha?.split('T')[0] === hoy && t.estado === 0
     ).length;
 
@@ -292,54 +290,54 @@ export class TicketsComponent implements OnInit, OnDestroy {
   actualizarEstadisticas(data: any): void {
     // Actualizar gráfico de pastel con datos por estado
     if (data.porEstado) {
-    const estadoData = data.porEstado.reduce((acc: any, item: any) => {
-      
-      const estado = (item.estado || '').toString().toLowerCase();
+      const estadoData = data.porEstado.reduce((acc: any, item: any) => {
 
-      // --- NUEVOS ---
-      if (estado === 'nueva' || estado === 'nuevo' || estado === '1') {
-        acc.nuevos = (acc.nuevos || 0) + item.cantidad;
-      }
+        const estado = (item.estado || '').toString().toLowerCase();
 
-      // --- ABIERTOS ---
-      else if (estado === 'abierta' || estado === '2') {
-        acc.abiertos = (acc.abiertos || 0) + item.cantidad;
-      }
+        // --- NUEVOS ---
+        if (estado === 'nueva' || estado === 'nuevo' || estado === '1') {
+          acc.nuevos = (acc.nuevos || 0) + item.cantidad;
+        }
 
-      // --- EN PROCESO ---
-      else if (estado === 'proceso' || estado === 'en proceso' || estado === '3') {
-        acc.enProceso = (acc.enProceso || 0) + item.cantidad;
-      }
+        // --- ABIERTOS ---
+        else if (estado === 'abierta' || estado === '2') {
+          acc.abiertos = (acc.abiertos || 0) + item.cantidad;
+        }
 
-      // --- CERRADOS (Resuelto + Cerrada) ---
-      else if (estado === 'resuelto' || estado === 'cerrada' || estado === '4' || estado === '5') {
-        acc.cerrados = (acc.cerrados || 0) + item.cantidad;
-      }
+        // --- EN PROCESO ---
+        else if (estado === 'proceso' || estado === 'en proceso' || estado === '3') {
+          acc.enProceso = (acc.enProceso || 0) + item.cantidad;
+        }
 
-      // --- NO PROCEDE ---
-      else if (estado === 'no procede' || estado === '6') {
-        acc.noProcede = (acc.noProcede || 0) + item.cantidad;
-      }
+        // --- CERRADOS (Resuelto + Cerrada) ---
+        else if (estado === 'resuelto' || estado === 'cerrada' || estado === '4' || estado === '5') {
+          acc.cerrados = (acc.cerrados || 0) + item.cantidad;
+        }
 
-      return acc;
+        // --- NO PROCEDE ---
+        else if (estado === 'no procede' || estado === '6') {
+          acc.noProcede = (acc.noProcede || 0) + item.cantidad;
+        }
 
-    }, {});
+        return acc;
 
-    this.pieChartData.datasets[0].data = [
-      estadoData.nuevos || 0,
-      estadoData.abiertos || 0,
-      estadoData.enProceso || 0,
-      estadoData.cerrados || 0,
-      estadoData.noProcede || 0
-    ];
+      }, {});
 
-  }
+      this.pieChartData.datasets[0].data = [
+        estadoData.nuevos || 0,
+        estadoData.abiertos || 0,
+        estadoData.enProceso || 0,
+        estadoData.cerrados || 0,
+        estadoData.noProcede || 0
+      ];
+
+    }
 
     // Actualizar gráfico de línea con datos mensuales
     if (data.generales?.ticketsPorMes) {
       const meses = Object.keys(data.generales.ticketsPorMes);
       const cantidades = Object.values(data.generales.ticketsPorMes);
-      
+
       // Ordenar meses cronológicamente
       const mesesOrdenados = meses.sort((a, b) => {
         const fechaA = new Date(a + ' 1, 2025');
@@ -348,7 +346,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
       });
 
       this.lineChartData.labels = mesesOrdenados;
-      this.lineChartData.datasets[0].data = mesesOrdenados.map(mes => 
+      this.lineChartData.datasets[0].data = mesesOrdenados.map(mes =>
         data.generales.ticketsPorMes[mes] || 0
       );
     } else {
@@ -369,7 +367,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
       });
 
       this.lineChartData.labels = mesesOrdenados;
-      this.lineChartData.datasets[0].data = mesesOrdenados.map(mes => 
+      this.lineChartData.datasets[0].data = mesesOrdenados.map(mes =>
         conteoPorMes[mes] || 0
       );
     }
@@ -386,7 +384,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
     // ✅ CUANDO SE CREA UN NUEVO TICKET
     this.socket.on('nuevo-ticket', (ticket: any) => {
       console.log("🟢 Nuevo ticket en tiempo real:", ticket);
-      
+
       this.resumen.nuevos++;
       this.resumen.total++;
 
@@ -408,8 +406,8 @@ export class TicketsComponent implements OnInit, OnDestroy {
       }
     });
     this.socket.on("nuevo-ticket", (ticket: any) => {
-    console.log("📌 Nuevo ticket detectado:", ticket);
-    this.cargarEstadisticas();
+      console.log("📌 Nuevo ticket detectado:", ticket);
+      this.cargarEstadisticas();
     });
 
     // Cuando se actualiza (cambia de estado, prioridad, etc.)
@@ -421,8 +419,8 @@ export class TicketsComponent implements OnInit, OnDestroy {
   // REPORTE: solo para admins — trae usuarios con rol admin (usa endpoint protegido)
   reporteAdmins: any[] = [];
   reporteVisible = false;
-  
-  
+
+
   hacerReporte() {
     const token = this.authService.obtenerToken();
     if (!token) return alert('Debes iniciar sesión');
@@ -442,136 +440,136 @@ export class TicketsComponent implements OnInit, OnDestroy {
   abrirModal() {
     this.modalAbierto = true;
   }
-  
+
   cerrarModal() {
     this.modalAbierto = false;
   }
-  
+
   generarExcel(oficinaSeleccionada?: string) {
-  this.ticketsService.obtenerTicketsDetallado().subscribe({
-    next: (tickets: any[]) => {
-      if (!tickets || tickets.length === 0) {
-        alert("No hay tickets cargados.");
-        return;
+    this.ticketsService.obtenerTicketsDetallado().subscribe({
+      next: (tickets: any[]) => {
+        if (!tickets || tickets.length === 0) {
+          alert("No hay tickets cargados.");
+          return;
+        }
+
+        // Filtrar por oficina si se selecciona
+        const datosFiltrados = oficinaSeleccionada
+          ? tickets.filter(ticket => ticket.nombreOficina === oficinaSeleccionada)
+          : tickets;
+
+        if (!datosFiltrados.length) {
+          alert("No hay datos para exportar.");
+          return;
+        }
+
+        // Preparar datos para Excel
+        const datosExcel = datosFiltrados.map(ticket => ({
+          ID: ticket.idTicket,
+          Título: ticket.tituloTicket,
+          Descripción: ticket.descTicket,
+          Estado: ticket.nombreEstado,
+          Prioridad: ticket.nombrePrioridad,
+          Categoría: ticket.nombreCategoria,
+          Usuario: `${ticket.nombreUsuario || ""} ${ticket.apellidoUsuario || ""}`.trim(),
+          FechaCreación: new Date(ticket.fechaCreacion).toLocaleDateString()
+        }));
+
+        // Generar Excel
+        const worksheet = XLSX.utils.json_to_sheet(datosExcel);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Tickets');
+        XLSX.writeFile(workbook, `Tickets_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      },
+      error: (err) => {
+        console.error("Error al obtener tickets:", err);
+        alert("No se pudieron cargar los tickets.");
       }
+    });
+  }
 
-      // Filtrar por oficina si se selecciona
-      const datosFiltrados = oficinaSeleccionada
-        ? tickets.filter(ticket => ticket.nombreOficina === oficinaSeleccionada)
-        : tickets;
+  generarPdf(oficinaSeleccionada?: string) {
+    this.ticketsService.obtenerTicketsDetallado().subscribe({
+      next: (tickets: any[]) => {
 
-      if (!datosFiltrados.length) {
-        alert("No hay datos para exportar.");
-        return;
-      }
+        if (!tickets || tickets.length === 0) {
+          alert("No hay tickets cargados.");
+          return;
+        }
 
-      // Preparar datos para Excel
-      const datosExcel = datosFiltrados.map(ticket => ({
-        ID: ticket.idTicket,
-        Título: ticket.tituloTicket,
-        Descripción: ticket.descTicket,
-        Estado: ticket.nombreEstado,
-        Prioridad: ticket.nombrePrioridad,
-        Categoría: ticket.nombreCategoria,
-        Usuario: `${ticket.nombreUsuario || ""} ${ticket.apellidoUsuario || ""}`.trim(),
-        FechaCreación: new Date(ticket.fechaCreacion).toLocaleDateString()
-      }));
+        // Filtrar por oficina
+        const datosFiltrados = oficinaSeleccionada
+          ? tickets.filter(t => t.nombreOficina === oficinaSeleccionada)
+          : tickets;
 
-      // Generar Excel
-      const worksheet = XLSX.utils.json_to_sheet(datosExcel);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Tickets');
-      XLSX.writeFile(workbook, `Tickets_${new Date().toISOString().slice(0,10)}.xlsx`);
-    },
-    error: (err) => {
-      console.error("Error al obtener tickets:", err);
-      alert("No se pudieron cargar los tickets.");
-    }
-  });
-}
+        if (!datosFiltrados.length) {
+          alert("No hay datos para exportar.");
+          return;
+        }
 
-generarPdf(oficinaSeleccionada?: string) {
-  this.ticketsService.obtenerTicketsDetallado().subscribe({
-    next: (tickets: any[]) => {
+        // Preparar filas de la tabla
+        const filasTabla = datosFiltrados.map(t => ([
+          t.idTicket,
+          t.tituloTicket,
+          t.descTicket,
+          t.nombreEstado,
+          t.nombrePrioridad,
+          t.nombreCategoria,
+          `${t.nombreUsuario || ""} ${t.apellidoUsuario || ""}`.trim(),
+          new Date(t.fechaCreacion).toLocaleDateString()
+        ]));
 
-      if (!tickets || tickets.length === 0) {
-        alert("No hay tickets cargados.");
-        return;
-      }
+        // Estructura del PDF
+        const docDefinition: any = {
+          content: [
+            { text: "Reporte de Tickets", style: "header" },
+            { text: `Oficina: ${oficinaSeleccionada || "Todas"}`, margin: [0, 0, 0, 10] },
 
-      // Filtrar por oficina
-      const datosFiltrados = oficinaSeleccionada
-        ? tickets.filter(t => t.nombreOficina === oficinaSeleccionada)
-        : tickets;
+            {
+              table: {
+                headerRows: 1,
+                widths: ["auto", "auto", "*", "auto", "auto", "auto", "*", "auto"],
+                body: [
+                  [
+                    { text: "ID", style: "tableHeader" },
+                    { text: "Título", style: "tableHeader" },
+                    { text: "Descripción", style: "tableHeader" },
+                    { text: "Estado", style: "tableHeader" },
+                    { text: "Prioridad", style: "tableHeader" },
+                    { text: "Categoría", style: "tableHeader" },
+                    { text: "Usuario", style: "tableHeader" },
+                    { text: "Fecha", style: "tableHeader" }
+                  ],
+                  ...filasTabla
+                ]
+              }
+            }
+          ],
 
-      if (!datosFiltrados.length) {
-        alert("No hay datos para exportar.");
-        return;
-      }
-
-      // Preparar filas de la tabla
-      const filasTabla = datosFiltrados.map(t => ([
-        t.idTicket,
-        t.tituloTicket,
-        t.descTicket,
-        t.nombreEstado,
-        t.nombrePrioridad,
-        t.nombreCategoria,
-        `${t.nombreUsuario || ""} ${t.apellidoUsuario || ""}`.trim(),
-        new Date(t.fechaCreacion).toLocaleDateString()
-      ]));
-
-      // Estructura del PDF
-      const docDefinition: any = {
-        content: [
-          { text: "Reporte de Tickets", style: "header" },
-          { text: `Oficina: ${oficinaSeleccionada || "Todas"}`, margin: [0, 0, 0, 10] },
-
-          {
-            table: {
-              headerRows: 1,
-              widths: ["auto", "auto", "*", "auto", "auto", "auto", "*", "auto"],
-              body: [
-                [
-                  { text: "ID", style: "tableHeader" },
-                  { text: "Título", style: "tableHeader" },
-                  { text: "Descripción", style: "tableHeader" },
-                  { text: "Estado", style: "tableHeader" },
-                  { text: "Prioridad", style: "tableHeader" },
-                  { text: "Categoría", style: "tableHeader" },
-                  { text: "Usuario", style: "tableHeader" },
-                  { text: "Fecha", style: "tableHeader" }
-                ],
-                ...filasTabla
-              ]
+          styles: {
+            header: {
+              fontSize: 18,
+              bold: true,
+              alignment: "center",
+              margin: [0, 0, 0, 10]
+            },
+            tableHeader: {
+              bold: true,
+              fillColor: "#eeeeee"
             }
           }
-        ],
+        };
 
-        styles: {
-          header: {
-            fontSize: 18,
-            bold: true,
-            alignment: "center",
-            margin: [0, 0, 0, 10]
-          },
-          tableHeader: {
-            bold: true,
-            fillColor: "#eeeeee"
-          }
-        }
-      };
+        // Descargar PDF → NO devuelve nada
+        pdfMake.createPdf(docDefinition)
+          .download(`Tickets_${new Date().toISOString().slice(0, 10)}.pdf`);
+      },
 
-      // Descargar PDF → NO devuelve nada
-      pdfMake.createPdf(docDefinition)
-        .download(`Tickets_${new Date().toISOString().slice(0,10)}.pdf`);
-    },
-
-    error: (err) => {
-      console.error("Error al obtener tickets:", err);
-      alert("No se pudieron cargar los datos.");
-    }
-  });
-}
+      error: (err) => {
+        console.error("Error al obtener tickets:", err);
+        alert("No se pudieron cargar los datos.");
+      }
+    });
+  }
 
 }

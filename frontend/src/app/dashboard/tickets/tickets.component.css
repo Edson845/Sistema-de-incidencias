@@ -1,203 +1,254 @@
 /* ====== LAYOUT GENERAL ====== */
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   font-family: 'Roboto', sans-serif;
-  background-color: #F5F5F5;
+  background-color: #f8f9fa;
   color: #333;
 }
 
-.layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
 .dashboard-container {
-  padding: 20px 40px;
+  padding: 30px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-/* ====== TITULOS ====== */
-.titulo {
+/* ====== TOOLBAR ====== */
+.modern-toolbar {
+  background: #1e3a8a;
+  /* Azul profesional sólido */
+  color: white;
+  padding: 16px 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-icon {
+  margin-right: 12px;
   font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+/* ====== TITULO ====== */
+.titulo {
+  font-size: 32px;
   font-weight: 700;
-  color: #0055A4;
-  margin-bottom: 20px;
+  color: #1e3a8a;
+  /* Azul principal */
+  margin-bottom: 30px;
 }
 
 /* ====== TARJETAS PRINCIPALES ====== */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
   margin-bottom: 40px;
 }
 
 .stat-card {
-  padding: 20px;
-  border-radius: 10px;
-  color: #fff;
-  font-weight: 500;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: visible;
+  border: 1px solid #e5e7eb;
 }
 
-.stat-card h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--card-color);
 }
 
-.stat-card p {
-  font-size: 24px;
-  font-weight: 700;
+.card-blue {
+  --card-color: #1e3a8a;
 }
 
-/* Colores de tarjetas */
-.stat-card.azul { background-color: #0055A4; }
-.stat-card.amarillo { background-color: #FFD700; color: #333; }
-.stat-card.verde { background-color: #28A745; }
-.stat-card.morado { background-color: #6F42C1; }
-.stat-card.gris { background-color: #6C757D; }
+.card-purple {
+  --card-color: #3b82f6;
+}
 
-/* Hover en tarjetas */
+.card-green {
+  --card-color: #10b981;
+}
+
+.card-orange {
+  --card-color: #fbbf24;
+}
+
 .stat-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* ====== GRÁFICOS ====== */
+.card-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: var(--card-color);
+  flex-shrink: 0;
+}
+
+.card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Título personalizado (no usa mat-card-title) */
+.card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
+.card-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+/* ====== GRAFICOS ====== */
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
   margin-bottom: 40px;
 }
 
 .chart-card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.chart-card h4 {
-  margin-top: 0;
-  color: #0055A4;
-}
-
-/* ====== BOTONES ====== */
-.btn-reporte, .btn-pdf, .btn-excel {
-  padding: 10px 20px;
-  border: none;
+  background: white;
+  padding: 24px;
   border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.chart-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.chart-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: #1e3a8a;
+}
+
+.chart-card mat-card-title {
+  font-size: 18px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  color: #1f2937;
+  margin: 0;
 }
 
-.btn-reporte {
-  background-color: #0055A4;
-  color: #fff;
-}
-
-.btn-reporte:hover {
-  background-color: #003F7F;
-}
-
-.btn-pdf {
-  background-color: #FFD700;
-  color: #333;
-}
-
-.btn-pdf:hover {
-  background-color: #FFC700;
-}
-
-.btn-excel {
-  background-color: #28A745;
-  color: #fff;
-}
-
-.btn-excel:hover {
-  background-color: #1E7E34;
-}
-
-/* ====== MODAL ====== */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-.modal-container {
-  background-color: #fff;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 600px;
-  padding: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.close-btn {
-  border: none;
-  background: transparent;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.tab {
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  background-color: #f5f5f5;
-  transition: all 0.2s;
-}
-
-.tab.active {
-  background-color: #0055A4;
-  color: #fff;
-  border-color: #0055A4;
-}
-
-/* Modal body y filtros */
-.modal-body .filtros {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.modal-body label {
-  font-weight: 500;
-}
-
-.modal-body input, .modal-body select {
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-/* ====== CENTRADO DE BOTONES ====== */
-.text-center {
+/* ====== BOTON ACCION ====== */
+.action-center {
   text-align: center;
+  margin-top: 30px;
+}
+
+.btn-report {
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 6px;
+  background: #1e3a8a;
+  /* Azul sólido */
+  color: white;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-report:hover {
+  background: #1e40af;
+  box-shadow: 0 4px 8px rgba(30, 58, 138, 0.3);
+}
+
+.btn-report mat-icon {
+  margin-right: 8px;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1200px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 20px 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .titulo {
+    font-size: 24px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .card-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .card-number {
+    font-size: 24px;
+  }
+}
+
+/* ====== ANIMACIONES ====== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.chart-card {
+  animation: fadeInUp 0.5s ease-out;
 }

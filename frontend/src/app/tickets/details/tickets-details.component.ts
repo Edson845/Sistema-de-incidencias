@@ -3,11 +3,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TicketsService } from '../../services/tickets.service';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-tickets-details',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule, FormsModule],
   templateUrl: './tickets-details.component.html',
   styleUrls: ['./tickets-details.component.css']
 })
@@ -18,6 +19,11 @@ export class TicketsDetailsComponent implements OnInit {
 
   herramientas: string[] = [];
   historial: any[] = [];
+  historialFiltrado: any[] = [];
+  filtroActivo: string = 'todos'; // 'todos', 'comentario', 'observacion'
+
+  nuevoComentario: string = '';
+  enviandoComentario: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -68,8 +74,48 @@ export class TicketsDetailsComponent implements OnInit {
     this.ticketsService.getHistorialTicket(id).subscribe({
       next: (data) => {
         this.historial = data;
+        this.aplicarFiltro();
       },
       error: (err) => console.error('Error al cargar historial', err)
+    });
+  }
+
+  aplicarFiltro() {
+    if (this.filtroActivo === 'todos') {
+      this.historialFiltrado = this.historial;
+    } else {
+      this.historialFiltrado = this.historial.filter(item => item.tipo === this.filtroActivo);
+    }
+  }
+
+  cambiarFiltro(filtro: string) {
+    this.filtroActivo = filtro;
+    this.aplicarFiltro();
+  }
+
+  agregarComentario() {
+    if (!this.nuevoComentario.trim() || !this.ticket) {
+      return;
+    }
+
+    this.enviandoComentario = true;
+
+    const formData = new FormData();
+    formData.append('rol', 'usuario');
+    formData.append('comentario', this.nuevoComentario);
+    formData.append('calificacion', '0'); // Valor por defecto
+
+    this.ticketsService.calificarTicket(this.ticket.idTicket, formData).subscribe({
+      next: () => {
+        this.nuevoComentario = '';
+        this.enviandoComentario = false;
+        // Recargar historial
+        this.cargarHistorial(this.ticket.idTicket);
+      },
+      error: (err) => {
+        console.error('Error al agregar comentario', err);
+        this.enviandoComentario = false;
+      }
     });
   }
 

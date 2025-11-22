@@ -6,7 +6,8 @@
 }
 
 body {
-    background: #003366; /* azul institucional fuerte */
+    background: #003366;
+    /* azul institucional fuerte */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -26,25 +27,29 @@ body {
 /* Sección Izquierda - FONDO BLANCO PARA QUE EL LOGO AZUL RESALTE */
 .left-section {
     flex: 1;
-    background: #ffffff; /* Fondo blanco puro para máximo contraste */
+    background: #ffffff;
+    /* Fondo blanco puro para máximo contraste */
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
     padding: 40px;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05); /* Sutil sombra para separar del lado derecho */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    /* Sutil sombra para separar del lado derecho */
 }
 
 .logo-container {
     text-align: center;
-    color: #003366; /* Texto en azul institucional */
+    color: #003366;
+    /* Texto en azul institucional */
     max-width: 80%;
 }
 
 .logo-container img {
     width: 180px;
     margin-bottom: 15px;
-    filter: brightness(0.95); /* Opcional: si el logo es muy brillante, atenúa un poco */
+    filter: brightness(0.95);
+    /* Opcional: si el logo es muy brillante, atenúa un poco */
 }
 
 .logo-container h2 {
@@ -60,12 +65,14 @@ body {
     margin-top: 5px;
     font-weight: 600;
 }
+
 .logo-login {
-  width: 120px;
-  height: auto; 
-  display: block;
-  margin: 0 auto 20px auto; 
+    width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto 20px auto;
 }
+
 .logo-container span {
     display: block;
     margin-top: 8px;
@@ -78,7 +85,8 @@ body {
 /* Sección Derecha - SIN CAMBIOS */
 .right-section {
     flex: 1;
-    background: #f8fafc; /* blanco suave, muy limpio */
+    background: #f8fafc;
+    /* blanco suave, muy limpio */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -94,7 +102,7 @@ body {
 .small-logo {
     width: 70px;
     margin-bottom: 10px;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
 }
 
 .login-box h2 {
@@ -185,6 +193,7 @@ button:hover {
         flex-direction: column;
         border-radius: 0;
     }
+
     .left-section,
     .right-section {
         padding: 30px;

@@ -1,0 +1,93 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="cerrar()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+
+        <!-- Header del Modal -->
+        <div class="modal-header">
+            <h2 class="modal-title">📊 Generar Reporte de Tickets</h2>
+            <button class="btn-close" (click)="cerrar()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <!-- Contenido del Modal -->
+        <div class="modal-body">
+
+            <!-- Tabs PDF / Excel -->
+            <mat-tab-group [(selectedIndex)]="tabActivaIndex" class="custom-tabs">
+
+                <!-- Tab PDF -->
+                <mat-tab label="📄 Exportar PDF">
+                    <div class="tab-content">
+                        <div class="filtros-grid">
+                            <mat-form-field appearance="outline" class="filtro-field">
+                                <mat-label>Fecha inicial</mat-label>
+                                <input matInput type="date" [(ngModel)]="filtros.fechaInicio">
+                                <mat-icon matPrefix>event</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="filtro-field">
+                                <mat-label>Fecha final</mat-label>
+                                <input matInput type="date" [(ngModel)]="filtros.fechaFin">
+                                <mat-icon matPrefix>event</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="filtro-field full-width">
+                                <mat-label>Oficina (opcional)</mat-label>
+                                <mat-select [(ngModel)]="oficinaSeleccionada">
+                                    <mat-option value="">Todas las oficinas</mat-option>
+                                    <mat-option *ngFor="let o of oficinas" [value]="o.nombreOficina">
+                                        {{ o.nombreOficina }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>business</mat-icon>
+                            </mat-form-field>
+                        </div>
+
+                        <button mat-raised-button color="primary" class="btn-download" (click)="generarPdf()">
+                            <mat-icon>picture_as_pdf</mat-icon>
+                            Descargar PDF
+                        </button>
+                    </div>
+                </mat-tab>
+
+                <!-- Tab Excel -->
+                <mat-tab label="📊 Exportar Excel">
+                    <div class="tab-content">
+                        <div class="filtros-grid">
+                            <mat-form-field appearance="outline" class="filtro-field">
+                                <mat-label>Fecha inicial</mat-label>
+                                <input matInput type="date" [(ngModel)]="filtros.fechaInicio">
+                                <mat-icon matPrefix>event</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="filtro-field">
+                                <mat-label>Fecha final</mat-label>
+                                <input matInput type="date" [(ngModel)]="filtros.fechaFin">
+                                <mat-icon matPrefix>event</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="filtro-field full-width">
+                                <mat-label>Oficina (opcional)</mat-label>
+                                <mat-select [(ngModel)]="oficinaSeleccionada">
+                                    <mat-option value="">Todas las oficinas</mat-option>
+                                    <mat-option *ngFor="let o of oficinas" [value]="o.nombreOficina">
+                                        {{ o.nombreOficina }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>business</mat-icon>
+                            </mat-form-field>
+                        </div>
+
+                        <button mat-raised-button color="accent" class="btn-download" (click)="generarExcel()">
+                            <mat-icon>table_chart</mat-icon>
+                            Descargar Excel
+                        </button>
+                    </div>
+                </mat-tab>
+
+            </mat-tab-group>
+
+        </div>
+
+    </div>
+</div>

@@ -144,7 +144,7 @@ export const crearTicket = async (req, res) => {
     // 🔥 PRIORIDAD POR NLP
     let idPrioridad = 3;
     try {
-      idPrioridad = await obtenerPrioridad(descripcion); 
+      idPrioridad = await obtenerPrioridad(descripcion);
       console.log("🎯 Prioridad NLP:", idPrioridad);
     } catch (err) {
       console.error("⚠️ Error NLP:", err.message);
@@ -263,13 +263,31 @@ export async function actualizarTicket(req, res) {
     // Ejecutar query
     await pool.query(query, valores);
 
-    // Emitir evento por socket si cambia el estado
-    if (estado !== undefined) {
+    // 🔥 OBTENER TICKET COMPLETO ACTUALIZADO con todos los JOINs
+    const [ticketActualizado] = await pool.query(`
+      SELECT 
+        t.*,
+        u.nombres AS nombreUsuario,
+        u.apellidos AS apellidoUsuario,
+        ut.nombres AS nombreTecnico,
+        ut.apellidos AS apellidoTecnico,
+        c.nombreCategoria,
+        p.nombrePrioridad,
+        e.nombreEstado
+      FROM ticket t
+      LEFT JOIN usuario u ON t.usuarioCrea = u.dni
+      LEFT JOIN usuario ut ON t.asignadoA = ut.dni
+      LEFT JOIN categoria c ON t.idCategoria = c.idCategoria
+      LEFT JOIN prioridad p ON t.idPrioridad = p.idPrioridad
+      LEFT JOIN estado e ON t.idEstado = e.idEstado
+      WHERE t.idTicket = ?
+    `, [id]);
+
+    // 🔥 EMITIR EVENTO POR SOCKET SIEMPRE (no solo cuando cambia estado)
+    if (ticketActualizado && ticketActualizado.length > 0) {
       const io = getIO();
-      io.emit('ticket-actualizado', {
-        idTicket: id,
-        estado
-      });
+      io.emit('ticket-actualizado', ticketActualizado[0]);
+      console.log('✅ Socket emitido: ticket-actualizado', ticketActualizado[0].idTicket);
     }
 
     res.json({ mensaje: 'Ticket actualizado correctamente' });
@@ -327,7 +345,7 @@ export async function getEstadisticasGenerales(req, res) {
     const [tickets] = await pool.query('SELECT idEstado, fechaCreacion FROM ticket');
 
     // Conteo dinámico por estado
-    const estadoConteo = {}; 
+    const estadoConteo = {};
     const diaConteo = {};
     let resueltosHoy = 0;
     const hoy = new Date().toISOString().split('T')[0];
@@ -413,6 +431,33 @@ export async function asignarTicketConHerramientas(req, res) {
       }
     }
 
+    // 🔥 OBTENER TICKET COMPLETO ACTUALIZADO
+    const [ticketActualizado] = await pool.query(`
+      SELECT 
+        t.*,
+        u.nombres AS nombreUsuario,
+        u.apellidos AS apellidoUsuario,
+        ut.nombres AS nombreTecnico,
+        ut.apellidos AS apellidoTecnico,
+        c.nombreCategoria,
+        p.nombrePrioridad,
+        e.nombreEstado
+      FROM ticket t
+      LEFT JOIN usuario u ON t.usuarioCrea = u.dni
+      LEFT JOIN usuario ut ON t.asignadoA = ut.dni
+      LEFT JOIN categoria c ON t.idCategoria = c.idCategoria
+      LEFT JOIN prioridad p ON t.idPrioridad = p.idPrioridad
+      LEFT JOIN estado e ON t.idEstado = e.idEstado
+      WHERE t.idTicket = ?
+    `, [id]);
+
+    // 🔥 EMITIR EVENTO POR SOCKET
+    if (ticketActualizado && ticketActualizado.length > 0) {
+      const io = getIO();
+      io.emit('ticket-actualizado', ticketActualizado[0]);
+      console.log('✅ Socket emitido: ticket asignado', ticketActualizado[0].idTicket);
+    }
+
     res.json({ mensaje: 'Asignación realizada correctamente' });
 
   } catch (err) {
@@ -495,6 +540,32 @@ export async function calificarTicket(req, res) {
         [dniUsuario, idTicket, comentario || "Sin comentario", adjunto]
       );
 
+      // 🔥 EMITIR SOCKET PARA CALIFICACIÓN
+      const [ticketCalificado] = await pool.query(`
+        SELECT 
+          t.*,
+          u.nombres AS nombreUsuario,
+          u.apellidos AS apellidoUsuario,
+          ut.nombres AS nombreTecnico,
+          ut.apellidos AS apellidoTecnico,
+          c.nombreCategoria,
+          p.nombrePrioridad,
+          e.nombreEstado
+        FROM ticket t
+        LEFT JOIN usuario u ON t.usuarioCrea = u.dni
+        LEFT JOIN usuario ut ON t.asignadoA = ut.dni
+        LEFT JOIN categoria c ON t.idCategoria = c.idCategoria
+        LEFT JOIN prioridad p ON t.idPrioridad = p.idPrioridad
+        LEFT JOIN estado e ON t.idEstado = e.idEstado
+        WHERE t.idTicket = ?
+      `, [idTicket]);
+
+      if (ticketCalificado && ticketCalificado.length > 0) {
+        const io = getIO();
+        io.emit('ticket-actualizado', ticketCalificado[0]);
+        console.log('✅ Socket emitido: ticket calificado', ticketCalificado[0].idTicket);
+      }
+
       return res.json({ ok: true, mensaje: "Calificación registrada" });
     }
 
@@ -507,6 +578,32 @@ export async function calificarTicket(req, res) {
         `UPDATE ticket SET idestado = 4 WHERE idTicket = ?`,
         [idTicket]
       );
+
+      // 🔥 EMITIR SOCKET PARA OBSERVACIÓN TÉCNICA
+      const [ticketObservado] = await pool.query(`
+        SELECT 
+          t.*,
+          u.nombres AS nombreUsuario,
+          u.apellidos AS apellidoUsuario,
+          ut.nombres AS nombreTecnico,
+          ut.apellidos AS apellidoTecnico,
+          c.nombreCategoria,
+          p.nombrePrioridad,
+          e.nombreEstado
+        FROM ticket t
+        LEFT JOIN usuario u ON t.usuarioCrea = u.dni
+        LEFT JOIN usuario ut ON t.asignadoA = ut.dni
+        LEFT JOIN categoria c ON t.idCategoria = c.idCategoria
+        LEFT JOIN prioridad p ON t.idPrioridad = p.idPrioridad
+        LEFT JOIN estado e ON t.idEstado = e.idEstado
+        WHERE t.idTicket = ?
+      `, [idTicket]);
+
+      if (ticketObservado && ticketObservado.length > 0) {
+        const io = getIO();
+        io.emit('ticket-actualizado', ticketObservado[0]);
+        console.log('✅ Socket emitido: observación técnica', ticketObservado[0].idTicket);
+      }
 
       await pool.query(
         `INSERT INTO comentarios 

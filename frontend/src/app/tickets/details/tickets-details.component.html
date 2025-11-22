@@ -19,12 +19,42 @@
     </div>
   </div>
 
+  <!-- Agregar Nuevo Comentario -->
+  <div class="comment-form-section">
+    <h3 class="section-title">Agregar Comentario</h3>
+    <div class="comment-form">
+      <textarea [(ngModel)]="nuevoComentario" placeholder="Escribe tu comentario aquí..." rows="3"
+        class="comment-textarea" [disabled]="enviandoComentario"></textarea>
+      <button class="btn-submit-comment" (click)="agregarComentario()"
+        [disabled]="!nuevoComentario.trim() || enviandoComentario">
+        <span *ngIf="!enviandoComentario">📝 Agregar Comentario</span>
+        <span *ngIf="enviandoComentario">Enviando...</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Historial del Ticket -->
   <div class="timeline-section">
-    <h3 class="timeline-title">Historial del ticket</h3>
+    <div class="timeline-header">
+      <h3 class="timeline-title">Historial del ticket</h3>
 
-    <div class="timeline" *ngIf="historial.length > 0; else noHistorial">
-      <div class="timeline-item" *ngFor="let item of historial; let i = index">
+      <!-- Filtros -->
+      <div class="filter-buttons">
+        <button class="filter-btn" [class.active]="filtroActivo === 'todos'" (click)="cambiarFiltro('todos')">
+          📋 Todos ({{ historial.length }})
+        </button>
+        <button class="filter-btn" [class.active]="filtroActivo === 'comentario'" (click)="cambiarFiltro('comentario')">
+          💬 Comentarios
+        </button>
+        <button class="filter-btn" [class.active]="filtroActivo === 'observacion'"
+          (click)="cambiarFiltro('observacion')">
+          📝 Observaciones
+        </button>
+      </div>
+    </div>
+
+    <div class="timeline" *ngIf="historialFiltrado.length > 0; else noHistorial">
+      <div class="timeline-item" *ngFor="let item of historialFiltrado; let i = index">
         <div class="timeline-date">
           <div class="date-box">
             <div class="month">{{ item.fechaCreacion | date:'MMM' }}</div>
@@ -35,7 +65,7 @@
 
         <div class="timeline-line">
           <div class="timeline-dot"></div>
-          <div class="timeline-connector" *ngIf="i < historial.length - 1"></div>
+          <div class="timeline-connector" *ngIf="i < historialFiltrado.length - 1"></div>
         </div>
 
         <div class="timeline-content">
@@ -45,6 +75,18 @@
           <div class="timeline-card">
             <h4 class="timeline-status">{{ getStatusTitle(item.tipo) }}</h4>
             <p class="timeline-description">{{ item.contenido }}</p>
+
+            <!-- Archivos Adjuntos -->
+            <div class="attachments" *ngIf="item.adjunto">
+              <div class="attachment-label">📎 Archivos adjuntos:</div>
+              <div class="attachment-list">
+                <a *ngFor="let archivo of item.adjunto.split(',')" [href]="'http://localhost:3000/uploads/' + archivo"
+                  target="_blank" class="attachment-link">
+                  📄 {{ archivo }}
+                </a>
+              </div>
+            </div>
+
             <div class="timeline-author" *ngIf="item.nombres">
               {{ item.nombres }} {{ item.apellidos }}
               <span class="author-role" *ngIf="item.nombreRol">({{ item.nombreRol }})</span>
@@ -55,7 +97,10 @@
     </div>
 
     <ng-template #noHistorial>
-      <p class="no-historial">No hay historial disponible para este ticket.</p>
+      <p class="no-historial">
+        {{ filtroActivo === 'todos' ? 'No hay historial disponible para este ticket.' : 'No hay ' + (filtroActivo ===
+        'comentario' ? 'comentarios' : 'observaciones') + ' disponibles.' }}
+      </p>
     </ng-template>
   </div>
 

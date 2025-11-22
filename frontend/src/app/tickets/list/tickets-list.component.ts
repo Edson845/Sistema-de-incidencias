@@ -14,11 +14,12 @@ import { WhatsAppService } from '../../services/whatsapp.service';
 import { CalificarTicket } from '../calificar/calificar-ticket/calificar-ticket';
 import { environment } from '../../environments/environments';
 import { Asignar } from '../asignar/asignar';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-tickets-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, MatIconModule],
   templateUrl: './tickets-list.component.html',
   styleUrls: ['./tickets-list.component.css']
 })
@@ -44,7 +45,7 @@ export class TicketsListComponent implements OnInit, OnDestroy {
     private socketService: SocketService,
     private WhatsappService: WhatsAppService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.rolUsuario = this.authService.roles[0];
@@ -95,11 +96,11 @@ export class TicketsListComponent implements OnInit, OnDestroy {
 
   estadoTexto(estado: number): string {
     return estado == 1 ? 'nuevo' :
-           estado == 2 ? 'abierto' :
-           estado == 3 ? 'proceoso' :
-           estado == 4 ? 'resuelto' :
-           estado == 5 ? 'cerrado' :
-           'desconocido';
+      estado == 2 ? 'abierto' :
+        estado == 3 ? 'proceoso' :
+          estado == 4 ? 'resuelto' :
+            estado == 5 ? 'cerrado' :
+              'desconocido';
   }
 
   ordenarTickets() {
@@ -179,18 +180,38 @@ export class TicketsListComponent implements OnInit, OnDestroy {
   iniciarSocket() {
     this.socket = io(environment.socketUrl, { transports: ['websocket'], autoConnect: true });
 
+    // 🔥 NUEVO TICKET CREADO
     this.socket.on("nuevo-ticket", (ticket: any) => {
-      if (!this.tickets.some(t => t.idTicket === ticket.idTicket)) this.tickets.unshift(ticket);
+      console.log('📥 Nuevo ticket recibido:', ticket);
+      if (!this.tickets.some(t => t.idTicket === ticket.idTicket)) {
+        this.tickets.unshift(ticket);
+        this.filtrarTickets(); // Actualizar lista filtrada
+      }
     });
 
-    this.socket.on("ticket-actualizado", (data: any) => {
-      const index = this.tickets.findIndex(t => t.idTicket === Number(data.idTicket));
-      if (index !== -1) this.tickets[index] = { ...this.tickets[index], ...data };
-      else this.tickets.unshift(data);
+    // 🔥 TICKET ACTUALIZADO (cualquier campo)
+    this.socket.on("ticket-actualizado", (ticketActualizado: any) => {
+      console.log('🔄 Ticket actualizado recibido:', ticketActualizado);
+
+      const index = this.tickets.findIndex(t => t.idTicket === Number(ticketActualizado.idTicket));
+
+      if (index !== -1) {
+        // Reemplazar completamente el ticket con los nuevos datos
+        this.tickets[index] = ticketActualizado;
+      } else {
+        // Si no existe, agregarlo (por si acaso)
+        this.tickets.unshift(ticketActualizado);
+      }
+
+      // Actualizar lista filtrada
+      this.filtrarTickets();
     });
 
+    // 🔥 TICKET ELIMINADO
     this.socket.on("ticket-eliminado", (idEliminado: number) => {
+      console.log('🗑️ Ticket eliminado:', idEliminado);
       this.tickets = this.tickets.filter(t => t.idTicket !== idEliminado);
+      this.filtrarTickets(); // Actualizar lista filtrada
     });
   }
 

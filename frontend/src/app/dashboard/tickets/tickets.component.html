@@ -1,6 +1,7 @@
 <!-- DASHBOARD PRINCIPAL -->
-<mat-toolbar color="primary">
-  Panel de Control - Municipalidad de San Román
+<mat-toolbar class="modern-toolbar">
+  <mat-icon class="toolbar-icon">dashboard</mat-icon>
+  <span>Panel de Control - Municipalidad de San Román</span>
 </mat-toolbar>
 
 <div class="dashboard-container">
@@ -9,57 +10,69 @@
 
   <!-- TARJETAS PRINCIPALES -->
   <div class="stats-grid">
-    <mat-card class="stat-card azul">
-      <mat-card-title>Tickets Nuevos</mat-card-title>
-      <mat-card-content>{{ resumen.nuevos }}</mat-card-content>
+    <mat-card class="stat-card card-blue">
+      <mat-icon class="card-icon">new_releases</mat-icon>
+      <div class="card-content">
+        <div class="card-title">Tickets Nuevos</div>
+        <div class="card-number">{{ resumen.nuevos }}</div>
+      </div>
     </mat-card>
 
-    <mat-card class="stat-card azul-oscuro">
-      <mat-card-title>Tiempo promedio de solución</mat-card-title>
-      <mat-card-content>{{ resumen.promedioSolucion }}</mat-card-content>
+    <mat-card class="stat-card card-purple">
+      <mat-icon class="card-icon">schedule</mat-icon>
+      <div class="card-content">
+        <div class="card-title">Tiempo Promedio</div>
+        <div class="card-number">{{ resumen.promedioSolucion }}</div>
+      </div>
     </mat-card>
 
-    <mat-card class="stat-card amarillo">
-      <mat-card-title>Tickets resueltos hoy</mat-card-title>
-      <mat-card-content>{{ resumen.resueltosHoy }}</mat-card-content>
+    <mat-card class="stat-card card-green">
+      <mat-icon class="card-icon">check_circle</mat-icon>
+      <div class="card-content">
+        <div class="card-title">Resueltos Hoy</div>
+        <div class="card-number">{{ resumen.resueltosHoy }}</div>
+      </div>
     </mat-card>
 
-    <mat-card class="stat-card gris">
-      <mat-card-title>Total de Tickets</mat-card-title>
-      <mat-card-content>{{ resumen.total }}</mat-card-content>
+    <mat-card class="stat-card card-orange">
+      <mat-icon class="card-icon">assessment</mat-icon>
+      <div class="card-content">
+        <div class="card-title">Total de Tickets</div>
+        <div class="card-number">{{ resumen.total }}</div>
+      </div>
     </mat-card>
   </div>
 
   <!-- GRÁFICOS -->
   <div class="charts-grid">
     <mat-card class="chart-card">
-      <mat-card-title>Tickets por Estado</mat-card-title>
+      <mat-card-header class="chart-header">
+        <mat-icon class="chart-icon">pie_chart</mat-icon>
+        <mat-card-title>Tickets por Estado</mat-card-title>
+      </mat-card-header>
       <mat-card-content>
-        <canvas *ngIf="pieChartData"
-          baseChart
-          [data]="pieChartData"
-          [options]="pieChartOptions"
-          [type]="'pie'">
+        <canvas *ngIf="pieChartData" baseChart [data]="pieChartData" [options]="pieChartOptions" [type]="'pie'">
         </canvas>
       </mat-card-content>
     </mat-card>
 
     <mat-card class="chart-card">
-      <mat-card-title>Evolución de Tickets por Mes</mat-card-title>
+      <mat-card-header class="chart-header">
+        <mat-icon class="chart-icon">show_chart</mat-icon>
+        <mat-card-title>Evolución de Tickets por Mes</mat-card-title>
+      </mat-card-header>
       <mat-card-content>
-        <canvas *ngIf="lineChartData && lineChartData.datasets && lineChartData.datasets.length > 0"
-          baseChart
-          [data]="lineChartData"
-          [options]="lineChartOptions"
-          [type]="'line'">
+        <canvas *ngIf="lineChartData && lineChartData.datasets && lineChartData.datasets.length > 0" baseChart
+          [data]="lineChartData" [options]="lineChartOptions" [type]="'line'">
         </canvas>
       </mat-card-content>
     </mat-card>
   </div>
 
   <!-- Botón de reporte (solo admin) -->
-  <div class="text-center mt-4">
-    <button mat-raised-button color="primary" *ngIf="authService.tieneRol('admin')" (click)="abrirModal()">
+  <div class="action-center">
+    <button mat-raised-button class="btn-report" *ngIf="authService.tieneRol('admin')" (click)="abrirModal()">
+      <mat-icon>description</mat-icon>
       Generar Reporte
     </button>
   </div>
@@ -67,70 +80,4 @@
 </div>
 
 <!-- MODAL GENERAR REPORTE -->
-<mat-dialog-content *ngIf="modalAbierto">
-  <mat-card class="modal-card">
-
-    <mat-card-header>
-      <mat-card-title>Generar Reporte</mat-card-title>
-      <button mat-icon-button (click)="cerrarModal()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </mat-card-header>
-
-    <!-- Tabs PDF / Excel -->
-    <mat-tab-group [(selectedIndex)]="tabActivaIndex">
-      <mat-tab label="PDF">
-        <div class="filtros">
-          <mat-form-field appearance="fill">
-            <mat-label>Fecha inicial</mat-label>
-            <input matInput type="date" [(ngModel)]="filtros.fechaInicio">
-          </mat-form-field>
-
-          <mat-form-field appearance="fill">
-            <mat-label>Fecha final</mat-label>
-            <input matInput type="date" [(ngModel)]="filtros.fechaFin">
-          </mat-form-field>
-
-          <mat-form-field appearance="fill">
-            <mat-label>Oficina (opcional)</mat-label>
-            <mat-select [(ngModel)]="usuario.idOficina">
-              <mat-option value="Todos">Todos</mat-option>
-              <mat-option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <button mat-raised-button color="primary" (click)="generarPdf(oficinaSeleccionada)">
-          Descargar PDF
-        </button>
-      </mat-tab>
-
-      <mat-tab label="Excel">
-        <div class="filtros">
-          <mat-form-field appearance="fill">
-            <mat-label>Fecha inicial</mat-label>
-            <input matInput type="date" [(ngModel)]="filtros.fechaInicio">
-          </mat-form-field>
-
-          <mat-form-field appearance="fill">
-            <mat-label>Fecha final</mat-label>
-            <input matInput type="date" [(ngModel)]="filtros.fechaFin">
-          </mat-form-field>
-
-          <mat-form-field appearance="fill">
-            <mat-label>Oficina (opcional)</mat-label>
-            <mat-select [(ngModel)]="usuario.idOficina">
-              <mat-option value="">Todas</mat-option>
-              <mat-option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <button mat-raised-button color="accent" (click)="generarExcel(oficinaSeleccionada)">
-          Descargar Excel
-        </button>
-      </mat-tab>
-    </mat-tab-group>
-
-  </mat-card>
-</mat-dialog-content>
+<app-reporte-modal [isOpen]="modalAbierto" [oficinas]="oficinas" (closeModal)="cerrarModal()"></app-reporte-modal>
