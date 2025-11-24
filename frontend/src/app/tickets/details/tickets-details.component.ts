@@ -20,7 +20,7 @@ export class TicketsDetailsComponent implements OnInit {
   loading = true;
   rolUsuario: string = '';
 
-  herramientas: string[] = [];
+  herramientas: any[] = [];
   historial: any[] = [];
   historialFiltrado: any[] = [];
   filtroActivo: string = 'todos'; // 'todos', 'comentario', 'observacion'
@@ -68,16 +68,18 @@ export class TicketsDetailsComponent implements OnInit {
     });
   }
 
+
+
   cargarHerramientas(id: number) {
     this.ticketsService.getHerramientasByTicket(id).subscribe({
-      next: (data) => {
-        try {
-          this.herramientas = data;
-        } catch {
-          this.herramientas = [];
-        }
+      next: (data: any) => {
+        this.herramientas = data;
+        console.log('✅ Herramientas cargadas exitosamente:', this.herramientas);
       },
-      error: (err) => console.error('Error al cargar herramientas', err)
+      error: (err) => {
+        console.error('❌ Error al cargar herramientas para el ticket', id, err);
+        this.herramientas = [];
+      }
     });
   }
 

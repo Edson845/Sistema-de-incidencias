@@ -42,8 +42,8 @@ export class TicketsService {
   }
 
   // Obtener herramientas de un ticket
-  getHerramientasByTicket(idTicket: number): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/herramientas/${idTicket}`);
+  getHerramientasByTicket(id: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/herramientas/${id}`);
   }
 
   // Actualizar estado del ticket

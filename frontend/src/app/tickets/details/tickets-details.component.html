@@ -77,6 +77,9 @@
           (click)="cambiarFiltro('observacion')">
           Observaciones
         </button>
+        <button class="filter-btn" [class.active]="filtroActivo === 'estado'" (click)="cambiarFiltro('estado')">
+          Estado
+        </button>
       </div>
     </div>
 
@@ -132,7 +135,7 @@
   <div class="det-card" *ngIf="herramientas.length > 0">
     <h3><mat-icon>build</mat-icon> Herramientas Utilizadas</h3>
     <ul class="herr-list">
-      <li *ngFor="let h of herramientas">{{ h }}</li>
+      <li *ngFor="let h of herramientas">{{ h.herramienta }}</li>
     </ul>
   </div>
 

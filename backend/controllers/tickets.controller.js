@@ -628,6 +628,16 @@ export async function getHistorialTicket(req, res) {
     const { id } = req.params;
 
     // Obtener comentarios y observaciones del ticket
+    const [estado] = await pool.query(
+      `
+      SELECT 
+        e.tituloTicket,
+        e.idTicket,
+        e.idEstado
+      FROM ticket_herramienta h
+      WHERE h.idTicket = ?
+    `, [id]
+    );
     const [comentarios] = await pool.query(
       `
       SELECT 
@@ -635,7 +645,6 @@ export async function getHistorialTicket(req, res) {
         c.contenido,
         c.adjunto,
         c.tipo,
-        c.fechaCreacion,
         u.nombres,
         u.apellidos,
         r.nombreRol
@@ -644,7 +653,6 @@ export async function getHistorialTicket(req, res) {
       LEFT JOIN rolusuario ru ON ru.dni = u.dni
       LEFT JOIN rol r ON r.idRol = ru.idRol
       WHERE c.idTicket = ?
-      ORDER BY c.fechaCreacion ASC
       `,
       [id]
     );
@@ -653,5 +661,26 @@ export async function getHistorialTicket(req, res) {
   } catch (error) {
     console.error("❌ Error en getHistorialTicket:", error);
     res.status(500).json({ mensaje: "Error al obtener historial del ticket" });
+  }
+}
+export async function getHerramientasTicket(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Obtener herramientas del ticket
+    const [herramientas] = await pool.query(
+      `
+      SELECT 
+        h.herramienta
+      FROM ticket_herramienta h
+      WHERE h.idTicket = ?
+      `,
+      [id]
+    );
+
+    res.json(herramientas);
+  } catch (error) {
+    console.error("❌ Error en getHerramientasTicket:", error);
+    res.status(500).json({ mensaje: "Error al obtener herramientas del ticket" });
   }
 }
