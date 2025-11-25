@@ -85,6 +85,7 @@
 
     <div class="timeline" *ngIf="historialFiltrado.length > 0; else noHistorial">
       <div class="timeline-item" *ngFor="let item of historialFiltrado; let i = index">
+
         <div class="timeline-date">
           <div class="date-box">
             <div class="month">{{ item.fechaCreacion | date:'MMM' }}</div>
@@ -98,19 +99,29 @@
         </div>
 
         <div class="timeline-content">
+
           <div class="timeline-meta">
             <span class="time">{{ item.fechaCreacion | date:'HH:mm' }}</span>
-            <span class="author">{{ item.nombres }} {{ item.apellidos }}</span>
-            <span class="role">({{ item.nombreRol }})</span>
+
+            <!-- Si es estado -->
+            <span *ngIf="item.tipo === 'estado'" class="author">Sistema</span>
+            <span *ngIf="item.tipo !== 'estado'" class="author">{{ item.nombres }} {{ item.apellidos }}</span>
+
+            <span class="role">
+              ({{ item.nombreRol || (item.tipo === 'estado' ? 'Estado' : '') }})
+            </span>
           </div>
 
           <div class="timeline-card">
             <h4 class="timeline-status">{{ getStatusTitle(item.tipo) }}</h4>
+
             <p class="timeline-description">{{ item.contenido }}</p>
 
-            <!-- Archivos Adjuntos -->
+            <!-- Adjuntos -->
             <div class="attachments" *ngIf="item.adjunto">
-              <div class="attachment-label"><mat-icon>attach_file</mat-icon> Adjuntos:</div>
+              <div class="attachment-label">
+                <mat-icon>attach_file</mat-icon> Adjuntos:
+              </div>
               <div class="attachment-list">
                 <a *ngFor="let archivo of item.adjunto.split(',')" [href]="'http://localhost:3000/uploads/' + archivo"
                   target="_blank" class="attachment-link">
@@ -119,6 +130,7 @@
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -130,6 +142,7 @@
       </div>
     </ng-template>
   </div>
+
 
   <!-- Herramientas -->
   <div class="det-card" *ngIf="herramientas.length > 0">

@@ -85,13 +85,40 @@ export class TicketsDetailsComponent implements OnInit {
 
   cargarHistorial(id: number) {
     this.ticketsService.getHistorialTicket(id).subscribe({
-      next: (data) => {
-        this.historial = data;
+      next: (data: any) => {
+        console.log(data);
+        const comentarios = data.comentarios || [];
+        const estado = data.estado;
+
+        // Convertimos estado → item del timeline
+        const estadoComoItem = estado ? {
+          fechaCreacion: estado.fechaCreacion,
+          tipo: "estado",
+          contenido: `Ticket ( ${estado.nombreEstado})`,
+          nombres: null,
+          apellidos: null,
+          nombreRol: "Sistema",
+          adjunto: null
+        } : null;
+
+        // Unimos estado + comentarios en un solo arreglo
+        this.historial = estadoComoItem
+          ? [estadoComoItem, ...comentarios]
+          : [...comentarios];
+
+        // Ordenar por fecha (si quieres)
+        this.historial.sort((a, b) =>
+          new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime()
+        );
+
+        // Aplicar filtro
         this.aplicarFiltro();
       },
       error: (err) => console.error('Error al cargar historial', err)
     });
   }
+
+
 
   aplicarFiltro() {
     if (this.filtroActivo === 'todos') {

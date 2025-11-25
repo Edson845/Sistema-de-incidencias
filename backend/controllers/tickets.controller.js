@@ -180,7 +180,19 @@ export const crearTicket = async (req, res) => {
     );
 
     const idInsertado = result.insertId;
-
+    // 🔥 REGISTRAR HISTORIAL inicial
+    await pool.query(`
+        INSERT INTO historial (
+          idTicket,
+          dni_usuario,
+          accion,
+          estadoAntiguo,
+          estadoNuevo,
+          tipo
+        ) VALUES (?, ?, 'abrir ticket', NULL, 1, 'Estado')
+      `, [
+      idInsertado, usuarioCrea, 1
+    ]);
     // 🔥 Obtener ticket COMPLETO con joins
     const [ticketCompleto] = await pool.query(`
       SELECT 
@@ -631,11 +643,12 @@ export async function getHistorialTicket(req, res) {
     const [estado] = await pool.query(
       `
       SELECT 
-        e.tituloTicket,
-        e.idTicket,
-        e.idEstado
-      FROM ticket_herramienta h
-      WHERE h.idTicket = ?
+        e.idEstado,
+        es.nombreEstado,
+        e.fechaCreacion
+      FROM ticket e
+      LEFT JOIN estado es ON es.idEstado = e.idEstado
+      WHERE e.idTicket = ?
     `, [id]
     );
     const [comentarios] = await pool.query(
@@ -657,7 +670,11 @@ export async function getHistorialTicket(req, res) {
       [id]
     );
 
-    res.json(comentarios);
+    res.json({
+      estado: estado[0] ?? null,
+      comentarios: comentarios ?? []
+    });
+
   } catch (error) {
     console.error("❌ Error en getHistorialTicket:", error);
     res.status(500).json({ mensaje: "Error al obtener historial del ticket" });
