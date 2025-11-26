@@ -65,19 +65,26 @@ export class TicketsListComponent implements OnInit, OnDestroy {
   }
 
   cargarTickets() {
-    this.ticketsService.obtenerMisTickets().subscribe({
-      next: (data) => {
-        this.tickets = data;
-        this.ticketsFiltrados = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('❌ Error al cargar los tickets:', err);
-        this.error = 'Error al cargar los tickets.';
-        this.loading = false;
-      }
-    });
-  }
+  this.ticketsService.obtenerMisTickets().subscribe({
+    next: (data) => {
+      // 🔥 Ordenar por fecha DESC (más actual primero)
+      data.sort((a:any, b:any) => {
+        return new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime();
+      });
+
+      this.tickets = data;
+      this.ticketsFiltrados = data;
+
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error('❌ Error al cargar los tickets:', err);
+      this.error = 'Error al cargar los tickets.';
+      this.loading = false;
+    }
+  });
+}
+
 
   filtrarTickets() {
     const texto = this.filtro.toLowerCase().trim();
@@ -100,7 +107,8 @@ export class TicketsListComponent implements OnInit, OnDestroy {
         estado == 3 ? 'proceoso' :
           estado == 4 ? 'resuelto' :
             estado == 5 ? 'cerrado' :
-              'desconocido';
+              estado == 6 ? 'no procede' :
+                'desconocido';
   }
 
   ordenarTickets() {

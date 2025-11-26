@@ -113,7 +113,7 @@ export async function getTicketsUsuario(req, res) {
 
 export async function getTodosTickets(req, res) {
   try {
-    const [rows] = await pool.query('SELECT * FROM ticket');
+    const [rows] = await pool.query('SELECT * FROM ticket ORDER BY fechaCreacion ASC');
     res.json(rows);
   } catch (error) {
     res.status(500).json({ mensaje: error.message });
@@ -184,7 +184,7 @@ export const crearTicket = async (req, res) => {
     const [historial] = await pool.query(`
         INSERT INTO historial (
           idTicket,
-          dni_usuario,
+          dni_usuarioModifica,
           accion,
           estadoAntiguo,
           estadoNuevo,
@@ -517,7 +517,9 @@ export async function calificarTicket(req, res) {
     const { idTicket } = req.params;
     const { rol, calificacion, comentario, observacionTecnico } = req.body;
     const dniUsuario = req.user?.dni;
-
+    let resolvio = req.body.resolvio;
+    
+  
     // 📎 ARCHIVOS
     const archivos = req.files?.length > 0
       ? req.files.map(f => f.filename)
@@ -584,11 +586,12 @@ export async function calificarTicket(req, res) {
     // -------------------------
     // TÉCNICO AGREGA OBSERVACIÓN
     // -------------------------
+    let nuevoEstado;
     if (rol === "tecnico") {
-
+        nuevoEstado = resolvio ? 4 : 7;
       await pool.query(
-        `UPDATE ticket SET idestado = 4 WHERE idTicket = ?`,
-        [idTicket]
+        `UPDATE ticket SET idestado = ? WHERE idTicket = ?`,
+        [nuevoEstado, idTicket]
       );
 
       // 🔥 EMITIR SOCKET PARA OBSERVACIÓN TÉCNICA

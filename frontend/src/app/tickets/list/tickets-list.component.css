@@ -276,6 +276,10 @@
   background: #6b7280;
   color: white;
 }
+.estado-no-procede {
+  background: #851d1d;
+  color: white;
+}
 
 /* PRIORIDADES - Escala de colores seria */
 .prioridad-muybaja {

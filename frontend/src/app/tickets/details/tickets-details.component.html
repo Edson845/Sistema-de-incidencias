@@ -45,9 +45,9 @@
   </div>
 
   <!-- Agregar Nuevo Comentario -->
-  <div class="comment-form-section">
+  <div class="comment-form-section" *ngIf="ticket.idEstado !== 5 && ticket.idEstado !== 6">
     <h3 class="section-title">Agregar Comentario</h3>
-    <div class="comment-form">
+    <div class="comment-form" >
       <textarea [(ngModel)]="nuevoComentario" placeholder="Escribe tu comentario aquí..." rows="3"
         class="comment-textarea" [disabled]="enviandoComentario"></textarea>
       <button class="btn-submit-comment" (click)="agregarComentario()"
@@ -153,15 +153,15 @@
   </div>
 
   <!-- Acciones de estado -->
-  <div class="acciones-footer" *ngIf="rolUsuario === 'tecnico' || rolUsuario === 'admin'">
-    <button class="btn-action btn-pend" (click)="cambiarEstado(3)">
-      <mat-icon>schedule</mat-icon> Marcar Pendiente
+  <div class="acciones-footer" >
+    <button class="btn-action btn-cerr" (click)="abrirEvaluacion(ticket.idTicket) " *ngIf="rolUsuario === 'tecnico' && ticket.idEstado === 3">
+      <mat-icon>lock</mat-icon> No Resuelto
     </button>
-    <button class="btn-action btn-res" (click)="cambiarEstado(4)">
-      <mat-icon>check_circle</mat-icon> Marcar Resuelto
+    <button class="btn-action btn-cerr" (click)="cambiarEstado(6)" *ngIf="rolUsuario === 'admin' && ticket.idEstado !== 6 && ticket.idEstado !== 5">
+      <mat-icon>lock</mat-icon> No procede
     </button>
-    <button class="btn-action btn-cerr" (click)="cambiarEstado(0)">
-      <mat-icon>lock</mat-icon> Cerrar Ticket
+    <button class="btn-action btn-cerr" (click)="abrirEvaluacion(ticket.idTicket)" *ngIf="rolUsuario === 'admin' && ticket.idEstado !== 6">
+      <mat-icon>lock</mat-icon> calificacion
     </button>
   </div>
 
