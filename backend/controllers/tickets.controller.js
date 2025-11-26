@@ -181,7 +181,7 @@ export const crearTicket = async (req, res) => {
 
     const idInsertado = result.insertId;
     // 🔥 REGISTRAR HISTORIAL inicial
-    await pool.query(`
+    const [historial] = await pool.query(`
         INSERT INTO historial (
           idTicket,
           dni_usuario,
