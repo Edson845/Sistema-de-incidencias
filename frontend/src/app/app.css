@@ -1,0 +1,6 @@
+.mat-dialog-container {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 1.5rem !important;
+}

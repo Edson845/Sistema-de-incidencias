@@ -1,59 +1,198 @@
-<h2 mat-dialog-title>Evaluación del Ticket</h2>
+<!-- Modal Header -->
+<div class="modal-header">
+  <h2>Evaluación del Ticket</h2>
+  <p class="subtitle">{{ getSubtitle() }}</p>
+</div>
 
-<div mat-dialog-content>
+<div class="modal-content">
 
   <!-- ⭐ Vista para USUARIO -->
-  <div *ngIf="rol === 'usuario'">
-    <h3>Califique la atención recibida</h3>
+  <div *ngIf="rol === 'usuario'" class="user-section">
+    
+    <!-- Sistema de Calificación con Caritas -->
+    <div class="rating-section">
+      <label class="section-label">¿Cómo calificarías el servicio?</label>
+      
+      <div class="emoji-rating">
+        <!-- Excelente - 5 -->
+        <div class="emoji-option" 
+             [class.selected]="calificacion === 5"
+             (click)="setCalificacion(5)">
+          <div class="emoji-circle happy-5">
+            <svg viewBox="0 0 100 100" class="emoji-face">
+              <circle cx="50" cy="50" r="45" fill="currentColor"/>
+              <circle cx="35" cy="40" r="5" fill="#000"/>
+              <circle cx="65" cy="40" r="5" fill="#000"/>
+              <path d="M 30 55 Q 50 75 70 55" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stars">★★★★★</div>
+          <span class="emoji-label">Excelente</span>
+        </div>
 
-    <label>Puntuación:</label>
-    <select [(ngModel)]="calificacion" class="form-control">
-      <option [value]="1">1 - Muy mala</option>
-      <option [value]="2">2 - Mala</option>
-      <option [value]="3">3 - Regular</option>
-      <option [value]="4">4 - Buena</option>
-      <option [value]="5">5 - Excelente</option>
-    </select>
+        <!-- Buena - 4 -->
+        <div class="emoji-option" 
+             [class.selected]="calificacion === 4"
+             (click)="setCalificacion(4)">
+          <div class="emoji-circle happy-4">
+            <svg viewBox="0 0 100 100" class="emoji-face">
+              <circle cx="50" cy="50" r="45" fill="currentColor"/>
+              <circle cx="35" cy="40" r="5" fill="#000"/>
+              <circle cx="65" cy="40" r="5" fill="#000"/>
+              <path d="M 35 60 Q 50 70 65 60" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stars">★★★★☆</div>
+          <span class="emoji-label">Buena</span>
+        </div>
 
-    <label class="mt-3">Comentario:</label>
-    <textarea [(ngModel)]="comentario" class="form-control" rows="3"></textarea>
+        <!-- Regular - 3 -->
+        <div class="emoji-option" 
+             [class.selected]="calificacion === 3"
+             (click)="setCalificacion(3)">
+          <div class="emoji-circle neutral-3">
+            <svg viewBox="0 0 100 100" class="emoji-face">
+              <circle cx="50" cy="50" r="45" fill="currentColor"/>
+              <circle cx="35" cy="40" r="5" fill="#000"/>
+              <circle cx="65" cy="40" r="5" fill="#000"/>
+              <line x1="35" y1="65" x2="65" y2="65" stroke="#000" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stars">★★★☆☆</div>
+          <span class="emoji-label">Regular</span>
+        </div>
+
+        <!-- Mala - 2 -->
+        <div class="emoji-option" 
+             [class.selected]="calificacion === 2"
+             (click)="setCalificacion(2)">
+          <div class="emoji-circle sad-2">
+            <svg viewBox="0 0 100 100" class="emoji-face">
+              <circle cx="50" cy="50" r="45" fill="currentColor"/>
+              <circle cx="35" cy="40" r="5" fill="#000"/>
+              <circle cx="65" cy="40" r="5" fill="#000"/>
+              <path d="M 35 70 Q 50 60 65 70" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stars">★★☆☆☆</div>
+          <span class="emoji-label">Mala</span>
+        </div>
+
+        <!-- Muy Mala - 1 -->
+        <div class="emoji-option" 
+             [class.selected]="calificacion === 1"
+             (click)="setCalificacion(1)">
+          <div class="emoji-circle sad-1">
+            <svg viewBox="0 0 100 100" class="emoji-face">
+              <circle cx="50" cy="50" r="45" fill="currentColor"/>
+              <circle cx="35" cy="38" r="5" fill="#000"/>
+              <circle cx="65" cy="38" r="5" fill="#000"/>
+              <path d="M 30 75 Q 50 55 70 75" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <circle cx="72" cy="35" r="2" fill="#000" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="stars">★☆☆☆☆</div>
+          <span class="emoji-label">Muy Mala</span>
+        </div>
+      </div>
+
+      <!-- Mensaje de selección -->
+      <div class="selection-message" *ngIf="calificacion > 0">
+        <span class="message-text">{{ getMensajeCalificacion() }}</span>
+      </div>
+    </div>
+
+    <!-- Comentario -->
+    <div class="input-group">
+      <label>Cuéntanos más sobre tu experiencia <span class="optional">(opcional)</span></label>
+      <textarea 
+        [(ngModel)]="comentario" 
+        placeholder="Comparte tus comentarios para ayudarnos a mejorar..."
+        rows="4"></textarea>
+    </div>
   </div>
 
   <!-- ⭐ Vista para TECNICO -->
-  <div *ngIf="rol === 'tecnico'">
-    <h3>Observaciones del Técnico</h3>
+  <div *ngIf="rol === 'tecnico'" class="tecnico-section">
+    
+    <div class="input-group">
+      <label>Observación Técnica <span class="required">*</span></label>
+      <textarea 
+        [(ngModel)]="observacionTecnico" 
+        placeholder="Describe las acciones realizadas, soluciones aplicadas o hallazgos relevantes..."
+        rows="5"></textarea>
+    </div>
 
-    <label>Observación Técnica:</label>
-    <textarea 
-      [(ngModel)]="observacionTecnico" 
-      class="form-control" 
-      rows="4">
-    </textarea>
-
-    <label class="mt-3">Adjuntar Archivos (Opcional):</label>
-    <input 
-      type="file" 
-      (change)="onFileSelected($event)"
-      multiple
-      class="form-control" />
+    <div class="upload-section">
+      <label>Adjuntar Archivos <span class="optional">(Opcional)</span></label>
+      <div class="upload-area">
+        <input 
+          type="file" 
+          (change)="onFileSelected($event)"
+          multiple
+          id="fileInput"
+          class="file-input" />
+        <label for="fileInput" class="upload-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Haz clic para seleccionar archivos</span>
+          <small>o arrastra y suelta aquí</small>
+        </label>
+      </div>
+      
+      <!-- Lista de archivos seleccionados -->
+      <div class="file-list" *ngIf="adjunto.length > 0">
+        <div class="file-item" *ngFor="let file of adjunto; let i = index">
+          <span class="file-icon">📎</span>
+          <span class="file-name">{{ file.name }}</span>
+          <span class="file-size">({{ getFileSize(file.size) }})</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-
   <!-- ⭐ Vista para ADMIN -->
-  <div *ngIf="rol === 'admin'">
-    <h3>Resumen de evaluación</h3>
+  <div *ngIf="rol === 'admin'" class="admin-section">
+    
+    <div class="summary-grid">
+      <div class="summary-card">
+        <label>Puntuación del Usuario</label>
+        <div class="value-box">
+          <span class="rating-value" *ngIf="data.calificacion">
+            {{ data.calificacion }} ★
+          </span>
+          <span class="no-data" *ngIf="!data.calificacion">Sin calificar</span>
+        </div>
+      </div>
 
-    <p><strong>Puntuación del Usuario:</strong> {{ data.calificacion || 'Sin calificar' }}</p>
-    <p><strong>Comentario del Usuario:</strong> {{ data.comentario || 'Sin comentario' }}</p>
-    <p><strong>Observación Técnico:</strong> {{ data.observacionTecnico || 'Ninguna' }}</p>
+      <div class="summary-card full-width">
+        <label>Comentario del Usuario</label>
+        <div class="value-box">
+          <p>{{ data.comentario || 'Sin comentario' }}</p>
+        </div>
+      </div>
+
+      <div class="summary-card full-width">
+        <label>Observación Técnica</label>
+        <div class="value-box">
+          <p>{{ data.observacionTecnico || 'Ninguna observación registrada' }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
 
-<div mat-dialog-actions align="end">
-  <button mat-button (click)="cerrar()">Cancelar</button>
+<!-- Modal Actions -->
+<div class="modal-actions">
+  <button class="btn-cancel" (click)="cerrar()">
+    ❌ Cancelar
+  </button>
 
-  <button mat-flat-button color="primary" *ngIf="rol !== 'Admin'" (click)="guardar()">
-    Guardar
+  <button class="btn-save" *ngIf="rol !== 'admin'" (click)="guardar()">
+    ✅ {{ rol === 'usuario' ? 'Enviar Calificación' : 'Guardar Observación' }}
   </button>
 </div>

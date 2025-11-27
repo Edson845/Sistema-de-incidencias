@@ -1,76 +1,460 @@
-/* ---------- CONTENEDOR DEL MODAL ---------- */
+/* Modal Container */
 :host {
   display: block;
-  padding: 10px;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  max-width: 950px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-h2 {
-  font-weight: 600;
-  color: #333;
+/* Modal Header */
+.modal-header {
   text-align: center;
-  margin-bottom: 10px;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 2rem;
 }
 
-h3 {
-  font-size: 18px;
-  font-weight: 500;
-  color: #555;
-  margin-bottom: 15px;
+.modal-header h2 {
+  color: #1e3a8a;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
 }
 
-/* ---------- LABELS ---------- */
-label {
+.subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Modal Content */
+.modal-content {
+  padding: 0 0.5rem;
+}
+
+/* Section Labels */
+.section-label {
   display: block;
+  font-weight: 600;
+  font-size: 16px;
+  color: #1e3a8a;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* SISTEMA DE CALIFICACIÓN CON CARITAS */
+.rating-section {
+  margin-bottom: 2rem;
+}
+
+.emoji-rating {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.emoji-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 1rem 0.5rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.emoji-option:hover {
+  background: #f3f4f6;
+  transform: translateY(-4px);
+}
+
+.emoji-option.selected {
+  background: #f0f9ff;
+  border-color: #1e3a8a;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+}
+
+.emoji-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.emoji-option:hover .emoji-circle {
+  transform: scale(1.1);
+}
+
+.emoji-option.selected .emoji-circle {
+  transform: scale(1.15);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Colores de las caritas */
+.happy-5 {
+  color: #22c55e;
+}
+
+/* Verde brillante */
+.happy-4 {
+  color: #a3e635;
+}
+
+/* Verde lima */
+.neutral-3 {
+  color: #fbbf24;
+}
+
+/* Amarillo */
+.sad-2 {
+  color: #fb923c;
+}
+
+/* Naranja */
+.sad-1 {
+  color: #ef4444;
+}
+
+/* Rojo */
+
+.emoji-face {
+  width: 100%;
+  height: 100%;
+}
+
+/* Estrellas */
+.stars {
+  font-size: 14px;
+  color: #fbbf24;
+  margin-bottom: 0.25rem;
+  letter-spacing: 1px;
+}
+
+.emoji-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-align: center;
+}
+
+/* Mensaje de selección */
+.selection-message {
+  background: #f0f9ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-text {
+  color: #1e40af;
   font-size: 14px;
   font-weight: 500;
-  margin-top: 10px;
-  color: #444;
 }
 
-/* ---------- SELECT Y TEXTAREA ---------- */
-select,
+/* Input Groups */
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.optional {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.required {
+  color: #dc2626;
+}
+
 textarea {
   width: 100%;
-  border: 1px solid #ccc;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
-  padding: 8px 10px;
   font-size: 14px;
-  margin-top: 4px;
-  transition: border-color 0.3s ease;
-  outline: none;
+  font-family: inherit;
+  background: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  resize: vertical;
 }
 
-select:focus,
 textarea:focus {
-  border-color: #3f51b5;
+  outline: none;
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
 }
 
-/* ---------- SECCIÓN ADMIN ---------- */
-p {
-  font-size: 14px;
-  margin: 6px 0;
-  color: #333;
+textarea::placeholder {
+  color: #9ca3af;
 }
 
-p strong {
-  color: #000;
+/* Upload Section */
+.upload-section {
+  margin-bottom: 1.5rem;
 }
 
-/* ---------- BOTONES ---------- */
-button[mat-button] {
-  color: #666;
-}
-
-button[mat-flat-button] {
+.upload-section label {
+  display: block;
   font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 0.5rem;
 }
 
-/* ---------- INTERIOR DEL DIALOG ---------- */
-.mat-dialog-content {
-  padding-top: 0;
+.upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  background: #f9fafb;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
-.mat-dialog-actions {
-  padding: 10px;
+.upload-area:hover {
+  border-color: #1e3a8a;
+  background: #f0f9ff;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #1e3a8a;
+}
+
+.upload-label svg {
+  color: #1e3a8a;
+}
+
+.upload-label span {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.upload-label small {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* File List */
+.file-list {
+  margin-top: 1rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f9fafb;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.file-item:last-child {
+  margin-bottom: 0;
+}
+
+.file-icon {
+  font-size: 16px;
+}
+
+.file-name {
+  flex: 1;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Admin Section */
+.admin-section {
+  padding: 1rem 0;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.summary-card {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.summary-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.summary-card label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.value-box {
+  background: white;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.rating-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.no-data {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.value-box p {
+  margin: 0;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.modal-actions button {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cancel {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.btn-cancel:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.btn-save {
+  background: #1e3a8a;
+  color: white;
+  box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
+}
+
+.btn-save:hover {
+  background: #1e40af;
+  box-shadow: 0 4px 8px rgba(30, 58, 138, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-save:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .emoji-rating {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .emoji-option {
+    flex-basis: calc(33.333% - 0.5rem);
+    padding: 0.75rem 0.25rem;
+  }
+
+  .emoji-circle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .stars {
+    font-size: 12px;
+  }
+
+  .emoji-label {
+    font-size: 11px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
 }

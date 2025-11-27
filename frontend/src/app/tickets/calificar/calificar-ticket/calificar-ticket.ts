@@ -57,6 +57,32 @@ export class CalificarTicket {
     this.dialogRef.close();
   }
 
-  
+  setCalificacion(valor: number) {
+    this.calificacion = valor;
+  }
+
+  getSubtitle(): string {
+    if (this.rol === 'usuario') return 'Tu opinión nos ayuda a mejorar';
+    if (this.rol === 'tecnico') return 'Registra las observaciones del trabajo realizado';
+    if (this.rol === 'admin') return 'Visualización de la evaluación completa';
+    return '';
+  }
+
+  getMensajeCalificacion(): string {
+    const mensajes: { [key: number]: string } = {
+      5: '¡Excelente! Nos alegra que hayas tenido una gran experiencia',
+      4: '¡Muy bien! Gracias por tu valoración positiva',
+      3: 'Gracias por tu opinión, trabajaremos para mejorar',
+      2: 'Lamentamos que no haya sido satisfactorio, tomaremos nota',
+      1: 'Lo sentimos mucho, revisaremos lo ocurrido para mejorar'
+    };
+    return mensajes[this.calificacion] || '';
+  }
+
+  getFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
 
 }
