@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class EstadisticasService {
   private apiUrl = 'http://localhost:3000/api/estadisticas'; // tu endpoint backend
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Obtener resumen general
   getResumen(): Observable<any> {
@@ -33,5 +33,10 @@ export class EstadisticasService {
   // Obtener estadísticas generales del sistema
   getEstadisticasGenerales(): Observable<any> {
     return this.http.get(`${this.apiUrl}/generales`);
+  }
+
+  // Obtener eficiencia de técnicos (tickets resueltos por técnico)
+  getEficienciaTecnicos(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/eficiencia-tecnicos`);
   }
 }

@@ -6,25 +6,45 @@ import { PerfilService } from '../services/perfil.service';
 import { UsuariosService } from '../services/usuarios.service';
 import Swal from 'sweetalert2';
 
+// Material Design
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDividerModule } from '@angular/material/divider';
+
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatDividerModule
+  ],
   templateUrl: './perfil.html',
   styleUrls: ['./perfil.css']
 })
 export class Perfil implements OnInit {
 
-  
   perfil: any = {
-  dni: '',
-  usuario: '',
-  nombres: '',
-  apellidos: '',
-  correo: '',
-  celular: '',
-  avatarUrl: ''
-};
+    dni: '',
+    usuario: '',
+    nombres: '',
+    apellidos: '',
+    correo: '',
+    celular: '',
+    avatarUrl: '',
+    idCargo: '',
+    nombreCargo: '',
+    nombreOficina: ''
+  };
+
   modalContrasenia = false;
 
   formContrasenia = {
@@ -32,10 +52,13 @@ export class Perfil implements OnInit {
     nueva: '',
     confirmar: ''
   };
+
   editMode: boolean = false;
   avatarFile!: File;
+  previewUrl: string | null = null;
+  selectedFile: File | null = null;
 
-  constructor(private usuariosService: UsuariosService, private PerfilService: PerfilService) {}
+  constructor(private usuariosService: UsuariosService, private PerfilService: PerfilService) { }
 
   ngOnInit() {
     this.cargarPerfil();
@@ -46,9 +69,7 @@ export class Perfil implements OnInit {
       this.perfil = data;
     });
   }
-  previewUrl: string | null = null; // Vista previa temporal
-  selectedFile: File | null = null;
-  
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
 
@@ -63,17 +84,17 @@ export class Perfil implements OnInit {
     };
     reader.readAsDataURL(file);
   }
+
   activarEdicion() {
     this.editMode = true;
   }
 
   cancelarEdicion() {
-  this.editMode = false;
-  this.previewUrl = null; // Quita vista previa
-  this.selectedFile = null;
-  this.cargarPerfil();  // Recarga datos originales
-}
-
+    this.editMode = false;
+    this.previewUrl = null;
+    this.selectedFile = null;
+    this.cargarPerfil();
+  }
 
   actualizarPerfil() {
     const data = {
@@ -84,58 +105,74 @@ export class Perfil implements OnInit {
       apellidos: this.perfil.apellidos
     };
 
-    this.PerfilService.actualizarPerfil(data).subscribe(() => {
-      Swal.fire("Éxito", "Perfil actualizado", "success");
-      this.editMode = false;
-      this.cargarPerfil();
-
-      // Si el usuario cambió avatar
-      if (this.avatarFile) {
-        this.PerfilService.actualizarAvatar(this.perfil.dni, this.avatarFile)
-          .subscribe(() => {
-            Swal.fire("Avatar actualizado", "", "success");
-            this.cargarPerfil();
-          });
+    this.PerfilService.actualizarPerfil(data).subscribe({
+      next: () => {
+        // Si el usuario cambió avatar
+        if (this.selectedFile) {
+          this.PerfilService.actualizarAvatar(this.perfil.dni, this.selectedFile)
+            .subscribe({
+              next: () => {
+                Swal.fire("Éxito", "Perfil y avatar actualizados", "success");
+                this.editMode = false;
+                this.previewUrl = null;
+                this.selectedFile = null;
+                this.cargarPerfil();
+              },
+              error: (err) => {
+                console.error('Error al actualizar avatar:', err);
+                Swal.fire("Éxito", "Perfil actualizado, pero hubo un error al actualizar el avatar", "warning");
+                this.editMode = false;
+                this.cargarPerfil();
+              }
+            });
+        } else {
+          Swal.fire("Éxito", "Perfil actualizado", "success");
+          this.editMode = false;
+          this.cargarPerfil();
+        }
+      },
+      error: (err) => {
+        console.error('Error al actualizar perfil:', err);
+        Swal.fire("Error", "No se pudo actualizar el perfil", "error");
       }
     });
   }
+
   abrirModalContrasenia() {
-  this.modalContrasenia = true;
-}
+    this.modalContrasenia = true;
+  }
 
-cerrarModalContrasenia() {
-  this.modalContrasenia = false;
-  this.formContrasenia = { actual: '', nueva: '', confirmar: '' };
-}
+  cerrarModalContrasenia() {
+    this.modalContrasenia = false;
+    this.formContrasenia = { actual: '', nueva: '', confirmar: '' };
+  }
 
-cambiarContrasenia() {
-  if (!this.formContrasenia.actual ||
+  cambiarContrasenia() {
+    if (!this.formContrasenia.actual ||
       !this.formContrasenia.nueva ||
       !this.formContrasenia.confirmar) {
-    alert("Todos los campos son obligatorios");
-    return;
-  }
-
-  if (this.formContrasenia.nueva !== this.formContrasenia.confirmar) {
-    alert("Las contraseñas no coinciden");
-    return;
-  }
-
-  // Aquí haces el llamado al backend
-  const data = {
-    actual: this.formContrasenia.actual,
-    nueva: this.formContrasenia.nueva
-  };
-
-  this.PerfilService.cambiarContrasenia(data).subscribe({
-    next: (response) => {
-      alert("Contraseña cambiada con éxito");
-      this.cerrarModalContrasenia();
-    },
-    error: (err) => {
-      alert("Error al cambiar contraseña");
+      alert("Todos los campos son obligatorios");
+      return;
     }
-  });
-}
 
+    if (this.formContrasenia.nueva !== this.formContrasenia.confirmar) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+
+    const data = {
+      actual: this.formContrasenia.actual,
+      nueva: this.formContrasenia.nueva
+    };
+
+    this.PerfilService.cambiarContrasenia(data).subscribe({
+      next: (response) => {
+        alert("Contraseña cambiada con éxito");
+        this.cerrarModalContrasenia();
+      },
+      error: (err) => {
+        alert("Error al cambiar contraseña");
+      }
+    });
+  }
 }

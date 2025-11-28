@@ -1,71 +1,182 @@
-<div class="perfil-container">
+<!-- PERFIL DE USUARIO -->
+<div class="perfil-wrapper">
 
-  <h2>Mi Perfil</h2>
+  <!-- Tarjeta principal del perfil -->
+  <mat-card class="perfil-card">
 
-  <img 
-    [src]="perfil.avatarUrl || 'assets/preder.png'" 
-    class="avatar">
+    <!-- Header con foto de perfil -->
+    <div class="perfil-header">
+      <div class="avatar-container">
+        <img [src]="previewUrl || perfil.avatarUrl || 'assets/preder.png'" class="avatar" alt="Foto de perfil">
+        <button *ngIf="editMode" mat-mini-fab color="primary" class="avatar-edit-btn" (click)="fileInput.click()">
+          <mat-icon>photo_camera</mat-icon>
+        </button>
+        <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+      </div>
 
-  <input type="file" (change)="onFileSelected($event)" *ngIf="editMode">
+      <h1 class="perfil-nombre">{{ perfil.nombres }} {{ perfil.apellidos }}</h1>
+      <p class="perfil-cargo">{{ perfil.nombreCargo || 'Sin cargo asignado' }}</p>
+    </div>
 
-  <div>
-    <label>DNI:</label>
-    <span>{{ perfil.dni }}</span>
-  </div>
+    <mat-divider></mat-divider>
 
-  <div>
-    <label>Usuario:</label>
-    <input *ngIf="editMode" [(ngModel)]="perfil.usuario">
-    <span *ngIf="!editMode">{{ perfil.usuario }}</span>
-  </div>
+    <!-- Información Personal -->
+    <div class="perfil-section">
+      <h2 class="section-title">
+        <mat-icon>person</mat-icon>
+        Información Personal
+      </h2>
 
-  <div>
-    <label>Nombres:</label>
-    <span>{{ perfil.nombres }} {{ perfil.apellidos }}</span>
-  </div>
+      <div class="info-grid">
+        <!-- DNI -->
+        <div class="info-item">
+          <mat-icon class="info-icon">badge</mat-icon>
+          <div class="info-content">
+            <label>DNI</label>
+            <span>{{ perfil.dni }}</span>
+          </div>
+        </div>
 
-  <div>
-    <label>Correo:</label>
-    <input *ngIf="editMode" [(ngModel)]="perfil.correo">
-    <span *ngIf="!editMode">{{ perfil.correo }}</span>
-  </div>
+        <!-- Usuario -->
+        <div class="info-item">
+          <mat-icon class="info-icon">account_circle</mat-icon>
+          <div class="info-content">
+            <label>Usuario</label>
+            <input *ngIf="editMode" [(ngModel)]="perfil.usuario" class="edit-input" placeholder="Usuario">
+            <span *ngIf="!editMode">{{ perfil.usuario }}</span>
+          </div>
+        </div>
 
-  <div>
-    <label>Celular:</label>
-    <input *ngIf="editMode" [(ngModel)]="perfil.celular">
-    <span *ngIf="!editMode">{{ perfil.celular }}</span>
-  </div>
+        <!-- Nombre Completo -->
+        <div class="info-item full-width">
+          <mat-icon class="info-icon">person_outline</mat-icon>
+          <div class="info-content">
+            <label>Nombre Completo</label>
+            <span>{{ perfil.nombres }} {{ perfil.apellidos }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <button *ngIf="!editMode" (click)="activarEdicion()">Editar</button>
-  <button *ngIf="!editMode" (click)="abrirModalContrasenia()">Cambiar contraseña</button>
+    <mat-divider></mat-divider>
 
-  <button *ngIf="editMode" (click)="actualizarPerfil()">Guardar</button>
-  <button *ngIf="editMode" (click)="cancelarEdicion()">Cancelar</button>
+    <!-- Información de Contacto -->
+    <div class="perfil-section">
+      <h2 class="section-title">
+        <mat-icon>contacts</mat-icon>
+        Información de Contacto
+      </h2>
+
+      <div class="info-grid">
+        <!-- Correo Institucional -->
+        <div class="info-item full-width">
+          <mat-icon class="info-icon">email</mat-icon>
+          <div class="info-content">
+            <label>Correo Institucional</label>
+            <input *ngIf="editMode" [(ngModel)]="perfil.correo" type="email" class="edit-input"
+              placeholder="correo@munisanroman.gob.pe">
+            <span *ngIf="!editMode">{{ perfil.correo || 'No registrado' }}</span>
+          </div>
+        </div>
+
+        <!-- Número de Celular -->
+        <div class="info-item">
+          <mat-icon class="info-icon">phone</mat-icon>
+          <div class="info-content">
+            <label>Número de Celular</label>
+            <input *ngIf="editMode" [(ngModel)]="perfil.celular" class="edit-input" placeholder="999 999 999">
+            <span *ngIf="!editMode">{{ perfil.celular || 'No registrado' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Información Organizacional -->
+    <div class="perfil-section">
+      <h2 class="section-title">
+        <mat-icon>business</mat-icon>
+        Información Organizacional
+      </h2>
+
+      <div class="info-grid">
+        <!-- Oficina/Departamento/Gerencia -->
+        <div class="info-item full-width">
+          <mat-icon class="info-icon">corporate_fare</mat-icon>
+          <div class="info-content">
+            <label>Área de Trabajo</label>
+            <span>{{ perfil.nombreOficina || 'No asignado' }}</span>
+          </div>
+        </div>
+
+        <!-- Cargo -->
+        <div class="info-item full-width">
+          <mat-icon class="info-icon">work</mat-icon>
+          <div class="info-content">
+            <label>Cargo</label>
+            <span>{{ perfil.nombreCargo || 'No especificado' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Botones de Acción -->
+    <div class="perfil-actions">
+      <div *ngIf="!editMode" class="action-buttons">
+        <button mat-raised-button color="primary" (click)="activarEdicion()">
+          <mat-icon>edit</mat-icon>
+          Editar Perfil
+        </button>
+        <button mat-raised-button color="accent" (click)="abrirModalContrasenia()">
+          <mat-icon>lock</mat-icon>
+          Cambiar Contraseña
+        </button>
+      </div>
+
+      <div *ngIf="editMode" class="action-buttons">
+        <button mat-raised-button color="primary" (click)="actualizarPerfil()">
+          <mat-icon>save</mat-icon>
+          Guardar Cambios
+        </button>
+        <button mat-raised-button (click)="cancelarEdicion()">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+      </div>
+    </div>
+
+  </mat-card>
 
 </div>
-<!-- Modal Cambiar Contraseña -->
-<div class="modal-backdrop" *ngIf="modalContrasenia">
-  <div class="modal">
-    <h3>Cambiar Contraseña</h3>
 
-    <div class="form-group">
-      <label>Contraseña actual:</label>
-      <input type="password" [(ngModel)]="formContrasenia.actual">
-    </div>
+<!-- MODAL CAMBIAR CONTRASEÑA -->
+<div class="modal-overlay" *ngIf="modalContrasenia" (click)="cerrarModalContrasenia()">
+  <div class="modal" (click)="$event.stopPropagation()">
 
-    <div class="form-group">
-      <label>Nueva contraseña:</label>
-      <input type="password" [(ngModel)]="formContrasenia.nueva">
-    </div>
+    <h3>🔒 Cambiar Contraseña</h3>
 
-    <div class="form-group">
-      <label>Confirmar nueva contraseña:</label>
-      <input type="password" [(ngModel)]="formContrasenia.confirmar">
+    <div class="tab-content">
+      <label>Contraseña Actual <span class="required">*</span></label>
+      <input type="password" [(ngModel)]="formContrasenia.actual" placeholder="Ingresa tu contraseña actual">
+
+      <label>Nueva Contraseña <span class="required">*</span></label>
+      <input type="password" [(ngModel)]="formContrasenia.nueva" placeholder="Mínimo 6 caracteres">
+
+      <label>Confirmar Nueva Contraseña <span class="required">*</span></label>
+      <input type="password" [(ngModel)]="formContrasenia.confirmar" placeholder="Repite la nueva contraseña">
     </div>
 
     <div class="modal-buttons">
-      <button (click)="cambiarContrasenia()">Cambiar</button>
-      <button (click)="cerrarModalContrasenia()">Cancelar</button>
+      <button class="btn-confirm" (click)="cambiarContrasenia()">
+        ✅ Cambiar
+      </button>
+      <button class="btn-cancelar" (click)="cerrarModalContrasenia()">
+        ❌ Cancelar
+      </button>
     </div>
+
   </div>
 </div>

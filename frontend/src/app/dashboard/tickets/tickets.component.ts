@@ -121,6 +121,38 @@ export class TicketsComponent implements OnInit, OnDestroy {
 
   };
 
+  // 🔹 Gráfico de Barras - Eficiencia de Técnicos
+  barChartData: ChartConfiguration<'bar'>['data'] = {
+    labels: [],
+    datasets: [{
+      label: 'Tickets Resueltos (Semana Actual)',
+      data: [],
+      backgroundColor: 'rgba(34, 197, 94, 0.7)',
+      borderColor: '#22c55e',
+      borderWidth: 2
+    }]
+  };
+
+  barChartOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Eficiencia de Técnicos'
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          precision: 0
+        }
+      }
+    }
+  };
+
   constructor(
     private http: HttpClient,
     public authService: AuthService,
@@ -134,6 +166,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
     this.iniciarSockets();
     this.cargarOficinas();
     this.cargarTicketsDetallado();
+    this.cargarEficienciaTecnicos();
   }
   ngOnDestroy(): void {
     if (this.socket) this.socket.disconnect();
@@ -414,6 +447,40 @@ export class TicketsComponent implements OnInit, OnDestroy {
     this.socket.on("ticket-actualizado", (ticket: any) => {
       console.log("♻ Ticket actualizado detectado:", ticket);
       this.cargarEstadisticas();
+
+      // Actualizar eficiencia si el ticket se resolvió
+      if (ticket.idEstado === 4) {
+        this.cargarEficienciaTecnicos();
+      }
+    });
+  }
+
+  cargarEficienciaTecnicos(): void {
+    this.estadisticasService.getEficienciaTecnicos().subscribe({
+      next: (data: any[]) => {
+        console.log('📊 Datos de eficiencia de técnicos:', data);
+
+        // Preparar labels (nombres de técnicos) y datos (tickets resueltos)
+        const labels = data.map(tecnico =>
+          `${tecnico.nombres} ${tecnico.apellidos}`.trim()
+        );
+        const tickets = data.map(tecnico => tecnico.ticketsResueltos);
+
+        // Actualizar el gráfico
+        this.barChartData = {
+          labels: labels,
+          datasets: [{
+            label: 'Tickets Resueltos',
+            data: tickets,
+            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+            borderColor: '#22c55e',
+            borderWidth: 2
+          }]
+        };
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar eficiencia de técnicos:', err);
+      }
     });
   }
   // REPORTE: solo para admins — trae usuarios con rol admin (usa endpoint protegido)

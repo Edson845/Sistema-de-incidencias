@@ -12,7 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-tickets-details',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule, MatIconModule ],
+  imports: [CommonModule, HttpClientModule, FormsModule, MatIconModule],
   templateUrl: './tickets-details.component.html',
   styleUrls: ['./tickets-details.component.css']
 })
@@ -88,30 +88,30 @@ export class TicketsDetailsComponent implements OnInit {
     });
   }
   abrirEvaluacion(idTicket: number) {
-      const rol = (localStorage.getItem('rol') || '').toLowerCase();
-      const dialogRef = this.dialog.open(CalificarTicket, {
-        width: '500px',
-        data: { idTicket, rol }
+    const rol = (localStorage.getItem('rol') || '').toLowerCase();
+    const dialogRef = this.dialog.open(CalificarTicket, {
+      width: '500px',
+      data: { idTicket, rol }
+    });
+
+    dialogRef.afterClosed().subscribe(res => {
+      if (!res) return;
+      const formData = new FormData();
+      formData.append("rol", res.rol);
+      if (res.rol === 'tecnico') {
+        formData.append("observacionTecnico", res.observacionTecnico);
+        formData.append('resolvio', 'true'); // ✅ Marca el ticket como resuelto
+      }
+      if (res.archivos && res.archivos.length > 0) {
+        res.archivos.forEach((file: File) => formData.append("fotos", file));
+      }
+
+      this.ticketsService.calificarTicket(idTicket, formData).subscribe({
+        next: () => this.cargarTicket(idTicket),
+        error: (err) => console.error("Error al calificar:", err)
       });
-  
-      dialogRef.afterClosed().subscribe(res => {
-        if (!res) return;
-        const formData = new FormData();
-        formData.append("rol", res.rol);
-        if (res.rol === 'tecnico') {
-          formData.append("observacionTecnico", res.observacionTecnico);
-          formData.append('resolvio', res.resolvio ? 'true' : 'false');
-        }
-        if (res.archivos && res.archivos.length > 0) {
-          res.archivos.forEach((file: File) => formData.append("fotos", file));
-        }
-  
-        this.ticketsService.calificarTicket(idTicket, formData).subscribe({
-          next: () => this.cargarTicket(idTicket),
-          error: (err) => console.error("Error al calificar:", err)
-        });
-      });
-    }
+    });
+  }
   cargarHistorial(id: number) {
     this.ticketsService.getHistorialTicket(id).subscribe({
       next: (data: any) => {

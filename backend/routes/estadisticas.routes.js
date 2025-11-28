@@ -1,13 +1,14 @@
 import express from 'express';
 import { verificarToken, verificarRol } from '../middlewares/auth.middleware.js';
 import { chatMunicipal } from '../controllers/chatbot.controller.js';
-import { 
-  getResumen, 
-  getTicketsPorEstado, 
-  getTicketsPorUsuario, 
-  getUsuariosPorRol, 
-  getEstadisticasGenerales 
+import {
+  getResumen,
+  getTicketsPorEstado,
+  getTicketsPorUsuario,
+  getUsuariosPorRol,
+  getEstadisticasGenerales
 } from '../controllers/estadisticas.controller.js';
+import { getEficienciaTecnicos } from '../controllers/tickets.controller.js';
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.get('/resumen', verificarToken, verificarRol('tecnico'), getResumen);
 router.get('/tickets-por-estado', verificarToken, verificarRol('admin'), getTicketsPorEstado);
 router.get('/tickets-por-usuario', verificarToken, verificarRol('usuario'), getTicketsPorUsuario);
 router.get('/usuarios-por-rol', verificarToken, verificarRol('admin'), getUsuariosPorRol);
+router.get('/eficiencia-tecnicos', verificarToken, verificarRol(['admin', 'tecnico']), getEficienciaTecnicos);
 router.post('/chatbot', chatMunicipal);
 
 export default router;
