@@ -41,7 +41,7 @@ export async function crearUsuario(req, res) {
   try {
     console.log('Datos recibidos:', req.body);
     //const { dni, usuario, password, nombres, celular, apellidos, correo, idRol,idCargo,idOficina,idDepartamento,idGerencia } = req.body;
-    
+
     let { dni, usuario, password, nombres, celular, apellidos, correo, idRol, idCargo, idOficina, idDepartamento, idGerencia } = req.body;
 
     // ================================
@@ -96,11 +96,11 @@ export async function crearUsuario(req, res) {
 
       console.log("Solo oficina recibido → asignando departamento y gerencia.");
     }
-    
+
     // Validación de datos obligatorios
     if (!dni || !usuario || !password || !nombres || !apellidos || !correo || !idRol || !idCargo || !idOficina || !idDepartamento || !idGerencia) {
       console.log('Faltan datos obligatorios:', { dni, usuario, nombres, apellidos, correo, idRol, idCargo, idOficina, idDepartamento, idGerencia });
-      return res.status(400).json({ 
+      return res.status(400).json({
         mensaje: 'Faltan datos obligatorios',
         camposFaltantes: {
           dni: !dni,
@@ -128,7 +128,7 @@ export async function crearUsuario(req, res) {
     // Verificar si el rol existe
     const [rolExiste] = await pool.query('SELECT idrol FROM rol WHERE idrol = ?', [idRol]);
     if (rolExiste.length === 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         mensaje: 'El rol seleccionado no existe',
         detalles: `No se encontró el rol con ID ${idRol}`
       });
@@ -167,7 +167,7 @@ export async function crearUsuario(req, res) {
       // Confirmar transacción
       await pool.query('COMMIT');
       console.log('Usuario creado y rol asignado correctamente');
-      
+
       res.status(201).json({ mensaje: 'Usuario creado exitosamente' });
     } catch (err) {
       // Revertir cambios si algo falla
@@ -176,7 +176,7 @@ export async function crearUsuario(req, res) {
     }
   } catch (error) {
     console.error('Error al crear usuario:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       mensaje: 'Error al crear usuario',
       detalles: error.message,
       sqlMessage: error.sqlMessage,
@@ -292,16 +292,20 @@ export async function getPerfil(req, res) {
 
     const [rows] = await pool.query(
       `SELECT 
-          dni,
-          usuario,
-          celular,
-          nombres,
-          apellidos,
-          correo,
-          idCargo,
-          avatar
-       FROM usuario
-       WHERE dni = ?`,
+          u.dni,
+          u.usuario,
+          u.celular,
+          u.nombres,
+          u.apellidos,
+          u.correo,
+          u.idCargo,
+          u.avatar,
+          c.nombreCargo,
+          o.nombreOficina
+       FROM usuario u
+       LEFT JOIN cargo c ON u.idCargo = c.idCargo
+       LEFT JOIN oficina o ON u.idOficina = o.idOficina
+       WHERE u.dni = ?`,
       [dni]
     );
 
