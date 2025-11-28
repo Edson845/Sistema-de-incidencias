@@ -588,11 +588,22 @@ export async function calificarTicket(req, res) {
     // -------------------------
     let nuevoEstado;
     if (rol === "tecnico") {
-      nuevoEstado = resolvio ? 4 : 7;
-      await pool.query(
-        `UPDATE ticket SET idestado = ? WHERE idTicket = ?`,
-        [nuevoEstado, idTicket]
-      );
+      // Forzamos la comparación con string por si viene de FormData
+      const esResuelto = resolvio === true || resolvio === "true";
+      nuevoEstado = esResuelto ? 4 : 7;
+
+      // Si se resuelve, actualizamos fechaCierre
+      if (nuevoEstado === 4) {
+        await pool.query(
+          `UPDATE ticket SET idestado = ?, fechaCierre = NOW() WHERE idTicket = ?`,
+          [nuevoEstado, idTicket]
+        );
+      } else {
+        await pool.query(
+          `UPDATE ticket SET idestado = ? WHERE idTicket = ?`,
+          [nuevoEstado, idTicket]
+        );
+      }
 
       // 🔥 EMITIR SOCKET PARA OBSERVACIÓN TÉCNICA
       const [ticketObservado] = await pool.query(`
@@ -716,7 +727,7 @@ export async function getEficienciaTecnicos(req, res) {
       FROM usuario u
       INNER JOIN rolusuario ru ON ru.dni = u.dni
       INNER JOIN rol r ON r.idRol = ru.idRol
-      LEFT JOIN ticket t ON t.asignadoA = u.dni AND t.idEstado = 4
+      LEFT JOIN ticket t ON t.asignadoA = u.dni AND t.idEstado IN (4, 5) AND YEARWEEK(t.fechaCreacion, 1) = YEARWEEK(NOW(), 1)
       WHERE r.nombreRol = 'tecnico'
       GROUP BY u.dni, u.nombres, u.apellidos
       ORDER BY ticketsResueltos DESC

@@ -65,25 +65,25 @@ export class TicketsListComponent implements OnInit, OnDestroy {
   }
 
   cargarTickets() {
-  this.ticketsService.obtenerMisTickets().subscribe({
-    next: (data) => {
-      // 🔥 Ordenar por fecha DESC (más actual primero)
-      data.sort((a:any, b:any) => {
-        return new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime();
-      });
+    this.ticketsService.obtenerMisTickets().subscribe({
+      next: (data) => {
+        // 🔥 Ordenar por fecha DESC (más actual primero)
+        data.sort((a: any, b: any) => {
+          return new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime();
+        });
 
-      this.tickets = data;
-      this.ticketsFiltrados = data;
+        this.tickets = data;
+        this.ticketsFiltrados = data;
 
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('❌ Error al cargar los tickets:', err);
-      this.error = 'Error al cargar los tickets.';
-      this.loading = false;
-    }
-  });
-}
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar los tickets:', err);
+        this.error = 'Error al cargar los tickets.';
+        this.loading = false;
+      }
+    });
+  }
 
 
   filtrarTickets() {
@@ -153,6 +153,7 @@ export class TicketsListComponent implements OnInit, OnDestroy {
       }
       if (res.rol === 'tecnico') {
         formData.append("observacionTecnico", res.observacionTecnico);
+        formData.append("resolvio", "true"); // ✅ Marca el ticket como resuelto
       }
       if (res.archivos && res.archivos.length > 0) {
         res.archivos.forEach((file: File) => formData.append("fotos", file));

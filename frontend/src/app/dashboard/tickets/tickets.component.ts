@@ -125,7 +125,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
   barChartData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
     datasets: [{
-      label: 'Tickets Resueltos',
+      label: 'Tickets Resueltos (Semana Actual)',
       data: [],
       backgroundColor: 'rgba(34, 197, 94, 0.7)',
       borderColor: '#22c55e',
