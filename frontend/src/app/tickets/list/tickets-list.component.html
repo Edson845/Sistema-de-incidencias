@@ -119,7 +119,7 @@
                 <mat-icon>build</mat-icon>
               </button>
               <button *ngIf="rolUsuario === 'tecnico' && t.idEstado === 3" class="btn-action btn-cerrar"
-                (click)="abrirEvaluacion(t.idTicket)">
+                (click)="cerrarTicket(t.idTicket)">
                 <mat-icon>check_circle</mat-icon>
               </button>
             </td>

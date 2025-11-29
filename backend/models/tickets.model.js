@@ -191,18 +191,11 @@ export async function actualizarCalificacion(idTicket, calificacion) {
     [calificacion, idTicket]
   );
 }
-export async function actualizarEstadoTecnico(idTicket, nuevoEstado, actualizarFecha) {
-  if (actualizarFecha) {
-    await pool.query(
-      `UPDATE ticket SET idestado = ?, fechaCierre = NOW() WHERE idTicket = ?`,
-      [nuevoEstado, idTicket]
-    );
-  } else {
+export async function actualizarEstadoTecnico(idTicket, nuevoEstado) {
     await pool.query(
       `UPDATE ticket SET idestado = ? WHERE idTicket = ?`,
       [nuevoEstado, idTicket]
     );
-  }
 }
 
 export async function guardarComentario(dni, idTicket, contenido, adjunto, tipo) {

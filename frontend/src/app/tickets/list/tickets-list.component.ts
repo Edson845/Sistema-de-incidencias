@@ -131,6 +131,12 @@ export class TicketsListComponent implements OnInit, OnDestroy {
       error: (err) => console.error('❌ Error al actualizar estado del ticket:', err)
     });
   }
+  cerrarTicket(idTicket: number){
+    this.ticketsService.actualizarEstado(idTicket, 4).subscribe({
+      next: () => { this.cargarTickets(); },
+      error: (err) => console.error('❌ Error al actualizar estado del ticket:', err)
+    });
+  }
 
   verTicket(id: number) {
     this.router.navigate(['/tickets', id]);
@@ -169,7 +175,7 @@ export class TicketsListComponent implements OnInit, OnDestroy {
   crearTicket() {
     this.router.navigate(['/tickets/nuevo']);
   }
-
+  
   asignarTicket(idTicket: number) {
     const dialogRef = this.dialog.open(Asignar, {
       width: '500px',

@@ -323,8 +323,7 @@ export async function calificarTicketServicio(params) {
 
     await ticketModel.actualizarEstadoTecnico(
       idTicket,
-      nuevoEstado,
-      nuevoEstado === 4 // si se resolvió -> fechaCierre
+      nuevoEstado, 
     );
 
     await ticketModel.guardarComentario(
@@ -334,7 +333,7 @@ export async function calificarTicketServicio(params) {
       adjunto,
       "observacion"
     );
-
+    
     const ticket = await ticketModel.obtenerTicketCompletoModel(idTicket);
     getIO().emit("ticket-actualizado", ticket);
 

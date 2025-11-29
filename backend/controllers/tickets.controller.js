@@ -1,5 +1,6 @@
 import * as ticketService from '../services/tickets.service.js';
 import { obtenerTicketsPorEstadoModel } from "../models/tickets.model.js";
+import { registrarHistorial } from '../services/historial.service.js';
 
 
 export async function getTodosTickets(req, res) {
@@ -155,7 +156,15 @@ export async function calificarTicket(req, res) {
       : [];
 
     const adjunto = archivos.length > 0 ? archivos.join(",") : null;
-
+    // Registrar historial
+    await registrarHistorial({
+      idTicket: idTicket,
+      usuario: dniUsuario,
+      accion: "calificar ticket",
+      estadoAntiguo: 4,
+      estadoNuevo: 5,
+      tipo: "Estado"
+    });
     const resultado = await ticketService.calificarTicketServicio({
       idTicket,
       rol,
@@ -165,7 +174,7 @@ export async function calificarTicket(req, res) {
       adjunto,
       dniUsuario,
       resolvio
-    });
+    }); 
 
     res.json(resultado);
 
