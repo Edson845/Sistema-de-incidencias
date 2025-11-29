@@ -10,9 +10,10 @@ import authRoutes from './routes/auth.routes.js';
 import ticketsRoutes from './routes/tickets.routes.js';
 import usuariosRoutes from './routes/usuarios.routes.js';
 import estadisticasRoutes from './routes/estadisticas.routes.js';
+import catalogosRoutes from './routes/catalogos.routes.js';
 import { verificarToken } from './middlewares/auth.middleware.js';
 import whatsappRoutes from './routes/whatsapp.routes.js';
-
+import rolesRoutes from './routes/rol.routes.js';
 dotenv.config();
 
 const app = express();
@@ -51,6 +52,8 @@ app.use('/api/tickets', verificarToken,ticketsRoutes);
 app.use('/api/usuarios',verificarToken, usuariosRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/catalogos', verificarToken, catalogosRoutes);
+app.use('/api/roles', verificarToken, rolesRoutes);
 
 
 const PORT = process.env.PORT || 3000;

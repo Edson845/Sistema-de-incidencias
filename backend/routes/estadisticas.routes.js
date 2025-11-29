@@ -8,20 +8,20 @@ import {
   getUsuariosPorRol,
   getEstadisticasGenerales
 } from '../controllers/estadisticas.controller.js';
-import { getEficienciaTecnicos } from '../controllers/tickets.controller.js';
+import { obtenerEficienciaTecnicos } from '../controllers/tickets.controller.js';
 
 const router = express.Router();
 
 // Ruta principal solo para admin
 router.get('/generales', verificarToken, verificarRol('admin'), getEstadisticasGenerales);
-router.get('/', verificarToken, verificarRol('admin'), getEstadisticasGenerales);
+
 
 // Rutas de estadísticas específicas (puedes aplicar roles según sea necesario)
 router.get('/resumen', verificarToken, verificarRol('tecnico'), getResumen);
 router.get('/tickets-por-estado', verificarToken, verificarRol('admin'), getTicketsPorEstado);
 router.get('/tickets-por-usuario', verificarToken, verificarRol('usuario'), getTicketsPorUsuario);
 router.get('/usuarios-por-rol', verificarToken, verificarRol('admin'), getUsuariosPorRol);
-router.get('/eficiencia-tecnicos', verificarToken, verificarRol(['admin', 'tecnico']), getEficienciaTecnicos);
+router.get('/eficiencia-tecnicos', verificarToken, verificarRol(['admin', 'tecnico']), obtenerEficienciaTecnicos);
 router.post('/chatbot', chatMunicipal);
 
 export default router;

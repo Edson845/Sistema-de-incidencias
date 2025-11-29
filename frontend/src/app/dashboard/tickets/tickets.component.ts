@@ -7,6 +7,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environments';
 import { AuthService } from '../../services/auth.service';
 import { EstadisticasService } from '../../services/estadisticas.service';
+import { CatalogoService } from '../../services/catalogos.service';
 import { io, Socket } from "socket.io-client";
 import { UsuariosService } from '../../services/usuarios.service';
 import { TicketsService } from '../../services/tickets.service';
@@ -157,7 +158,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     public authService: AuthService,
     private estadisticasService: EstadisticasService,
-    private usuariosService: UsuariosService,
+    private CatalogoService: CatalogoService,
     private ticketsService: TicketsService
   ) { }
 
@@ -183,7 +184,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
     });
   }
   cargarOficinas() {
-    this.usuariosService.obtenerOficinas().subscribe({
+    this.CatalogoService.obtenerOficinas().subscribe({
       next: (data) => {
         this.oficinas = data;
       },

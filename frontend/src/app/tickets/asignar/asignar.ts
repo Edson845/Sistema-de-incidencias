@@ -4,6 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TicketsService } from '../../services/tickets.service';
 import { WhatsAppService } from '../../services/whatsapp.service';
 import { CommonModule } from '@angular/common';
+import { UsuariosService } from '../../services/usuarios.service';
 
 @Component({
   selector: 'app-asignar-ticket-modal',
@@ -31,7 +32,8 @@ export class Asignar {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<Asignar>,
     private ticketsService: TicketsService,
-    private whatsappService: WhatsAppService
+    private whatsappService: WhatsAppService,
+    private UsuariosService: UsuariosService
   ) {
     this.ticketSeleccionado = data.ticketSeleccionado;
     this.herramientas = data.herramientas;
@@ -40,7 +42,7 @@ export class Asignar {
   }
   
   cargarTecnicos() {
-    this.ticketsService.getTecnicos().subscribe({
+    this.UsuariosService.getTecnicos().subscribe({
       next: (data) => {
         this.tecnicos = data;
         this.tecnicosFiltrados = [...data];

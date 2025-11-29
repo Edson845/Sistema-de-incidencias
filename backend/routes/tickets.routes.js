@@ -8,17 +8,16 @@ import {
   obtenerCategorias,
   getTodosTickets,
   crearTicket,
-  actualizarTicket,
+  actualizarEstado,
   getTicketsPorEstado,
   getTicketsPorMes,
   getEstadisticasGenerales,
-  getTecnicos,
   asignarTicketConHerramientas,
   getTicketPorId,
   obtenerTicketsDetallado,
   calificarTicket,
-  getHistorialTicket,
-  getHerramientasTicket
+  obtenerHistorialTicket,
+  obtenerHerramientasTicket
 } from '../controllers/tickets.controller.js';
 
 
@@ -53,17 +52,17 @@ router.get('/', verificarToken, verificarRol(['admin', 'tecnico']), getTodosTick
 router.get('/categorias', verificarToken, obtenerCategorias);
 router.post('/', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), upload.array('archivos', 5), crearTicket);
 router.get("/detallado", verificarToken, obtenerTicketsDetallado);
-router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualizarTicket);
+router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualizarEstado);
 router.get('/:id', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), getTicketPorId);
 router.post('/calificar/:idTicket', verificarToken, upload.array('fotos', 5), calificarTicket);
-router.get('/herramientas/:id', verificarToken, verificarRol(['tecnico', 'admin']), getHerramientasTicket);
+router.get('/herramientas/:id', verificarToken, verificarRol(['tecnico', 'admin']), obtenerHerramientasTicket);
 // Rutas para estadísticas
 router.get('/estadisticas/por-estado', verificarToken, getTicketsPorEstado);
 router.get('/estadisticas/por-mes', verificarToken, getTicketsPorMes);
 router.get('/estadisticas/generales', verificarToken, getEstadisticasGenerales);
-router.get('/usuarios/tecnicos', verificarToken, verificarRol(['admin']), getTecnicos);
+
 router.put('/asignar/:id', verificarToken, verificarRol(['admin']), asignarTicketConHerramientas);
-router.get('/historial/:id', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), getHistorialTicket);
+router.get('/historial/:id', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), obtenerHistorialTicket);
 
 
 export default router;

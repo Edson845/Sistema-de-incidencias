@@ -23,6 +23,10 @@ export class UsuariosService {
   actualizarUsuario(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, data);
   }
+  // Obtener técnicos
+  getTecnicos(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/tecnicos`);
+  }
 
   // Crear usuario
   createUsuario(usuario: any): Observable<any> {
@@ -40,27 +44,13 @@ export class UsuariosService {
     return this.http.post(`${this.apiUrl}/registro`, usuario);
   }
 
-  // Obtener listados auxiliares
-  obtenerOficinas(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/oficinas`);
-  }
-
-  obtenerDepartamentos(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/departamentos`);
-  }
-
-  obtenerGerencias(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/gerencias`);
-  }
+  
 
   obtenerRoles(): Observable<any> {
     return this.http.get(`${this.apiUrl}/roles`);
   }
 
-  obtenerCargos(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/cargos`);
-  }
-
+  
   // Eliminar usuario
   eliminarUsuario(dni: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${dni}`);

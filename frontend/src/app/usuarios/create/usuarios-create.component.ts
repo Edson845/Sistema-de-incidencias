@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { UsuariosService } from '../../services/usuarios.service';
+import { CatalogoService } from '../../services/catalogos.service';
+import { RolService } from '../../services/rol.service';
 
 @Component({
   selector: 'app-usuarios-create',
@@ -43,7 +45,10 @@ export class UsuariosCreateComponent implements OnInit {
   mostrarRangoUnidad = false;  // para asistente, secretario, técnico, personal
 
 
-  constructor(private usuariosService: UsuariosService, private router: Router) {}
+  constructor(private usuariosService: UsuariosService, private router: Router, 
+    private CatalogoService:CatalogoService,
+    private RolService: RolService
+  ) {}
 
   ngOnInit(): void {
     this.cargarRoles();
@@ -54,7 +59,7 @@ export class UsuariosCreateComponent implements OnInit {
   }
   
   cargarCargos(){
-    this.usuariosService.obtenerCargos().subscribe({
+    this.CatalogoService.obtenerCargos().subscribe({
       next: (data) => {
         this.cargos = data;
       },
@@ -64,7 +69,7 @@ export class UsuariosCreateComponent implements OnInit {
     });
   }
   cargarRoles() {
-    this.usuariosService.obtenerRoles().subscribe({
+    this.RolService.obtenerRoles().subscribe({
       next: (data) => {
         this.roles = data;
       },
@@ -74,7 +79,7 @@ export class UsuariosCreateComponent implements OnInit {
     });
   }
   cargarOficinas(){
-    this.usuariosService.obtenerOficinas().subscribe({
+    this.CatalogoService.obtenerOficinas().subscribe({
       next: (data) => {
         this.oficinas = data;
       },
@@ -84,7 +89,7 @@ export class UsuariosCreateComponent implements OnInit {
     });
   }
   cargarGerencias(){
-    this.usuariosService.obtenerGerencias().subscribe({
+    this.CatalogoService.obtenerGerencias().subscribe({
       next: (data) => {
         this.gerencias = data;
       },
@@ -94,7 +99,7 @@ export class UsuariosCreateComponent implements OnInit {
     });
   }
   cargarDepartamentos(){
-    this.usuariosService.obtenerDepartamentos().subscribe({
+    this.CatalogoService.obtenerDepartamentos().subscribe({
       next: (data) => {
         this.departamentos = data;
       },

@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import pool from '../db.js';
-
+import { obtenerRolesUsuarioService } from '../services/rol.service.js';
 dotenv.config();
 
 export async function verificarToken(req, res, next) {
@@ -27,52 +26,48 @@ export async function verificarToken(req, res, next) {
   }
 }
 
-export function verificarRol(rolesPermitidos) {
+
+export function verificarRol(rolesPermitidos = []) {
   return async (req, res, next) => {
     try {
-      // Verifica que el token haya sido procesado antes
       const dni = req.user?.dni;
+
       if (!dni) {
         return res.status(400).json({ mensaje: 'DNI no encontrado en el token' });
       }
 
-      // Normaliza el parámetro rolesPermitidos (puede ser string o array)
+      // Convertir rolesPermitidos a array si viene como string
       const rolesArray = Array.isArray(rolesPermitidos)
         ? rolesPermitidos
         : [rolesPermitidos];
 
-      // 🔍 Consulta los roles del usuario en la BD
-      const [rows] = await pool.query(
-        `SELECT r.nombreRol
-         FROM usuario u
-         JOIN rolusuario ru ON u.dni = ru.dni
-         JOIN rol r ON ru.idrol = r.idrol
-         WHERE u.dni = ?`,
-        [dni]
+      // Normalizar roles permitidos
+      const rolesPermitidosNormalizados = rolesArray.map(rol =>
+        rol.trim().toLowerCase()
       );
 
-      if (!rows || rows.length === 0) {
-        return res.status(404).json({ mensaje: 'Usuario o rol no encontrado' });
+      // Obtener roles reales del usuario desde el servicio
+      const rolesUsuario = await obtenerRolesUsuarioService(dni);
+
+      if (rolesUsuario.length === 0) {
+        return res.status(404).json({ mensaje: 'Usuario sin roles asignados' });
       }
 
-      // Normaliza los nombres de roles
-      const rolesUsuario = rows.map(r => r.nombreRol.trim().toLowerCase());
-
-      // Comprueba si el usuario tiene alguno de los roles permitidos
-      const tieneRol = rolesArray.some(rol =>
-        rolesUsuario.includes(rol.trim().toLowerCase())
+      // Verifica coincidencia
+      const autorizado = rolesPermitidosNormalizados.some(rol =>
+        rolesUsuario.includes(rol)
       );
 
-      if (!tieneRol) {
-        return res
-          .status(403)
-          .json({ mensaje: `Acceso denegado: se requiere uno de los roles [${rolesArray.join(', ')}]` });
+      if (!autorizado) {
+        return res.status(403).json({
+          mensaje: `Acceso denegado. Se requiere uno de los roles: [${rolesPermitidos.join(', ')}]`
+        });
       }
 
-      next(); // ✅ Usuario autorizado
+      next(); // ✅ Autorizado
     } catch (error) {
-      console.error('Error en verificarRol:', error);
-      return res.status(500).json({ mensaje: 'Error interno del servidor' });
+      console.error("Error en verificarRol:", error);
+      res.status(500).json({ mensaje: "Error interno del servidor" });
     }
   };
 }

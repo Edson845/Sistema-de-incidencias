@@ -13,10 +13,7 @@ export class TicketsService {
     return this.http.get(`${this.apiUrl}/mios`);
   }
 
-  // Obtener técnicos
-  getTecnicos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/usuarios/tecnicos`);
-  }
+  
 
   // Asignar ticket
   asignarTicket(idTicket: number, dniTecnico: string, herramientas: string[]): Observable<any> {

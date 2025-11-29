@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UsuariosService } from '../../services/usuarios.service';
+import { CatalogoService } from '../../services/catalogos.service';
+import { RolService } from '../../services/rol.service';
 
 @Component({
   selector: 'app-usuarios-edit',
@@ -48,7 +50,9 @@ export class UsuariosEditComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private usuariosService: UsuariosService
+    private usuariosService: UsuariosService,
+    private CatalogoService: CatalogoService,
+    private RolService: RolService 
   ) { }
 
   ngOnInit() {
@@ -60,11 +64,11 @@ export class UsuariosEditComponent implements OnInit {
   }
 
   cargarDatosAuxiliares() {
-    this.usuariosService.obtenerRoles().subscribe(data => this.roles = data);
-    this.usuariosService.obtenerCargos().subscribe(data => this.cargos = data);
-    this.usuariosService.obtenerOficinas().subscribe(data => this.oficinas = data);
-    this.usuariosService.obtenerGerencias().subscribe(data => this.gerencias = data);
-    this.usuariosService.obtenerDepartamentos().subscribe(data => this.departamentos = data);
+    this.RolService.obtenerRoles().subscribe(data => this.roles = data);
+    this.CatalogoService.obtenerCargos().subscribe(data => this.cargos = data);
+    this.CatalogoService.obtenerOficinas().subscribe(data => this.oficinas = data);
+    this.CatalogoService.obtenerGerencias().subscribe(data => this.gerencias = data);
+    this.CatalogoService.obtenerDepartamentos().subscribe(data => this.departamentos = data);
   }
 
   cargarUsuario(id: number) {
