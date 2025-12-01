@@ -53,6 +53,9 @@ export class SidebarComponent implements OnInit {
       case 'usuarios':
         this.router.navigate(['/usuarios']);
         break;
+      case 'perfil':
+        this.router.navigate(['/usuario/perfil']);
+        break;
       default:
         console.warn('Opción no reconocida:', opcion);
         break;

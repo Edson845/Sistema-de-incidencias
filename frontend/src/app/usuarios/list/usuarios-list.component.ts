@@ -4,6 +4,7 @@ import { UsuariosService } from '../../services/usuarios.service';
 import { Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { CatalogoService } from '../../services/catalogos.service';
 
 @Component({
   selector: 'app-usuarios-list',
@@ -16,16 +17,32 @@ export class UsuariosListComponent implements OnInit {
   usuarios: any[] = [];
   loading = true;
   error = '';
+  cargos: any[] = [];
 
   // Campo para buscar usuarios
   filtro = '';
 
-  constructor(private usuariosService: UsuariosService, private router: Router) {}
+  constructor(private usuariosService: UsuariosService, private router: Router, private CatalogoService: CatalogoService) {}
 
   ngOnInit() {
     this.cargarUsuarios();
+    this.cargarCargos();
   }
 
+  cargarCargos(){
+    this.CatalogoService.obtenerCargos().subscribe({
+      next: (data) => {
+        this.cargos = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar Cargos:', err);
+      }
+    });
+  }
+  getNombreCargo(idCargo: number): string {
+  const cargo = this.cargos.find(c => c.idCargo === idCargo);
+  return cargo ? cargo.nombreCargo : 'Sin cargo';
+}
   cargarUsuarios() {
   this.usuariosService.getUsuarios().subscribe({
     next: (data) => {

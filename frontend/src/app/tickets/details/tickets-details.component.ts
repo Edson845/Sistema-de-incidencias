@@ -163,31 +163,28 @@ export class TicketsDetailsComponent implements OnInit {
   }
 
   agregarComentario() {
-    if (!this.nuevoComentario.trim() || !this.ticket) {
-      return;
-    }
-
-    this.enviandoComentario = true;
-
-    const formData = new FormData();
-    formData.append('rol', 'usuario');
-    formData.append('comentario', this.nuevoComentario);
-    formData.append('calificacion', '0'); // Valor por defecto
-
-    this.ticketsService.calificarTicket(this.ticket.idTicket, formData).subscribe({
-      next: () => {
-        this.nuevoComentario = '';
-        this.enviandoComentario = false;
-        // Recargar historial
-        this.cargarHistorial(this.ticket.idTicket);
-      },
-      error: (err) => {
-        console.error('Error al agregar comentario', err);
-        this.enviandoComentario = false;
-      }
-    });
+  if (!this.nuevoComentario.trim() || !this.ticket) {
+    return;
   }
 
+  this.enviandoComentario = true;
+
+  const formData = new FormData();
+  formData.append('rol', 'usuario');
+  formData.append('comentario', this.nuevoComentario);
+
+  this.ticketsService.agregarComentario(this.ticket.idTicket, formData).subscribe({
+    next: () => {
+      this.nuevoComentario = '';
+      this.enviandoComentario = false;
+      this.cargarHistorial(this.ticket.idTicket);
+    },
+    error: (err) => {
+      console.error('Error al agregar comentario', err);
+      this.enviandoComentario = false;
+    }
+  });
+}
   estadoNombre(id: number) {
     return id === 1 ? 'Nuevo' :
       id === 2 ? 'Abierto' :

@@ -39,12 +39,12 @@
           <td>{{ usuario.nombres }}</td>
           <td>{{ usuario.apellidos }}</td>
           <td>{{ usuario.correo }}</td>
-          <td>{{ usuario.idCargo }}</td>
+          <td>{{ getNombreCargo(usuario.idCargo) }}</td>
           <td>{{ usuario.usuario }}</td>
           <td>
-            <button class="btn-ver" (click)="verDetalle(usuario.dni)">👁 Ver</button>
-            <button class="btn-editar" (click)="editarUsuario(usuario.dni)">✏️ Editar</button>
-            <button class="btn-eliminar" (click)="eliminarUsuario(usuario.dni)">🗑️ Eliminar</button>
+            <button class="btn-ver" (click)="verDetalle(usuario.dni)">👁</button>
+            <button class="btn-editar" (click)="editarUsuario(usuario.dni)">✏️</button>
+            <button class="btn-eliminar" (click)="eliminarUsuario(usuario.dni)">🗑️</button>
           </td>
         </tr>
       </tbody>

@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { io, Socket } from 'socket.io-client';
+import { ObservacionTecnico } from '../observacion-tecnico/observacion-tecnico';
 
 import { TicketsService } from '../../services/tickets.service';
 import { AuthService } from '../../services/auth.service';
@@ -142,35 +143,51 @@ export class TicketsListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/tickets', id]);
   }
 
-  abrirEvaluacion(idTicket: number) {
-    const rol = (localStorage.getItem('rol') || '').toLowerCase();
-    const dialogRef = this.dialog.open(CalificarTicket, {
-      width: '500px',
-      data: { idTicket, rol }
-    });
+  abrirEvaluacionUsuario(idTicket: number) {
+  const dialogRef = this.dialog.open(CalificarTicket, {
+    width: '500px',
+    data: { idTicket, rol: 'usuario' }
+  });
 
-    dialogRef.afterClosed().subscribe(res => {
-      if (!res) return;
-      const formData = new FormData();
-      formData.append("rol", res.rol);
-      if (res.rol === 'usuario') {
-        formData.append("calificacion", res.calificacion);
-        formData.append("comentario", res.comentario);
-      }
-      if (res.rol === 'tecnico') {
-        formData.append("observacionTecnico", res.observacionTecnico);
-        formData.append("resolvio", "true"); // ✅ Marca el ticket como resuelto
-      }
-      if (res.archivos && res.archivos.length > 0) {
-        res.archivos.forEach((file: File) => formData.append("fotos", file));
-      }
+  dialogRef.afterClosed().subscribe(res => {
+    if (!res) return;
 
-      this.ticketsService.calificarTicket(idTicket, formData).subscribe({
-        next: () => this.cargarTickets(),
-        error: (err) => console.error("Error al calificar:", err)
-      });
+    const formData = new FormData();
+    formData.append("rol", "usuario");
+    formData.append("calificacion", res.calificacion);
+    formData.append("comentario", res.comentario);
+
+    if (res.archivos?.length > 0) {
+      res.archivos.forEach((file: File) => formData.append("fotos", file));
+    }
+
+    this.ticketsService.calificarTicket(idTicket, formData).subscribe({
+      next: () => this.cargarTickets(),
+      error: (err) => console.error("Error al calificar (usuario):", err)
     });
-  }
+  });
+}
+abrirObservacionTecnico(idTicket: number) {
+  const dialogRef = this.dialog.open(ObservacionTecnico, {
+    width: '450px',
+    data: { idTicket }
+  });
+
+  dialogRef.afterClosed().subscribe(res => {
+    if (!res) return;
+
+    const formData = new FormData();
+    formData.append("rol", "tecnico");
+    formData.append("observacionTecnico", res.observacion);
+    formData.append("resolvio", "true");
+
+    this.ticketsService.calificarTicket(idTicket, formData).subscribe({
+      next: () => this.cargarTickets(),
+      error: (err) => console.error("Error al resolver ticket:", err)
+    });
+  });
+}
+
 
   crearTicket() {
     this.router.navigate(['/tickets/nuevo']);

@@ -63,7 +63,7 @@
           <tr *ngFor="let t of ticketsFiltrados" class="table-row">
             <td class="td-title">{{ t.tituloTicket }}</td>
             <td class="td-desc">{{ t.descTicket }}</td>
-            <td>{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>
+            <td >{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>
             <td>{{ t.fechaCreacion | date:'dd/MM/yyyy HH:mm'}}</td>
             <td>
               <span class="badge-categoria">{{ t.nombreCategoria }}</span>
@@ -111,7 +111,7 @@
                 <mat-icon>assignment_ind</mat-icon>
               </button>
               <button *ngIf="rolUsuario === 'usuario' && t.idEstado === 4" class="btn-action btn-calificar"
-                (click)="abrirEvaluacion(t.idTicket)">
+                (click)="abrirEvaluacionUsuario(t.idTicket)">
                 <mat-icon>star</mat-icon>
               </button>
               <button *ngIf="rolUsuario === 'tecnico' && t.idEstado == 2" class="btn-action btn-solucionar"
@@ -119,7 +119,7 @@
                 <mat-icon>build</mat-icon>
               </button>
               <button *ngIf="rolUsuario === 'tecnico' && t.idEstado === 3" class="btn-action btn-cerrar"
-                (click)="cerrarTicket(t.idTicket)">
+                (click)="abrirObservacionTecnico(t.idTicket)">
                 <mat-icon>check_circle</mat-icon>
               </button>
             </td>

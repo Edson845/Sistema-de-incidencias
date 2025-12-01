@@ -114,6 +114,7 @@
 
 /* ====== ORDER SELECT ====== */
 .order-select {
+  margin-left: 100px; ;
   padding: 12px 16px;
   border: 1px solid #d1d5db;
   border-radius: 6px;

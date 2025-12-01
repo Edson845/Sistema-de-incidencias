@@ -25,11 +25,19 @@ export async function obtenerTicketsDetalladoService() {
   const [rows] = await ticketModel.obtenerTicketsDetalladoModel();
   return rows;
 }
+// Mapa de estados
+const ESTADOS = {
+  1: "Pendiente",
+  2: "En revisión",
+  3: "En proceso",
+  4: "Resuelto por técnico",
+  5: "Cerrado",
+  6: "Rechazado",
+  7: "Devuelto con observaciones"
+};
+
 export async function actualizarEstado({ idTicket, titulo, descripcion, estado, usuarioModifica }) {
 
-  // -----------------------------
-  // Construir campos dinámicos
-  // -----------------------------
   const campos = [];
   const valores = [];
 
@@ -43,35 +51,49 @@ export async function actualizarEstado({ idTicket, titulo, descripcion, estado, 
     valores.push(descripcion);
   }
 
+  let estadoAntiguo = null;
+
   if (estado !== undefined) {
     campos.push("idEstado = ?");
     valores.push(estado);
+
+    // obtener estado antiguo
+    estadoAntiguo = await ticketModel.obtenerEstado(idTicket);
   }
 
   if (campos.length === 0) {
     throw new Error("No se enviaron campos para actualizar");
   }
 
-  // Obtener estado antiguo si se está cambiando el estado
-  let estadoAntiguo = null;
-  if (estado !== undefined) {
-    estadoAntiguo = await ticketModel.obtenerEstado(idTicket);
-  }
-
-  // Agregar id al final
   valores.push(idTicket);
 
   const query = `UPDATE ticket SET ${campos.join(", ")} WHERE idTicket = ?`;
   await pool.query(query, valores);
 
   // -----------------------------------
-  // Registrar historial si cambia el estado
+  // HISTORIAL MEJORADO
   // -----------------------------------
   if (estado !== undefined) {
+
+    const estadoAntesTexto = ESTADOS[estadoAntiguo] || `Estado ${estadoAntiguo}`;
+    const estadoNuevoTexto = ESTADOS[estado] || `Estado ${estado}`;
+
+    // Reglas personalizadas (puedes añadir más)
+    const reglasHistorial = {
+      "3->4": "El técnico marcó el ticket como resuelto",
+      "3->7": "El técnico devolvió el ticket con observaciones",
+      "4->5": "El usuario calificó y cerró el ticket",
+    };
+
+    const clave = `${estadoAntiguo}->${estado}`;
+    const accionGenerada = reglasHistorial[clave]
+      ? reglasHistorial[clave]
+      : `Cambio de estado: ${estadoAntesTexto} → ${estadoNuevoTexto}`;
+
     await registrarHistorial({
       idTicket,
       usuario: usuarioModifica,
-      accion: "cambiar estado",
+      accion: accionGenerada,
       estadoAntiguo,
       estadoNuevo: estado,
       tipo: "Estado"
@@ -79,13 +101,10 @@ export async function actualizarEstado({ idTicket, titulo, descripcion, estado, 
   }
 
   // -----------------------------------
-  // Obtener ticket COMPLETO actualizado
+  // Emitir ticket actualizado
   // -----------------------------------
   const ticketActualizado = await ticketModel.obtenerTicketCompletoModel(idTicket);
-
-  // Emitir socket global
-  const io = getIO();
-  io.emit("ticket-actualizado", ticketActualizado);
+  getIO().emit("ticket-actualizado", ticketActualizado);
 
   return ticketActualizado;
 }
@@ -298,6 +317,7 @@ export async function calificarTicketServicio(params) {
   // USUARIO CALIFICA
   // -------------------------
   if (rol === "usuario") {
+
     await ticketModel.actualizarCalificacion(idTicket, calificacion);
 
     await ticketModel.guardarComentario(
@@ -305,8 +325,17 @@ export async function calificarTicketServicio(params) {
       idTicket,
       comentario || "Sin comentario",
       adjunto,
-      "comentario"
+      "calificacion"
     );
+
+    await registrarHistorial({
+      idTicket,
+      usuario: dniUsuario,
+      accion: "califidfdfsfsdfsdcar ticket",
+      estadoAntiguo: 5,
+      estadoNuevo: 6,
+      tipo: "Estado"
+    });
 
     const ticket = await ticketModel.obtenerTicketCompletoModel(idTicket);
     getIO().emit("ticket-actualizado", ticket);
@@ -315,16 +344,16 @@ export async function calificarTicketServicio(params) {
   }
 
   // -------------------------
-  // TÉCNICO AGREGA OBSERVACIÓN
+  // TÉCNICO AGREGA OBSERVACIÓN O RESUELVE
   // -------------------------
   if (rol === "tecnico") {
-    const esResuelto = resolvio === true || resolvio === "true";
-    const nuevoEstado = esResuelto ? 4 : 7;
 
-    await ticketModel.actualizarEstadoTecnico(
-      idTicket,
-      nuevoEstado, 
-    );
+    const estadoAntiguo = await ticketModel.obtenerEstado(idTicket);
+    const esResuelto = resolvio === true || resolvio === "true";
+
+    const nuevoEstado = esResuelto ? 5 : 7;  // 5 = Resuelto, 7 = Observado
+
+    await ticketModel.actualizarEstadoTecnico(idTicket, nuevoEstado);
 
     await ticketModel.guardarComentario(
       dniUsuario,
@@ -333,15 +362,25 @@ export async function calificarTicketServicio(params) {
       adjunto,
       "observacion"
     );
-    
+
+    await registrarHistorial({
+      idTicket,
+      usuario: dniUsuario,
+      accion: esResuelto ? "resolver ticket" : "agregar observación",
+      estadoAntiguo,
+      estadoNuevo: nuevoEstado,
+      tipo: "Estado"
+    });
+
     const ticket = await ticketModel.obtenerTicketCompletoModel(idTicket);
     getIO().emit("ticket-actualizado", ticket);
 
-    return { ok: true, mensaje: "Observación registrada" };
+    return { ok: true, mensaje: esResuelto ? "Ticket resuelto" : "Observación registrada" };
   }
 
   throw new Error("Rol no válido");
 }
+
 export async function obtenerHistorialTicketServicio(idTicket) {
   const estado = await ticketModel.obtenerEstadoTicketModelo(idTicket);
   const comentarios = await ticketModel.obtenerComentariosTicketModelo(idTicket);
@@ -358,4 +397,13 @@ export async function obtenerHerramientasTicketServicio(idTicket) {
 export async function obtenerEficienciaTecnicosServicio() {
   const lista = await ticketModel.obtenerEficienciaTecnicosModelo();
   return lista;
+}
+export async function agregarComentarioService(idTicket, comentario, dniUsuario, adjunto) {
+  return ticketModel.guardarComentario(
+    dniUsuario,
+    idTicket,
+    comentario,
+    adjunto,
+    "comentario"
+  );
 }

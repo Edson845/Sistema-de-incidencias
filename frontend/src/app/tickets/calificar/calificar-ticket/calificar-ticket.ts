@@ -17,6 +17,7 @@ export class CalificarTicket {
   comentario: string = '';
   observacionTecnico: string = '';
 
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<CalificarTicket>

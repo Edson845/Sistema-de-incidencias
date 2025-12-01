@@ -156,15 +156,7 @@ export async function calificarTicket(req, res) {
       : [];
 
     const adjunto = archivos.length > 0 ? archivos.join(",") : null;
-    // Registrar historial
-    await registrarHistorial({
-      idTicket: idTicket,
-      usuario: dniUsuario,
-      accion: "calificar ticket",
-      estadoAntiguo: 4,
-      estadoNuevo: 5,
-      tipo: "Estado"
-    });
+    
     const resultado = await ticketService.calificarTicketServicio({
       idTicket,
       rol,
@@ -223,5 +215,39 @@ export async function obtenerEficienciaTecnicos(req, res) {
     return res.status(500).json({
       mensaje: "Error al obtener estadísticas de técnicos",
     });
+  }
+}
+
+export async function agregarComentario(req, res) {
+  try {
+    const idTicket = req.params.idTicket;
+    const comentario = req.body.comentario;
+    const dniUsuario = req.user?.dni; // debe venir del middleware
+    const adjunto = req.file?.filename || null;
+    // VALIDACIONES
+    if (!idTicket) {
+      return res.status(400).json({ ok: false, msg: "idTicket no recibido" });
+    }
+
+    if (!dniUsuario) {
+      return res.status(400).json({ ok: false, msg: "dniUsuario no recibido" });
+    }
+
+    if (!comentario || comentario.trim() === "") {
+      return res.status(400).json({ ok: false, msg: "Comentario vacío" });
+    }
+
+    await ticketService.agregarComentarioService(
+      idTicket,
+      comentario,
+      dniUsuario,
+      adjunto
+    );
+
+    res.json({ ok: true, msg: "Comentario guardado" });
+
+  } catch (error) {
+    console.error("Error en agregarComentario:", error);
+    res.status(500).json({ ok: false, msg: error.message });
   }
 }

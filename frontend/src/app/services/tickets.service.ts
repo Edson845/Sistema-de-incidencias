@@ -67,6 +67,9 @@ export class TicketsService {
   calificarTicket(idTicket: number, data: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}/calificar/${idTicket}`, data);
   }
+  agregarComentario(idTicket: number, formData:FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/comentarios/${idTicket}`,formData );
+  }
 
   // Obtener historial del ticket
   getHistorialTicket(idTicket: number): Observable<any[]> {

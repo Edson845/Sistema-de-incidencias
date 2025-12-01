@@ -17,7 +17,8 @@ import {
   obtenerTicketsDetallado,
   calificarTicket,
   obtenerHistorialTicket,
-  obtenerHerramientasTicket
+  obtenerHerramientasTicket,
+  agregarComentario
 } from '../controllers/tickets.controller.js';
 
 
@@ -56,6 +57,7 @@ router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualiza
 router.get('/:id', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), getTicketPorId);
 router.post('/calificar/:idTicket', verificarToken, upload.array('fotos', 5), calificarTicket);
 router.get('/herramientas/:id', verificarToken, verificarRol(['tecnico', 'admin']), obtenerHerramientasTicket);
+router.post('/comentarios/:idTicket', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), upload.single('adjunto'),agregarComentario);
 // Rutas para estadísticas
 router.get('/estadisticas/por-estado', verificarToken, getTicketsPorEstado);
 router.get('/estadisticas/por-mes', verificarToken, getTicketsPorMes);
