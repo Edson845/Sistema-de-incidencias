@@ -88,7 +88,7 @@ export async function actualizarEstado({ idTicket, titulo, descripcion, estado, 
     const clave = `${estadoAntiguo}->${estado}`;
     const accionGenerada = reglasHistorial[clave]
       ? reglasHistorial[clave]
-      : `Cambio de estado: ${estadoAntesTexto} → ${estadoNuevoTexto}`;
+      : `ticket ${estadoNuevoTexto}`;
 
     await registrarHistorial({
       idTicket,
@@ -331,9 +331,9 @@ export async function calificarTicketServicio(params) {
     await registrarHistorial({
       idTicket,
       usuario: dniUsuario,
-      accion: "califidfdfsfsdfsdcar ticket",
-      estadoAntiguo: 5,
-      estadoNuevo: 6,
+      accion: "calificar ticket",
+      estadoAntiguo: 4,
+      estadoNuevo: 5,
       tipo: "Estado"
     });
 
@@ -342,43 +342,6 @@ export async function calificarTicketServicio(params) {
 
     return { ok: true, mensaje: "Calificación registrada" };
   }
-
-  // -------------------------
-  // TÉCNICO AGREGA OBSERVACIÓN O RESUELVE
-  // -------------------------
-  if (rol === "tecnico") {
-
-    const estadoAntiguo = await ticketModel.obtenerEstado(idTicket);
-    const esResuelto = resolvio === true || resolvio === "true";
-
-    const nuevoEstado = esResuelto ? 5 : 7;  // 5 = Resuelto, 7 = Observado
-
-    await ticketModel.actualizarEstadoTecnico(idTicket, nuevoEstado);
-
-    await ticketModel.guardarComentario(
-      dniUsuario,
-      idTicket,
-      observacionTecnico || "Sin observación",
-      adjunto,
-      "observacion"
-    );
-
-    await registrarHistorial({
-      idTicket,
-      usuario: dniUsuario,
-      accion: esResuelto ? "resolver ticket" : "agregar observación",
-      estadoAntiguo,
-      estadoNuevo: nuevoEstado,
-      tipo: "Estado"
-    });
-
-    const ticket = await ticketModel.obtenerTicketCompletoModel(idTicket);
-    getIO().emit("ticket-actualizado", ticket);
-
-    return { ok: true, mensaje: esResuelto ? "Ticket resuelto" : "Observación registrada" };
-  }
-
-  throw new Error("Rol no válido");
 }
 
 export async function obtenerHistorialTicketServicio(idTicket) {
@@ -406,4 +369,38 @@ export async function agregarComentarioService(idTicket, comentario, dniUsuario,
     adjunto,
     "comentario"
   );
+}
+export async function agregarObservacionTecnico({ idTicket, observacionTecnico, archivo, usuarioModifica }) {
+  try {
+    // Registrar observación en BD
+    await ticketModel.guardarObservacionTecnico(idTicket, observacionTecnico, archivo, usuarioModifica);
+
+    // Registrar en historial
+    await registrarHistorial({
+      idTicket,
+      usuario: usuarioModifica,
+      accion: "ticket solucionado",
+      estadoAntiguo: 3,
+      estadoNuevo: 4,
+      tipo: "Estado"
+    });
+    await ticketModel.actualizarEstadoTecnico(idTicket, 4); // 4 = Resuelto por técnico
+    const ticketActualizado = await ticketModel.obtenerTicketCompletoModel(idTicket);
+    getIO().emit("ticket-actualizado", ticketActualizado);
+
+    return ticketActualizado;
+
+  } catch (error) {
+    console.error("❌ Error en agregarObservacionTecnico (service):", error);
+    throw error;
+  }
+}
+export async function servicioObtenerHistorial(idTicket) {
+  try {
+    const historial = await ticketModel.obtenerHistorialPorTicket(idTicket);
+    return historial;
+  } catch (error) {
+    console.error("Error en servicioObtenerHistorial:", error);
+    throw new Error("No se pudo obtener el historial del ticket.");
+  }
 }

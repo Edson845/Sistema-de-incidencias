@@ -45,6 +45,7 @@
 
     <!-- TABLA MODERNA -->
     <div *ngIf="!loading && ticketsFiltrados.length > 0" class="table-card">
+      
       <table class="modern-table">
         <thead>
           <tr>
@@ -61,6 +62,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let t of ticketsFiltrados" class="table-row">
+            
             <td class="td-title">{{ t.tituloTicket }}</td>
             <td class="td-desc">{{ t.descTicket }}</td>
             <td >{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>
@@ -99,7 +101,8 @@
                 {{ t.nombrePrioridad }}
               </span>
             </td>
-            <td *ngIf="rolUsuario === 'admin'">{{ t.nombreUsuario }} {{ t.apellidoUsuario }}</td>
+            <td *ngIf="rolUsuario === 'admin'">{{ t.nombreUsuario || '---' }} {{ t.apellidoUsuario || '' }}</td>
+
 
             <!-- ACCIONES -->
             <td class="td-actions">

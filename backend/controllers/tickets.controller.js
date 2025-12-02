@@ -175,6 +175,19 @@ export async function calificarTicket(req, res) {
     res.status(500).json({ mensaje: error.message });
   }
 }
+export async function obtenerHistorial(req, res) {
+  const { id } = req.params;
+
+  try {
+    const historial = await ticketService.servicioObtenerHistorial(id);
+    res.json(historial);
+  } catch (error) {
+    console.error("Error en obtenerHistorial:", error);
+    res.status(500).json({
+      mensaje: "Ocurrió un error al obtener el historial del ticket."
+    });
+  }
+}
 
 export async function obtenerHistorialTicket(req, res) {
   try {
@@ -249,5 +262,31 @@ export async function agregarComentario(req, res) {
   } catch (error) {
     console.error("Error en agregarComentario:", error);
     res.status(500).json({ ok: false, msg: error.message });
+  }
+}
+export async function agregarObservacionTecnico(req, res) {
+  const { idTicket } = req.params;
+  const { observacionTecnico } = req.body;
+  const usuarioModifica = req.user?.dni;
+  const archivo = req.file?.filename || null;
+
+  try {
+    if (!observacionTecnico) {
+      return res.status(400).json({ mensaje: "La observación es obligatoria" });
+    }
+
+    // Llamar al servicio
+    await ticketService.agregarObservacionTecnico({
+      idTicket,
+      observacionTecnico,
+      archivo,
+      usuarioModifica
+    });
+
+    return res.json({ mensaje: "Observación registrada correctamente" });
+
+  } catch (error) {
+    console.error("❌ Error en agregarObservacionTecnico (controller):", error);
+    res.status(500).json({ mensaje: error.message });
   }
 }

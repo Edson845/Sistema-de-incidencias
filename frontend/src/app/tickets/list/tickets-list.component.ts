@@ -181,7 +181,7 @@ abrirObservacionTecnico(idTicket: number) {
     formData.append("observacionTecnico", res.observacion);
     formData.append("resolvio", "true");
 
-    this.ticketsService.calificarTicket(idTicket, formData).subscribe({
+    this.ticketsService.ObservacionTicket(idTicket, formData).subscribe({
       next: () => this.cargarTickets(),
       error: (err) => console.error("Error al resolver ticket:", err)
     });

@@ -113,39 +113,26 @@ export class TicketsDetailsComponent implements OnInit {
     });
   }
   cargarHistorial(id: number) {
-    this.ticketsService.getHistorialTicket(id).subscribe({
-      next: (data: any) => {
-        console.log(data);
-        const comentarios = data.comentarios || [];
-        const estado = data.estado;
+  this.ticketsService.getHistorialCompleto(id).subscribe({
+    next: (data: any[]) => {
 
-        // Convertimos estado → item del timeline
-        const estadoComoItem = estado ? {
-          fechaCreacion: estado.fechaCreacion,
-          tipo: "estado",
-          contenido: `Ticket ( ${estado.nombreEstado})`,
-          nombres: null,
-          apellidos: null,
-          nombreRol: "Sistema",
-          adjunto: null
-        } : null;
+      console.log("Historial completo:", data);
 
-        // Unimos estado + comentarios en un solo arreglo
-        this.historial = estadoComoItem
-          ? [estadoComoItem, ...comentarios]
-          : [...comentarios];
+      // Guardamos el historial tal cual viene del backend
+      this.historial = data || [];
 
-        // Ordenar por fecha (si quieres)
-        this.historial.sort((a, b) =>
-          new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime()
-        );
+      // Ordenar por fecha (ASC o DESC según tu diseño)
+      this.historial.sort((a, b) =>
+        new Date(a.fechaCreacion).getTime() - new Date(b.fechaCreacion).getTime()
+      );
 
-        // Aplicar filtro
-        this.aplicarFiltro();
-      },
-      error: (err) => console.error('Error al cargar historial', err)
-    });
-  }
+      // Aplicar filtros iniciales
+      this.aplicarFiltro();
+    },
+    error: (err) => console.error("Error al cargar historial", err)
+  });
+}
+
 
 
 

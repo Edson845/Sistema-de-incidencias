@@ -301,3 +301,66 @@ export async function obtenerEficienciaTecnicosModelo() {
 
   return rows;
 }
+export async function guardarObservacionTecnico(idTicket, observacion, archivo, usuarioModifica) {
+  try {
+    const query = `
+      INSERT INTO comentarios (
+        dni_usuarioComenta,
+        idTicket,
+        contenido,
+        adjunto,
+        tipo
+      )
+      VALUES (?, ?, ?, ?, 'observacion')
+    `;
+
+    await pool.query(query, [
+      usuarioModifica,
+      idTicket,
+      observacion,
+      archivo
+    ]);
+
+  } catch (error) {
+    console.error("❌ Error en guardarObservacionTecnico (model):", error);
+    throw error;
+  }
+}
+export async function obtenerHistorialPorTicket(idTicket) {
+  try {
+    const sql = `
+      SELECT 
+          c.fechaCreacion AS fechaCreacion,
+          c.tipo AS tipo,
+          c.contenido AS contenido,
+          c.dni_usuarioComenta AS nombres,  -- devolveremos el DNI como "nombres"
+          '' AS apellidos,
+          'Comentario' AS nombreRol,
+          c.adjunto AS adjunto
+      FROM comentarios c
+      WHERE c.idTicket = ?
+
+      UNION ALL
+
+      SELECT 
+          h.fechaCreacion AS fechaCreacion,
+          'estado' AS tipo,
+          CONCAT(h.accion, ' | Estado nuevo: ', h.estadoNuevo) AS contenido,
+          h.dni_usuarioModifica AS nombres,  -- devolveremos el DNI
+          '' AS apellidos,
+          'Sistema' AS nombreRol,
+          NULL AS adjunto
+      FROM historial h
+      WHERE h.idTicket = ?
+
+      ORDER BY fechaCreacion ASC;
+    `;
+
+    const [rows] = await pool.query(sql, [idTicket, idTicket]);
+    return rows;
+
+  } catch (error) {
+    console.error("❌ Error en obtenerHistorialPorTicket (model):", error);
+    throw error;
+  }
+}

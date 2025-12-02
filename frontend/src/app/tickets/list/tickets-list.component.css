@@ -179,16 +179,19 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  /*overflow-x: auto;  /* permite scroll horizontal si se necesita */
+  overflow: visible;
   border: 1px solid #e5e7eb;
+   width: 100%;  
 }
 
 /* ====== MODERN TABLE ====== */
 .modern-table {
-  width: 100%;
+  width: 100%;          /* Mantiene la tabla completa dentro del contenedor */
   border-collapse: collapse;
   font-size: 14px;
 }
+
 
 .modern-table thead {
   background: #0a3a6b;
