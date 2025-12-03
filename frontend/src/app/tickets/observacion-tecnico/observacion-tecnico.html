@@ -1,13 +1,22 @@
 <h2 mat-dialog-title>Observación del Técnico</h2>
 
 <mat-dialog-content>
-  <textarea matInput placeholder="Escribe una observación..."
-            [(ngModel)]="observacion"
-            rows="4"></textarea>
+  <!-- Pregunta inicial -->
+  <div *ngIf="!mostrarObservacion">
+    <p>¿Tiene alguna observación?</p>
+    <button mat-raised-button color="primary" (click)="mostrarObservacion = true">Sí</button>
+    <button mat-button (click)="guardar()">No</button>
+  </div>
+
+  <!-- Bloque de observación -->
+  <div *ngIf="mostrarObservacion">
+    <textarea matInput placeholder="Escribe una observación..."
+              [(ngModel)]="observacion"
+              rows="4"></textarea>
+  </div>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
+<mat-dialog-actions align="end" *ngIf="mostrarObservacion">
   <button mat-button mat-dialog-close>Cancelar</button>
-  <button mat-raised-button color="primary"
-          (click)="guardar()">Guardar</button>
+  <button mat-raised-button color="primary" (click)="guardar()">Guardar</button>
 </mat-dialog-actions>

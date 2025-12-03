@@ -13,6 +13,7 @@ import { MatButton } from '@angular/material/button';
   styleUrl: './observacion-tecnico.css',
 })
 export class ObservacionTecnico {
+  mostrarObservacion: boolean = false;
    observacion: string = "";
 
   constructor(

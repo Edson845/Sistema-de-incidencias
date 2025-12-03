@@ -32,8 +32,9 @@ export class EstadisticasService {
 
   // Obtener estadísticas generales del sistema
   getEstadisticasGenerales(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/generales`);
-  }
+  return this.http.get(`${this.apiUrl}/generales`,
+  );
+}
 
   // Obtener eficiencia de técnicos (tickets resueltos por técnico)
   getEficienciaTecnicos(): Observable<any> {

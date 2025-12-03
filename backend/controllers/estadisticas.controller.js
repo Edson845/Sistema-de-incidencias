@@ -49,38 +49,94 @@ export const getUsuariosPorRol = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener usuarios por rol', error: error.message });
   }
 };
-
 export const getEstadisticasGenerales = async (req, res) => {
   try {
-    const [ultimosTickets] = await pool.query('SELECT id, titulo, estado, fecha_creacion FROM tickets ORDER BY fecha_creacion DESC LIMIT 5');
-    const [usuariosActivos] = await pool.query("SELECT COUNT(*) AS activos FROM usuarios WHERE estado = 'Activo'");
-    const [resueltos] = await pool.query("SELECT COUNT(*) AS resueltos FROM tickets WHERE estado = 'Resuelto'");
-    const [ticketsPorDia] = await pool.query(`
-      SELECT DATE_FORMAT(fecha_creacion, '%d/%m/%Y') AS dia, COUNT(*) AS cantidad
-      FROM tickets
-      GROUP BY dia
-      ORDER BY fecha_creacion ASC
+
+    // 🟦 1. TOTAL DE TICKETS
+    const [total] = await pool.query(`
+      SELECT COUNT(*) AS total
+      FROM ticket
     `);
 
-    // Convierte el array a objeto { 'DD/MM/YYYY': cantidad }
-    const ticketsPorDiaObj = {};
-    ticketsPorDia.forEach(row => {
-      ticketsPorDiaObj[row.dia] = row.cantidad;
+    // 🟩 2. TICKETS NUEVOS (sin resolver)
+    const [nuevos] = await pool.query(`
+      SELECT COUNT(*) AS nuevos
+      FROM ticket
+      WHERE idEstado IN (1,2,3)
+    `);
+
+    // 🟧 3. TICKETS RESUELTOS HOY
+    const [resueltosHoy] = await pool.query(`
+      SELECT COUNT(*) AS resueltosHoy
+      FROM historial
+      WHERE estadoNuevo IN (4,5)
+      AND DATE(fechaCreacion) = CURDATE()
+    `);
+
+    // 🟥 4. TIEMPO PROMEDIO DE RESOLUCIÓN
+    const [promedioSolucion] = await pool.query(`
+      SELECT 
+        SEC_TO_TIME(
+          AVG(TIMESTAMPDIFF(SECOND, h1.fechaCreacion, h2.fechaCreacion))
+        ) AS promedio
+      FROM historial h1
+      JOIN historial h2 ON h1.idTicket = h2.idTicket
+      WHERE h1.estadoNuevo = 1
+      AND h2.estadoNuevo IN (4,5)
+    `);
+
+    // 🟪 5. PIE CHART → Tickets por estado
+    const [porEstado] = await pool.query(`
+      SELECT idEstado AS estado, COUNT(*) AS cantidad
+      FROM ticket
+      GROUP BY idEstado
+      ORDER BY idEstado
+    `);
+
+    // 🟫 6. LINE CHART → Tickets creados por día (últimos 30 días)
+    const [ticketsPorDiaRows] = await pool.query(`
+      SELECT 
+        DATE_FORMAT(fechaCreacion, '%d/%m/%Y') AS dia,
+        COUNT(*) AS cantidad
+      FROM ticket
+      WHERE fechaCreacion >= CURDATE() - INTERVAL 30 DAY
+      GROUP BY dia
+      ORDER BY fechaCreacion ASC
+    `);
+
+    // Convertir array → objeto { '10/12/2025': 5 }
+    const ticketsPorDia = {};
+    ticketsPorDiaRows.forEach(row => {
+      ticketsPorDia[row.dia] = row.cantidad;
     });
 
+    // 🟦 RESPUESTA COMPLETA PARA EL DASHBOARD
     res.json({
-      ultimosTickets,
-      usuariosActivos: usuariosActivos[0].activos,
-      ticketsResueltos: resueltos[0].resueltos,
-      ticketsPorDia: ticketsPorDiaObj
+      total: total[0].total,
+      nuevos: nuevos[0].nuevos,
+      resueltosHoy: resueltosHoy[0].resueltosHoy,
+      promedioSolucion: promedioSolucion[0].promedio,
+      porEstado,
+      ticketsPorDia
     });
-    console.log('Respuesta enviada:', {
-      ultimosTickets,
-      usuariosActivos: usuariosActivos[0].activos,
-      ticketsResueltos: resueltos[0].resueltos,
-      ticketsPorDia: ticketsPorDiaObj
+
+    console.log("📊 Estadísticas enviadas:", {
+      total: total[0].total,
+      nuevos: nuevos[0].nuevos,
+      resueltosHoy: resueltosHoy[0].resueltosHoy,
+      promedioSolucion: promedioSolucion[0].promedio,
+      porEstado,
+      ticketsPorDia
     });
+
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener estadísticas generales', error: error.message });
+
+    console.error("❌ Error estadísticas:", error);
+
+    res.status(500).json({
+      message: "Error al obtener estadísticas generales",
+      error: error.message
+    });
+
   }
 };

@@ -63,7 +63,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
 
   resumen = {
     nuevos: 0,
-    promedioSolucion: '—',
+    promedioSolucion: '0h',
     respuestasUsuarios: 0,
     resueltosHoy: 0,
     total: 0
@@ -218,84 +218,104 @@ export class TicketsComponent implements OnInit, OnDestroy {
     });
   }
 
-  cargarEstadisticas(): void {
-    const token = this.authService.obtenerToken();
-    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+ cargarEstadisticas(): void {
+  this.estadisticasService.getEstadisticasGenerales().subscribe({
+    next: (data: any) => {
 
-    this.http.get<any>(`${environment.apiUrl}/tickets/estadisticas/generales`, { headers }).subscribe({
-      next: (data: any) => {
+      console.log("📊 Datos recibidos:", data);
 
-        console.log("Datos recibidos:", data);
-        const porEstado = data.porEstado || [];
+      // 🔹 Resumen basado en el NUEVO endpoint
+      this.resumen = {
+        nuevos: Number(data.nuevos ?? 0),
+        promedioSolucion: this.formatearTiempo(data.promedioSolucion),
+        respuestasUsuarios: 0, // ya no existe este dato
+        resueltosHoy: Number(data.resueltosHoy ?? 0),
+        total: Number(data.total ?? 0)
+      };
+const porEstado = Array.isArray(data.porEstado) ? data.porEstado : [];
 
-        // 🟦 MAPEO SEGURO PARA 6 ESTADOS
-        const contar = (id: number) =>
-          porEstado.find((e: any) => e.estado === id)?.cantidad || 0;
+      const get = (id: number) =>
+        porEstado.find((e: any) => Number(e.estado) === id)?.cantidad ?? 0;
 
-        // 🟩 RESUMEN
-        this.resumen = {
-          nuevos: contar(1),
-          promedioSolucion: '40 min',
-          respuestasUsuarios: contar(2),
-          resueltosHoy: data.resueltosHoy || 0,
-          total: porEstado.reduce((sum: number, e: any) => sum + e.cantidad, 0)
-        };
+      this.pieChartData = {
+        labels: ['Nueva', 'Abierta', 'Proceso', 'Resuelto', 'Cerrada', 'No Procede'],
+        datasets: [{
+          data: [
+            get(1), // Nueva
+            get(2), // Abierta
+            get(3), // Proceso
+            get(4), // Resuelto
+            get(5), // Cerrada
+            get(6)  // No procede
+          ],
+          backgroundColor: [
+            '#f59e0b', // nueva
+            '#2563eb', // abierta
+            '#22c55e', // proceso
+            '#6b7280', // resuelto
+            '#9ca3af', // cerrada
+            '#a855f7'  // no procede
+          ]
+        }]
+      };
 
-        // 🟧 GRÁFICO DE PIE PARA 6 ESTADOS
-        this.pieChartData = {
-          labels: ['Nueva', 'Abierta', 'Proceso', 'Resuelto', 'Cerrada', 'No Procede'],
-          datasets: [{
-            data: [
-              contar(1), // Nueva
-              contar(2), // Abierta
-              contar(3), // Proceso
-              contar(4), // Resuelto
-              contar(5), // Cerrada
-              contar(6)  // No Procede
-            ],
-            backgroundColor: [
-              '#f59e0b', // Nueva
-              '#2563eb', // Abierta
-              '#22c55e', // Proceso
-              '#6b7280', // Resuelto
-              '#9ca3af', // Cerrada
-              '#a855f7'  // No Procede
-            ]
-          }]
-        };
-
-        // 🟥 GRÁFICO DE LÍNEA (NO SE TOCA)
-        if (data.ticketsPorDia) {
-          const dias = Object.keys(data.ticketsPorDia).sort((a, b) => {
+      // ============================================================
+      // 🟦 GRÁFICO DE LÍNEA — Tickets por día (data.ticketsPorDia)
+      // ============================================================
+      if (data.ticketsPorDia) {
+        const dias = Object.keys(data.ticketsPorDia)
+          .sort((a, b) => {
             const [da, ma, ya] = a.split('/');
             const [db, mb, yb] = b.split('/');
             return new Date(`${ya}-${ma}-${da}`).getTime() -
-              new Date(`${yb}-${mb}-${db}`).getTime();
+                   new Date(`${yb}-${mb}-${db}`).getTime();
           });
 
-          const cantidades = dias.map(dia => data.ticketsPorDia[dia]);
+        const cantidades = dias.map(d => data.ticketsPorDia[d] ?? 0);
 
-          this.lineChartData = {
-            labels: dias,
-            datasets: [{
-              label: 'Cantidad de Tickets',
-              data: cantidades,
-              borderColor: '#2563eb',
-              backgroundColor: 'rgba(37, 99, 235, 0.2)',
-              fill: true,
-              tension: 0.4
-            }]
-          };
-        }
-
-      },
-      error: (err) => {
-        console.error('Error al obtener tickets:', err);
-        this.generarResumen();
+        this.lineChartData = {
+          labels: dias,
+          datasets: [{
+            label: 'Tickets creados',
+            data: cantidades,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.2)',
+            fill: true,
+            tension: 0.4
+          }]
+        };
       }
-    });
+
+    },
+
+    error: (err) => {
+      console.error("❌ Error al obtener estadísticas:", err);
+      this.generarResumen(); // Fallback si falla la API
+    }
+  });
+}
+
+formatearTiempo(valor: any): string {
+  if (!valor) return '—';
+
+  // ⏱ Si MySQL devuelve "HH:MM:SS"
+  if (typeof valor === 'string' && valor.includes(':')) {
+    const [h, m, s] = valor.split(':').map(Number);
+
+    if (h === 0 && m === 0) return `${s} seg`;
+    if (h === 0) return `${m} min`;
+    return `${h}h ${m}min`;
   }
 
+  // Si viene en minutos o milisegundos, lo convertimos igual
+  const horas = Number(valor);
+
+  if (isNaN(horas)) return '—';
+
+  if (horas < 1) return `${Math.round(horas * 60)} min`;
+
+  return `${horas.toFixed(1)} h`;
+}
 
   generarResumen(): void {
     const total = this.tickets.length;
@@ -484,160 +504,14 @@ export class TicketsComponent implements OnInit, OnDestroy {
       }
     });
   }
-  // REPORTE: solo para admins — trae usuarios con rol admin (usa endpoint protegido)
-  reporteAdmins: any[] = [];
-  reporteVisible = false;
 
 
-  hacerReporte() {
-    const token = this.authService.obtenerToken();
-    if (!token) return alert('Debes iniciar sesión');
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-
-    this.estadisticasService.getUsuariosPorRol().subscribe({
-      next: (res) => {
-        this.reporteAdmins = res.filter((r: any) => (r.rol || '').toLowerCase() === 'admin');
-        this.reporteVisible = true;
-      },
-      error: (err) => {
-        console.error('Error al generar reporte:', err);
-        alert('No autorizado para generar el reporte o error del servidor');
-      }
-    });
-  }
   abrirModal() {
+    console.log("Abriendo modal de reporte");
     this.modalAbierto = true;
   }
 
   cerrarModal() {
     this.modalAbierto = false;
   }
-
-  generarExcel(oficinaSeleccionada?: string) {
-    this.ticketsService.obtenerTicketsDetallado().subscribe({
-      next: (tickets: any[]) => {
-        if (!tickets || tickets.length === 0) {
-          alert("No hay tickets cargados.");
-          return;
-        }
-
-        // Filtrar por oficina si se selecciona
-        const datosFiltrados = oficinaSeleccionada
-          ? tickets.filter(ticket => ticket.nombreOficina === oficinaSeleccionada)
-          : tickets;
-
-        if (!datosFiltrados.length) {
-          alert("No hay datos para exportar.");
-          return;
-        }
-
-        // Preparar datos para Excel
-        const datosExcel = datosFiltrados.map(ticket => ({
-          ID: ticket.idTicket,
-          Título: ticket.tituloTicket,
-          Descripción: ticket.descTicket,
-          Estado: ticket.nombreEstado,
-          Prioridad: ticket.nombrePrioridad,
-          Categoría: ticket.nombreCategoria,
-          Usuario: `${ticket.nombreUsuario || ""} ${ticket.apellidoUsuario || ""}`.trim(),
-          FechaCreación: new Date(ticket.fechaCreacion).toLocaleDateString()
-        }));
-
-        // Generar Excel
-        const worksheet = XLSX.utils.json_to_sheet(datosExcel);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Tickets');
-        XLSX.writeFile(workbook, `Tickets_${new Date().toISOString().slice(0, 10)}.xlsx`);
-      },
-      error: (err) => {
-        console.error("Error al obtener tickets:", err);
-        alert("No se pudieron cargar los tickets.");
-      }
-    });
-  }
-
-  generarPdf(oficinaSeleccionada?: string) {
-    this.ticketsService.obtenerTicketsDetallado().subscribe({
-      next: (tickets: any[]) => {
-
-        if (!tickets || tickets.length === 0) {
-          alert("No hay tickets cargados.");
-          return;
-        }
-
-        // Filtrar por oficina
-        const datosFiltrados = oficinaSeleccionada
-          ? tickets.filter(t => t.nombreOficina === oficinaSeleccionada)
-          : tickets;
-
-        if (!datosFiltrados.length) {
-          alert("No hay datos para exportar.");
-          return;
-        }
-
-        // Preparar filas de la tabla
-        const filasTabla = datosFiltrados.map(t => ([
-          t.idTicket,
-          t.tituloTicket,
-          t.descTicket,
-          t.nombreEstado,
-          t.nombrePrioridad,
-          t.nombreCategoria,
-          `${t.nombreUsuario || ""} ${t.apellidoUsuario || ""}`.trim(),
-          new Date(t.fechaCreacion).toLocaleDateString()
-        ]));
-
-        // Estructura del PDF
-        const docDefinition: any = {
-          content: [
-            { text: "Reporte de Tickets", style: "header" },
-            { text: `Oficina: ${oficinaSeleccionada || "Todas"}`, margin: [0, 0, 0, 10] },
-
-            {
-              table: {
-                headerRows: 1,
-                widths: ["auto", "auto", "*", "auto", "auto", "auto", "*", "auto"],
-                body: [
-                  [
-                    { text: "ID", style: "tableHeader" },
-                    { text: "Título", style: "tableHeader" },
-                    { text: "Descripción", style: "tableHeader" },
-                    { text: "Estado", style: "tableHeader" },
-                    { text: "Prioridad", style: "tableHeader" },
-                    { text: "Categoría", style: "tableHeader" },
-                    { text: "Usuario", style: "tableHeader" },
-                    { text: "Fecha", style: "tableHeader" }
-                  ],
-                  ...filasTabla
-                ]
-              }
-            }
-          ],
-
-          styles: {
-            header: {
-              fontSize: 18,
-              bold: true,
-              alignment: "center",
-              margin: [0, 0, 0, 10]
-            },
-            tableHeader: {
-              bold: true,
-              fillColor: "#eeeeee"
-            }
-          }
-        };
-
-        // Descargar PDF → NO devuelve nada
-        pdfMake.createPdf(docDefinition)
-          .download(`Tickets_${new Date().toISOString().slice(0, 10)}.pdf`);
-      },
-
-      error: (err) => {
-        console.error("Error al obtener tickets:", err);
-        alert("No se pudieron cargar los datos.");
-      }
-    });
-  }
-
 }

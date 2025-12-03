@@ -13,7 +13,7 @@ import { obtenerEficienciaTecnicos } from '../controllers/tickets.controller.js'
 const router = express.Router();
 
 // Ruta principal solo para admin
-router.get('/generales', verificarToken, verificarRol('admin'), getEstadisticasGenerales);
+router.get('/generales', verificarToken, verificarRol(['admin','tecnico']), getEstadisticasGenerales);
 
 
 // Rutas de estadísticas específicas (puedes aplicar roles según sea necesario)
