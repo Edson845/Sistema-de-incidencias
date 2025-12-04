@@ -1,124 +1,97 @@
-import json
 import os
-import joblib
 from flask import Flask, request, jsonify
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import train_test_split
+from flask_cors import CORS
+from src.predict import Predictor
 
 # ==============================
 # ⚙️ CONFIGURACIÓN
 # ==============================
 BASE_DIR = os.path.dirname(__file__)
-DATA_PATH = os.path.join(BASE_DIR, 'incidencias_120000.json')  # Archivo JSON
-MODEL_PATH = os.path.join(BASE_DIR, 'nlp_model.joblib')        # Modelo entrenado
+MODEL_PATH = os.path.join(BASE_DIR, 'nlp_model.joblib')
 
 # ==============================
-# 📂 CARGA Y VALIDACIÓN DE DATOS
+# 🧠 CARGA DEL MODELO
 # ==============================
-print("Cargando datos desde:", DATA_PATH)
-
-try:
-    with open(DATA_PATH, encoding='utf-8') as f:
-        data = json.load(f)
-except FileNotFoundError:
-    raise FileNotFoundError(f"No se encontró el archivo {DATA_PATH}")
-except json.JSONDecodeError as e:
-    raise ValueError(f"Error al leer el JSON: {e}")
-
-if not isinstance(data, list) or len(data) == 0:
-    raise ValueError("El archivo JSON está vacío o no contiene una lista de incidencias.")
-
-print(f"Total de registros cargados: {len(data)}")
-
-# ==============================
-# 🧹 PREPROCESAMIENTO AUTOMÁTICO
-# ==============================
-texts, labels = [], []
-
-for item in data:
-    desc = (
-        item.get('descripcion')
-        or item.get('description')
-        or item.get('texto')
-        or item.get('detalle')
-        or item.get('desc')
-    )
-
-    prio = (
-        item.get('prioridad')
-        or item.get('priority')
-        or item.get('nivel')
-        or item.get('valor')
-        or item.get('categoria')
-    )
-
-    if desc and prio:
-        texts.append(str(desc))
-        labels.append(str(prio))
-
-print(f"Datos válidos: {len(texts)} descripciones y {len(labels)} etiquetas")
-
-if not texts or not labels:
-    raise ValueError("No se cargaron datos válidos. Revisa las claves del JSON (descripcion/prioridad/nivel).")
-
-# ==============================
-# 🤖 ENTRENAMIENTO DEL MODELO
-# ==============================
-print("Entrenando modelo NLP...")
-
-X_train, X_test, y_train, y_test = train_test_split(
-    texts, labels, test_size=0.1, random_state=42
-)
-
-pipeline = Pipeline([
-    ('tfidf', TfidfVectorizer(max_features=3000, ngram_range=(1, 2))),
-    ('clf', LogisticRegression(max_iter=300, solver='lbfgs', multi_class='auto'))
-])
-
-pipeline.fit(X_train, y_train)
-
-# Guardar modelo
-joblib.dump(pipeline, MODEL_PATH)
-print(f"Modelo entrenado y guardado en: {MODEL_PATH}")
+predictor = Predictor(MODEL_PATH)
 
 # ==============================
 # 🌐 API FLASK
 # ==============================
 app = Flask(__name__)
+CORS(app)  # Habilita CORS si tienes frontend
+
+def success(data):
+    """Formato estándar de respuesta exitosa."""
+    return jsonify({"status": "success", "data": data}), 200
+
+def error(message, code=400):
+    """Formato estándar de error."""
+    return jsonify({"status": "error", "message": message}), code
+
 
 @app.route('/')
 def home():
-    return jsonify({
-        "mensaje": "API NLP de Prioridad de Incidencias lista",
+    return success({
+        "mensaje": "API NLP de Prioridad de Incidencias lista (Mejorada v2)",
+        "modelo_cargado": predictor.classifier is not None,
         "endpoints": {
-            "POST /priorizar": "Clasifica la prioridad de una descripción"
+            "POST /priorizar": "Clasifica la prioridad de una incidencia"
         }
-    }), 200
+    })
+
 
 @app.route('/priorizar', methods=['POST'])
 def priorizar():
     try:
+        # Validar que el body sea JSON
+        if not request.is_json:
+            return error("El contenido debe ser JSON válido.", 415)
+
         data = request.get_json()
-        descripcion = data.get('descripcion') or data.get('description')
 
+        # Extraer descripción
+        descripcion = (
+            data.get('descripcion') or 
+            data.get('description') or 
+            data.get('texto') or 
+            ""
+        ).strip()
+
+        # Validaciones básicas
         if not descripcion:
-            return jsonify({'error': 'Falta la descripción'}), 400
+            return error("Falta la descripción.", 400)
 
-        modelo = joblib.load(MODEL_PATH)
-        pred = modelo.predict([descripcion])[0]
+        # Evitar descripciones demasiado cortas
+        if len(descripcion.split()) < 3:
+            return error("La descripción es muy corta para poder clasificar.", 400)
 
-        return jsonify({'prioridad': pred}), 200
+        # Verificar modelo cargado
+        if predictor.classifier is None:
+            return error("El modelo NLP no está cargado.", 500)
+
+        # Ejecutar predicción
+        result = predictor.predict(descripcion)
+
+        # Verificar si hay error
+        if isinstance(result, dict) and 'error' in result:
+            return error(result['error'], 400)
+
+        # Extraer categoría del resultado
+        if isinstance(result, dict):
+            prioridad = result.get('categoria', result)
+        else:
+            prioridad = result
+
+        return success({"prioridad": prioridad})
 
     except Exception as e:
-        print("Error en /priorizar:", e)
-        return jsonify({'error': str(e)}), 500
+        print("❌ Error en /priorizar:", e)
+        return error(f"Error interno del servidor: {str(e)}", 500)
 
 
 # ==============================
 # 🚀 EJECUCIÓN
 # ==============================
 if __name__ == '__main__':
-    print("Servidor Flask ejecutándose en http://localhost:5005")
+    print("🚀 Servidor Flask ejecutándose en http://localhost:5005")
     app.run(host='0.0.0.0', port=5005, debug=True)
