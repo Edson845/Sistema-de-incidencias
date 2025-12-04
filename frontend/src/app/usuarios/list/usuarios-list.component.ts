@@ -22,14 +22,22 @@ export class UsuariosListComponent implements OnInit {
   // Campo para buscar usuarios
   filtro = '';
 
-  constructor(private usuariosService: UsuariosService, private router: Router, private CatalogoService: CatalogoService) {}
+  // Sistema de notificaciones
+  mensaje = '';
+  tipoMensaje = '';
+
+  // Modal de confirmación
+  mostrarModalEliminar = false;
+  dniAEliminar = '';
+
+  constructor(private usuariosService: UsuariosService, private router: Router, private CatalogoService: CatalogoService) { }
 
   ngOnInit() {
     this.cargarUsuarios();
     this.cargarCargos();
   }
 
-  cargarCargos(){
+  cargarCargos() {
     this.CatalogoService.obtenerCargos().subscribe({
       next: (data) => {
         this.cargos = data;
@@ -40,63 +48,83 @@ export class UsuariosListComponent implements OnInit {
     });
   }
   getNombreCargo(idCargo: number): string {
-  const cargo = this.cargos.find(c => c.idCargo === idCargo);
-  return cargo ? cargo.nombreCargo : 'Sin cargo';
-}
+    const cargo = this.cargos.find(c => c.idCargo === idCargo);
+    return cargo ? cargo.nombreCargo : 'Sin cargo';
+  }
   cargarUsuarios() {
-  this.usuariosService.getUsuarios().subscribe({
-    next: (data) => {
-      console.log('Usuarios cargados desde API:', data);
-      this.usuarios = Array.isArray(data)
-        ? data
-        : (data?.usuarios ?? []); // usa el arreglo si está dentro de data.usuarios o [] si es null
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('Error al cargar usuarios:', err);
-      this.error = err.error?.mensaje || 'Error al cargar usuarios';
-      this.loading = false;
-    }
-  });
-}
+    this.usuariosService.getUsuarios().subscribe({
+      next: (data) => {
+        console.log('Usuarios cargados desde API:', data);
+        this.usuarios = Array.isArray(data)
+          ? data
+          : (data?.usuarios ?? []); // usa el arreglo si está dentro de data.usuarios o [] si es null
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar usuarios:', err);
+        this.error = err.error?.mensaje || 'Error al cargar usuarios';
+        this.loading = false;
+      }
+    });
+  }
   agregarUsuario() {
     this.router.navigate(['usuarios/nuevo']);
   }
 
   verDetalle(dni: string) {
-    this.router.navigate(['/usuario/perfil' ]);
+    this.router.navigate(['/usuario/perfil']);
   }
 
   editarUsuario(dni: string) {
     this.router.navigate(['/usuarios/editar', dni]);
   }
 
-  eliminarUsuario(dni: string) {
-    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      this.usuariosService.eliminarUsuario(dni).subscribe({
-        next: () => {
-          console.log('Usuario eliminado:', dni);
-          this.cargarUsuarios(); // Recargar la lista de usuarios
-        },
-        error: (err) => {
-          console.error('Error al eliminar usuario:', err);
-          this.error = err.error?.mensaje || 'Error al eliminar usuario';
-        }
-      });
-    }
+  abrirModalEliminar(dni: string) {
+    this.dniAEliminar = dni;
+    this.mostrarModalEliminar = true;
+  }
+
+  cerrarModalEliminar() {
+    this.mostrarModalEliminar = false;
+    this.dniAEliminar = '';
+  }
+
+  confirmarEliminar() {
+    this.usuariosService.eliminarUsuario(this.dniAEliminar).subscribe({
+      next: () => {
+        this.mostrarMensaje('Usuario eliminado correctamente', 'success');
+        this.cargarUsuarios();
+        this.cerrarModalEliminar();
+      },
+      error: (err) => {
+        console.error('Error al eliminar usuario:', err);
+        this.mostrarMensaje('Error al eliminar usuario', 'error');
+        this.cerrarModalEliminar();
+      }
+    });
   }
 
   // 🔍 Filtro básico en memoria
   get usuariosFiltrados() {
-  const texto = this.filtro.toLowerCase().trim();
+    const texto = this.filtro.toLowerCase().trim();
 
-  return this.usuarios.filter((u) =>
-    u.nombres?.toLowerCase().includes(texto) ||
-    u.apellidos?.toLowerCase().includes(texto) ||
-    u.correo?.toLowerCase().includes(texto) ||
-    u.dni?.toString().includes(texto) || // 🔹 busca por DNI
-    u.usuario?.toLowerCase().includes(texto) // 🔹 busca por usuario
-  );
-}
+    return this.usuarios.filter((u) =>
+      u.nombres?.toLowerCase().includes(texto) ||
+      u.apellidos?.toLowerCase().includes(texto) ||
+      u.correo?.toLowerCase().includes(texto) ||
+      u.dni?.toString().includes(texto) || // 🔹 busca por DNI
+      u.usuario?.toLowerCase().includes(texto) // 🔹 busca por usuario
+    );
+  }
+
+  mostrarMensaje(texto: string, tipo: 'success' | 'error') {
+    this.mensaje = texto;
+    this.tipoMensaje = tipo;
+    this.error = '';
+    setTimeout(() => {
+      this.mensaje = '';
+      this.tipoMensaje = '';
+    }, 3000);
+  }
 
 }

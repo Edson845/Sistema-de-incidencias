@@ -23,10 +23,14 @@ export class TicketsCreateComponent implements OnInit {
   archivos: File[] = [];
   categorias: any[] = [];
 
-  // 🔹 Agrega esta línea — es la que faltaba:
+  // Vista previa de imagen
   imagenPreview: string | null = null;
 
-  constructor(private fb: FormBuilder, private ticketService: TicketsService, private router:Router) {}
+  // Sistema de notificaciones
+  mensaje = '';
+  tipoMensaje = '';
+
+  constructor(private fb: FormBuilder, private ticketService: TicketsService, private router: Router) { }
 
   ngOnInit(): void {
     this.ticketForm = this.fb.group({
@@ -95,17 +99,25 @@ export class TicketsCreateComponent implements OnInit {
 
     this.ticketService.crearTicket(formData).subscribe({
       next: (res) => {
-        alert('✅ Ticket registrado correctamente');
+        this.mostrarMensaje('Ticket creado correctamente', 'success');
         this.ticketForm.reset();
         this.archivos = [];
         this.imagenPreview = null;
+        setTimeout(() => this.router.navigate(['/tickets']), 1500);
       },
       error: (err) => {
         console.error(err);
-        alert('❌ Error al registrar el ticket');
+        this.mostrarMensaje('Error al crear el ticket', 'error');
       }
-      
     });
-    this.router.navigate(['/tickets']);
+  }
+
+  mostrarMensaje(texto: string, tipo: 'success' | 'error') {
+    this.mensaje = texto;
+    this.tipoMensaje = tipo;
+    setTimeout(() => {
+      this.mensaje = '';
+      this.tipoMensaje = '';
+    }, 3000);
   }
 }

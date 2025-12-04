@@ -149,6 +149,127 @@ button:hover {
   color: #fff;
 }
 
+/* Modal de Confirmación */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  animation: slideDown 0.3s ease;
+}
+
+.modal-content h3 {
+  color: #1e3a8a;
+  margin-bottom: 1rem;
+  font-size: 20px;
+}
+
+.modal-content p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 10px 20px;
+}
+
+.btn-cancel:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+  padding: 10px 20px;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+/* Mensaje Flotante */
+.mensaje-flotante {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease;
+  z-index: 100;
+}
+
+.mensaje-flotante.success {
+  background: #10b981;
+}
+
+.mensaje-flotante.error {
+  background: #dc2626;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .usuarios-container {
@@ -175,5 +296,17 @@ button:hover {
     padding: 6px 12px;
     font-size: 13px;
     margin-bottom: 4px;
+  }
+
+  .modal-content {
+    width: 95%;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions button {
+    width: 100%;
   }
 }

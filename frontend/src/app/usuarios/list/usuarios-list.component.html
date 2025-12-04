@@ -44,7 +44,7 @@
           <td>
             <button class="btn-ver" (click)="verDetalle(usuario.dni)">👁</button>
             <button class="btn-editar" (click)="editarUsuario(usuario.dni)">✏️</button>
-            <button class="btn-eliminar" (click)="eliminarUsuario(usuario.dni)">🗑️</button>
+            <button class="btn-eliminar" (click)="abrirModalEliminar(usuario.dni)">🗑️</button>
           </td>
         </tr>
       </tbody>
@@ -53,5 +53,22 @@
 
   <div *ngIf="!loading && usuariosFiltrados.length === 0" class="mensaje vacio">
     No se encontraron usuarios.
+  </div>
+
+  <!-- MODAL DE CONFIRMACIÓN -->
+  <div *ngIf="mostrarModalEliminar" class="modal-overlay" (click)="cerrarModalEliminar()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>¿Eliminar usuario?</h3>
+      <p>Esta acción no se puede deshacer. ¿Está seguro de que desea eliminar este usuario?</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cerrarModalEliminar()">Cancelar</button>
+        <button class="btn-danger" (click)="confirmarEliminar()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENSAJES -->
+  <div *ngIf="mensaje" class="mensaje-flotante" [ngClass]="tipoMensaje">
+    {{ mensaje }}
   </div>
 </div>

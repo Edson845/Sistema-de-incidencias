@@ -60,4 +60,9 @@
     </div>
 
   </form>
+
+  <!-- MENSAJES -->
+  <div *ngIf="mensaje" class="mensaje-flotante" [ngClass]="tipoMensaje">
+    {{ mensaje }}
+  </div>
 </div>

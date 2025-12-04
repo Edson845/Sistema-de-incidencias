@@ -203,6 +203,40 @@ button {
     box-shadow: 0 4px 8px rgba(30, 58, 138, 0.3);
 }
 
+/* Mensaje Flotante */
+.mensaje-flotante {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.3s ease;
+    z-index: 100;
+}
+
+.mensaje-flotante.success {
+    background: #10b981;
+}
+
+.mensaje-flotante.error {
+    background: #dc2626;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .create-container {
