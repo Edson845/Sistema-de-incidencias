@@ -284,18 +284,17 @@ export async function obtenerEficienciaTecnicosModelo() {
   const [rows] = await pool.query(`
     SELECT 
       u.dni,
-      u.nombres,
-      u.apellidos,
+      u.usuario,
       COUNT(t.idTicket) AS ticketsResueltos
     FROM usuario u
     INNER JOIN rolusuario ru ON ru.dni = u.dni
     INNER JOIN rol r ON r.idRol = ru.idRol
     LEFT JOIN ticket t 
       ON t.asignadoA = u.dni 
-      AND t.idEstado IN (4, 5)
+      AND t.idEstado IN (5)
       AND YEARWEEK(t.fechaCreacion, 1) = YEARWEEK(NOW(), 1)
     WHERE r.nombreRol = 'tecnico'
-    GROUP BY u.dni, u.nombres, u.apellidos
+    GROUP BY u.dni, u.usuario
     ORDER BY ticketsResueltos DESC
   `);
 

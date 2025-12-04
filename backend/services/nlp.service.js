@@ -19,8 +19,9 @@ export async function obtenerPrioridad(descripcion) {
 
     // Convierte el texto a número usando el mapa
     const valorNumerico = prioridadNumerica[prioridadTexto] || 3; // valor por defecto: media
-
+    console.log("valor asignado a la prediccion",valorNumerico)
     return valorNumerico;
+    
 
   } catch (error) {
     console.error('❌ Error al conectar con NLP API:', error.message);

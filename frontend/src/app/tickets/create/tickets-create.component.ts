@@ -3,6 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TicketsService } from '../../services/tickets.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-ticket-form',
@@ -25,7 +26,7 @@ export class TicketsCreateComponent implements OnInit {
   // 🔹 Agrega esta línea — es la que faltaba:
   imagenPreview: string | null = null;
 
-  constructor(private fb: FormBuilder, private ticketService: TicketsService) {}
+  constructor(private fb: FormBuilder, private ticketService: TicketsService, private router:Router) {}
 
   ngOnInit(): void {
     this.ticketForm = this.fb.group({
@@ -73,7 +74,9 @@ export class TicketsCreateComponent implements OnInit {
       this.ticketForm.patchValue({ adjunto: '' });
     }
   }
-
+  volver() {
+    this.router.navigate(['/tickets']);
+  }
   registrarTicket() {
     console.log('✅ registrarTicket() ejecutado');
     if (this.ticketForm.invalid) {
@@ -101,6 +104,8 @@ export class TicketsCreateComponent implements OnInit {
         console.error(err);
         alert('❌ Error al registrar el ticket');
       }
+      
     });
+    this.router.navigate(['/tickets']);
   }
 }

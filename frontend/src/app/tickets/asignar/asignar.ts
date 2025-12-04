@@ -5,6 +5,7 @@ import { TicketsService } from '../../services/tickets.service';
 import { WhatsAppService } from '../../services/whatsapp.service';
 import { CommonModule } from '@angular/common';
 import { UsuariosService } from '../../services/usuarios.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-asignar-ticket-modal',
@@ -13,7 +14,7 @@ import { UsuariosService } from '../../services/usuarios.service';
   templateUrl: './asignar.html',
   styleUrls: ['./asignar.css']
 })
-export class Asignar {
+export class Asignar {  
   ticketSeleccionado: number;
   tecnicos: any[] = [];
   tecnicosFiltrados: any[] = [];
@@ -30,10 +31,12 @@ export class Asignar {
   
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
+    
     private dialogRef: MatDialogRef<Asignar>,
     private ticketsService: TicketsService,
     private whatsappService: WhatsAppService,
-    private UsuariosService: UsuariosService
+    private UsuariosService: UsuariosService,
+    private router: Router
   ) {
     this.ticketSeleccionado = data.ticketSeleccionado;
     this.herramientas = data.herramientas;
@@ -97,6 +100,7 @@ export class Asignar {
 
   cerrarModal() {
     this.dialogRef.close();
+    
   }
 }
 

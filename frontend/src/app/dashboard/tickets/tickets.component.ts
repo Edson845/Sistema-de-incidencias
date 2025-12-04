@@ -483,7 +483,7 @@ formatearTiempo(valor: any): string {
 
         // Preparar labels (nombres de técnicos) y datos (tickets resueltos)
         const labels = data.map(tecnico =>
-          `${tecnico.nombres} ${tecnico.apellidos}`.trim()
+          `${tecnico.usuario}`.trim()
         );
         const tickets = data.map(tecnico => tecnico.ticketsResueltos);
 

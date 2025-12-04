@@ -97,11 +97,19 @@ export class TicketsListComponent implements OnInit, OnDestroy {
       (t.nombreTecnico?.toLowerCase().includes(texto)) ||
       (t.apellidoTecnico?.toLowerCase().includes(texto)) ||
       t.nombreCategoria?.toLowerCase().includes(texto) ||
-      this.estadoTexto(t.idEstado).toLowerCase().includes(texto)
+      this.estadoTexto(t.idEstado).toLowerCase().includes(texto) ||
+      this.prioridadTexto(t.idPrioridad).toLowerCase().includes(texto)
     );
     this.ordenarTickets();
   }
-
+  prioridadTexto(prioridad: number): string {
+    return prioridad == 1 ? 'muy baja' :
+      prioridad == 2 ? 'baja' :
+        prioridad == 3 ? 'media' :
+          prioridad == 4 ? 'alta' :
+            prioridad == 5 ? 'muy alta' :
+                'desconocido';
+  }
   estadoTexto(estado: number): string {
     return estado == 1 ? 'nuevo' :
       estado == 2 ? 'abierto' :

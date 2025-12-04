@@ -120,14 +120,14 @@ export const getEstadisticasGenerales = async (req, res) => {
       ticketsPorDia
     });
 
-    console.log("📊 Estadísticas enviadas:", {
+    /*console.log("Estadísticas enviadas:", {
       total: total[0].total,
       nuevos: nuevos[0].nuevos,
       resueltosHoy: resueltosHoy[0].resueltosHoy,
       promedioSolucion: promedioSolucion[0].promedio,
       porEstado,
       ticketsPorDia
-    });
+    });*/
 
   } catch (error) {
 
