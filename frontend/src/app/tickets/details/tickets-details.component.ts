@@ -90,7 +90,7 @@ export class TicketsDetailsComponent implements OnInit {
   abrirEvaluacion(idTicket: number) {
     const rol = (localStorage.getItem('rol') || '').toLowerCase();
     const dialogRef = this.dialog.open(CalificarTicket, {
-      width: '700px',
+      width: '550px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       autoFocus: false,

@@ -51,12 +51,12 @@
           <tr>
             <th>Título</th>
             <th>Descripción</th>
-            <th>Asignado A</th>
+            <th *ngIf="rolUsuario === 'usuario'|| rolUsuario === 'admin'">Asignado A</th>
             <th>Fecha Creación</th>
             <th>Categoría</th>
             <th>Estado</th>
             <th *ngIf="rolUsuario === 'admin'">Prioridad</th>
-            <th *ngIf="rolUsuario === 'admin'">Usuario</th>
+            <th *ngIf="rolUsuario === 'admin'|| rolUsuario === 'tecnico'">Usuario</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -65,7 +65,7 @@
             
             <td class="td-title">{{ t.tituloTicket }}</td>
             <td class="td-desc">{{ t.descTicket }}</td>
-            <td >{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>
+            <td *ngIf= "rolUsuario === 'usuario'|| rolUsuario === 'admin'">{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>
             <td>{{ t.fechaCreacion | date:'dd/MM/yyyy HH:mm'}}</td>
             <td>
               <span class="badge-categoria">{{ t.nombreCategoria }}</span>
@@ -101,7 +101,7 @@
                 {{ t.nombrePrioridad }}
               </span>
             </td>
-            <td *ngIf="rolUsuario === 'admin'">{{ t.nombreUsuario || '---' }} {{ t.apellidoUsuario || '' }}</td>
+            <td *ngIf="rolUsuario === 'admin' || rolUsuario === 'tecnico'">{{ t.nombreUsuario || '---' }} {{ t.apellidoUsuario || '' }}</td>
 
 
             <!-- ACCIONES -->

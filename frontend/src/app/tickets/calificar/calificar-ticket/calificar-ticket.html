@@ -171,10 +171,10 @@
 <!-- Modal Actions -->
 <div class="modal-actions">
   <button class="btn-cancel" (click)="cerrar()">
-    ❌ Cancelar
+    Cancelar
   </button>
 
   <button class="btn-save" *ngIf="rol !== 'admin'" (click)="guardar()">
-    ✅ {{ rol === 'usuario' ? 'Enviar Calificación' : 'Guardar Observación' }}
+    {{ rol === 'usuario' ? 'Enviar Calificación' : 'Guardar Observación' }}
   </button>
 </div>

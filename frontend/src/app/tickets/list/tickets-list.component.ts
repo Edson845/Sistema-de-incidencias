@@ -153,7 +153,7 @@ export class TicketsListComponent implements OnInit, OnDestroy {
 
   abrirEvaluacionUsuario(idTicket: number) {
     const dialogRef = this.dialog.open(CalificarTicket, {
-      width: '700px',
+      width: '550px',
       maxWidth: '95vw',
       maxHeight: '90vh',
       autoFocus: false,
@@ -178,6 +178,7 @@ export class TicketsListComponent implements OnInit, OnDestroy {
       });
     });
   }
+
   abrirObservacionTecnico(idTicket: number) {
     const dialogRef = this.dialog.open(ObservacionTecnico, {
       width: '450px',
