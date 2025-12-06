@@ -108,7 +108,7 @@ export class TicketsListComponent implements OnInit, OnDestroy {
         prioridad == 3 ? 'media' :
           prioridad == 4 ? 'alta' :
             prioridad == 5 ? 'muy alta' :
-                'desconocido';
+              'desconocido';
   }
   estadoTexto(estado: number): string {
     return estado == 1 ? 'nuevo' :
@@ -140,7 +140,7 @@ export class TicketsListComponent implements OnInit, OnDestroy {
       error: (err) => console.error('❌ Error al actualizar estado del ticket:', err)
     });
   }
-  cerrarTicket(idTicket: number){
+  cerrarTicket(idTicket: number) {
     this.ticketsService.actualizarEstado(idTicket, 4).subscribe({
       next: () => { this.cargarTickets(); },
       error: (err) => console.error('❌ Error al actualizar estado del ticket:', err)
@@ -152,55 +152,58 @@ export class TicketsListComponent implements OnInit, OnDestroy {
   }
 
   abrirEvaluacionUsuario(idTicket: number) {
-  const dialogRef = this.dialog.open(CalificarTicket, {
-    width: '500px',
-    data: { idTicket, rol: 'usuario' }
-  });
-
-  dialogRef.afterClosed().subscribe(res => {
-    if (!res) return;
-
-    const formData = new FormData();
-    formData.append("rol", "usuario");
-    formData.append("calificacion", res.calificacion);
-    formData.append("comentario", res.comentario);
-
-    if (res.archivos?.length > 0) {
-      res.archivos.forEach((file: File) => formData.append("fotos", file));
-    }
-
-    this.ticketsService.calificarTicket(idTicket, formData).subscribe({
-      next: () => this.cargarTickets(),
-      error: (err) => console.error("Error al calificar (usuario):", err)
+    const dialogRef = this.dialog.open(CalificarTicket, {
+      width: '700px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      autoFocus: false,
+      data: { idTicket, rol: 'usuario' }
     });
-  });
-}
-abrirObservacionTecnico(idTicket: number) {
-  const dialogRef = this.dialog.open(ObservacionTecnico, {
-    width: '450px',
-    data: { idTicket }
-  });
 
-  dialogRef.afterClosed().subscribe(res => {
-    if (!res) return;
+    dialogRef.afterClosed().subscribe(res => {
+      if (!res) return;
 
-    const formData = new FormData();
-    formData.append("rol", "tecnico");
-    formData.append("observacionTecnico", res.observacion);
-    formData.append("resolvio", "true");
+      const formData = new FormData();
+      formData.append("rol", "usuario");
+      formData.append("calificacion", res.calificacion);
+      formData.append("comentario", res.comentario);
 
-    this.ticketsService.ObservacionTicket(idTicket, formData).subscribe({
-      next: () => this.cargarTickets(),
-      error: (err) => console.error("Error al resolver ticket:", err)
+      if (res.archivos?.length > 0) {
+        res.archivos.forEach((file: File) => formData.append("fotos", file));
+      }
+
+      this.ticketsService.calificarTicket(idTicket, formData).subscribe({
+        next: () => this.cargarTickets(),
+        error: (err) => console.error("Error al calificar (usuario):", err)
+      });
     });
-  });
-}
+  }
+  abrirObservacionTecnico(idTicket: number) {
+    const dialogRef = this.dialog.open(ObservacionTecnico, {
+      width: '450px',
+      data: { idTicket }
+    });
+
+    dialogRef.afterClosed().subscribe(res => {
+      if (!res) return;
+
+      const formData = new FormData();
+      formData.append("rol", "tecnico");
+      formData.append("observacionTecnico", res.observacion);
+      formData.append("resolvio", "true");
+
+      this.ticketsService.ObservacionTicket(idTicket, formData).subscribe({
+        next: () => this.cargarTickets(),
+        error: (err) => console.error("Error al resolver ticket:", err)
+      });
+    });
+  }
 
 
   crearTicket() {
     this.router.navigate(['/tickets/nuevo']);
   }
-  
+
   asignarTicket(idTicket: number) {
     const dialogRef = this.dialog.open(Asignar, {
       width: '500px',

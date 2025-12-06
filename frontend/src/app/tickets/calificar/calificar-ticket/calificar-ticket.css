@@ -1,35 +1,21 @@
-/* Modal Container */
+/* Modal Container - Ajustado para MatDialog */
 :host {
   display: block;
   font-family: 'Roboto', 'Segoe UI', sans-serif;
+  width: 100%;
   max-width: 950px;
-  width: 100%;
   box-sizing: border-box;
+  padding: 1.5rem;
 }
 
-/* Modal Overlay (if needed) */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease;
+/* Eliminar restricciones de altura del MatDialog */
+::ng-deep .mat-mdc-dialog-container {
+  max-height: 90vh !important;
+  overflow: visible !important;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+::ng-deep .mat-mdc-dialog-surface {
+  overflow: visible !important;
 }
 
 /* Modal Header */
@@ -42,7 +28,7 @@
 
 .modal-header h2 {
   color: #1e3a8a;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
 }
@@ -56,6 +42,27 @@
 /* Modal Content */
 .modal-content {
   padding: 0 0.5rem;
+  max-height: calc(90vh - 200px);
+  overflow-y: auto;
+}
+
+/* Scrollbar personalizado para modal-content */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Section Labels */
@@ -128,27 +135,21 @@
   color: #22c55e;
 }
 
-/* Verde brillante */
 .happy-4 {
   color: #a3e635;
 }
 
-/* Verde lima */
 .neutral-3 {
   color: #fbbf24;
 }
 
-/* Amarillo */
 .sad-2 {
   color: #fb923c;
 }
 
-/* Naranja */
 .sad-1 {
   color: #ef4444;
 }
-
-/* Rojo */
 
 .emoji-face {
   width: 100%;
@@ -223,6 +224,9 @@
 
 textarea {
   width: 100%;
+  max-width: 100%;
+  min-height: 60px;
+  max-height: 200px;
   padding: 12px 14px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -231,6 +235,7 @@ textarea {
   background: white;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   resize: vertical;
+  box-sizing: border-box;
 }
 
 textarea:focus {
@@ -395,7 +400,7 @@ textarea::placeholder {
   line-height: 1.5;
 }
 
-/* Modal Actions */
+/* Modal Actions - MISMO ESTILO QUE ASIGNAR Y REPORTE */
 .modal-actions {
   display: flex;
   justify-content: flex-end;

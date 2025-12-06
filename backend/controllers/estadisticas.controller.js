@@ -69,7 +69,7 @@ export const getEstadisticasGenerales = async (req, res) => {
     const [resueltosHoy] = await pool.query(`
       SELECT COUNT(*) AS resueltosHoy
       FROM historial
-      WHERE estadoNuevo IN (4,5)
+      WHERE estadoNuevo IN (5)
       AND DATE(fechaCreacion) = CURDATE()
     `);
 
@@ -82,7 +82,7 @@ export const getEstadisticasGenerales = async (req, res) => {
       FROM historial h1
       JOIN historial h2 ON h1.idTicket = h2.idTicket
       WHERE h1.estadoNuevo = 1
-      AND h2.estadoNuevo IN (4,5)
+      AND h2.estadoNuevo IN (5)
     `);
 
     // 🟪 5. PIE CHART → Tickets por estado

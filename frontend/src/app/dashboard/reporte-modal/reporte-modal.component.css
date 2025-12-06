@@ -1,206 +1,224 @@
-/* ===========================
-   OVERLAY
-=========================== */
+/* Modal Overlay */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 1000;
     animation: fadeIn 0.2s ease;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
-/* ===========================
-   MODAL CONTENEDOR
-=========================== */
-.modal-container {
-    background: #ffffff;
-    border-radius: 10px;
-    width: 95%;
-    max-width: 700px;
-    max-height: 90vh;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-    animation: slideIn 0.25s ease;
+/* Modal Container */
+.modal {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 600px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 2rem;
+    animation: slideIn 0.3s ease;
 }
 
 @keyframes slideIn {
-    from { transform: translateY(-25px); opacity: 0; }
-    to   { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
-/* ===========================
-   HEADER
-=========================== */
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #1e3a8a;
-    padding: 1rem 1.5rem;
-    color: white;
-}
-
-.modal-title {
-    font-size: 20px;
+/* Modal Title */
+.modal h3 {
+    color: #1e3a8a;
+    font-size: 24px;
     font-weight: 700;
-    margin: 0;
-}
-
-.btn-close {
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.btn-close:hover {
-    transform: scale(1.1);
-}
-
-/* ===========================
-   CONTENIDO
-=========================== */
-.modal-body {
-    padding: 1.5rem;
-    overflow-y: auto;
-}
-
-/* Scroll bonito */
-.modal-body::-webkit-scrollbar {
-    width: 8px;
-}
-
-.modal-body::-webkit-scrollbar-track {
-    background: #f1f5f9;
-}
-
-.modal-body::-webkit-scrollbar-thumb {
-    background: #94a3b8;
-    border-radius: 4px;
-}
-
-.modal-body::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
-}
-
-/* ===========================
-   TABS
-=========================== */
-
-::ng-deep .custom-tabs .mat-tab-labels {
-    background: #f8fafc;
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 1rem;
     border-bottom: 2px solid #e5e7eb;
 }
 
-::ng-deep .custom-tabs .mat-tab-label {
-    font-weight: 600;
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tabs button {
+    flex: 1;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
     color: #6b7280;
-}
-
-::ng-deep .custom-tabs .mat-tab-label.mat-tab-label-active {
-    color: #1e3a8a !important;
-}
-
-::ng-deep .custom-tabs .mat-ink-bar {
-    background: #1e3a8a !important;
-}
-
-/* ===========================
-   FILTROS
-=========================== */
-
-.filtros-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-
-.full-width {
-    grid-column: span 2;
-}
-
-/* ===========================
-   BOTÓN DESCARGAR
-=========================== */
-
-.btn-download {
-    margin-top: 1.2rem;
-    width: 100%;
     font-weight: 600;
-    padding: 0.8rem;
-    border-radius: 8px;
-    text-transform: none;
     font-size: 15px;
-    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.btn-download:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25);
+.tabs button:hover {
+    color: #1e3a8a;
+    background: #f3f4f6;
 }
 
-/* ===========================
-   RESPONSIVE
-=========================== */
+.tabs button.active {
+    color: #1e3a8a;
+    border-bottom-color: #1e3a8a;
+    background: #f0f9ff;
+}
 
-@media (max-width: 600px) {
-    .filtros-grid {
-        grid-template-columns: 1fr;
+/* Tab Content */
+.tab-content {
+    padding: 1rem 0;
+}
+
+.tab-content label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+/* Inputs */
+.tab-content input[type="date"],
+.tab-content select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+.tab-content input[type="date"]:focus,
+.tab-content select:focus {
+    outline: none;
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.tab-content select {
+    cursor: pointer;
+}
+
+/* Modal Buttons */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.modal-buttons button {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-confirm {
+    background: #1e3a8a;
+    color: white;
+    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
+}
+
+.btn-confirm:hover {
+    background: #1e40af;
+    box-shadow: 0 4px 8px rgba(30, 58, 138, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-confirm:active {
+    transform: translateY(0);
+}
+
+.btn-cancelar {
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #374151;
+}
+
+.btn-cancelar:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+/* Scrollbar personalizado */
+.modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal {
+        width: 95%;
+        padding: 1.5rem;
+        max-height: 90vh;
     }
 
-    .full-width {
-        grid-column: span 1;
+    .modal h3 {
+        font-size: 20px;
     }
-}
-/* Quitar padding interno del panel de pestañas */
-::ng-deep .custom-tabs .mat-tab-body-content {
-    padding: 0 !important;
-    margin: 0 !important;
-}
 
-/* Quitar altura automática del tab-group */
-::ng-deep .custom-tabs .mat-tab-body-wrapper {
-    height: auto !important;
-}
+    .tabs button {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
 
-/* Arreglar el contenedor interno que causa scroll */
-::ng-deep .mat-tab-body {
-    padding: 0 !important;
-    overflow: visible !important;
-}
+    .modal-buttons {
+        flex-direction: column-reverse;
+    }
 
-/* Reducir padding por defecto del mat-form-field */
-::ng-deep .filtro-field .mat-form-field-wrapper {
-    padding-bottom: 0 !important;
-    margin-bottom: 0 !important;
-}
-
-/* Quitar el espacio de Material bajo los inputs */
-::ng-deep .mat-form-field-subscript-wrapper {
-    display: none !important;
-}
-
-/* Input más limpio */
-::ng-deep .mat-form-field-appearance-outline .mat-form-field-flex {
-    padding: 0 12px !important;
-}
-
-/* Checkbox de tabs superior */
-::ng-deep .mat-tab-label {
-    min-width: 120px !important;
+    .modal-buttons button {
+        width: 100%;
+        justify-content: center;
+    }
 }

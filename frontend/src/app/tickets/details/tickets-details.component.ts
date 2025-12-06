@@ -90,7 +90,10 @@ export class TicketsDetailsComponent implements OnInit {
   abrirEvaluacion(idTicket: number) {
     const rol = (localStorage.getItem('rol') || '').toLowerCase();
     const dialogRef = this.dialog.open(CalificarTicket, {
-      width: '500px',
+      width: '700px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      autoFocus: false,
       data: { idTicket, rol }
     });
 
@@ -113,25 +116,25 @@ export class TicketsDetailsComponent implements OnInit {
     });
   }
   cargarHistorial(id: number) {
-  this.ticketsService.getHistorialCompleto(id).subscribe({
-    next: (data: any[]) => {
+    this.ticketsService.getHistorialCompleto(id).subscribe({
+      next: (data: any[]) => {
 
-      console.log("Historial completo:", data);
+        console.log("Historial completo:", data);
 
-      // Guardamos el historial tal cual viene del backend
-      this.historial = data || [];
+        // Guardamos el historial tal cual viene del backend
+        this.historial = data || [];
 
-      // Ordenar por fecha (ASC o DESC según tu diseño)
-      this.historial.sort((a, b) =>
-        new Date(a.fechaCreacion).getTime() - new Date(b.fechaCreacion).getTime()
-      );
+        // Ordenar por fecha (ASC o DESC según tu diseño)
+        this.historial.sort((a, b) =>
+          new Date(a.fechaCreacion).getTime() - new Date(b.fechaCreacion).getTime()
+        );
 
-      // Aplicar filtros iniciales
-      this.aplicarFiltro();
-    },
-    error: (err) => console.error("Error al cargar historial", err)
-  });
-}
+        // Aplicar filtros iniciales
+        this.aplicarFiltro();
+      },
+      error: (err) => console.error("Error al cargar historial", err)
+    });
+  }
 
 
 
@@ -150,28 +153,28 @@ export class TicketsDetailsComponent implements OnInit {
   }
 
   agregarComentario() {
-  if (!this.nuevoComentario.trim() || !this.ticket) {
-    return;
-  }
-
-  this.enviandoComentario = true;
-
-  const formData = new FormData();
-  formData.append('rol', 'usuario');
-  formData.append('comentario', this.nuevoComentario);
-
-  this.ticketsService.agregarComentario(this.ticket.idTicket, formData).subscribe({
-    next: () => {
-      this.nuevoComentario = '';
-      this.enviandoComentario = false;
-      this.cargarHistorial(this.ticket.idTicket);
-    },
-    error: (err) => {
-      console.error('Error al agregar comentario', err);
-      this.enviandoComentario = false;
+    if (!this.nuevoComentario.trim() || !this.ticket) {
+      return;
     }
-  });
-}
+
+    this.enviandoComentario = true;
+
+    const formData = new FormData();
+    formData.append('rol', 'usuario');
+    formData.append('comentario', this.nuevoComentario);
+
+    this.ticketsService.agregarComentario(this.ticket.idTicket, formData).subscribe({
+      next: () => {
+        this.nuevoComentario = '';
+        this.enviandoComentario = false;
+        this.cargarHistorial(this.ticket.idTicket);
+      },
+      error: (err) => {
+        console.error('Error al agregar comentario', err);
+        this.enviandoComentario = false;
+      }
+    });
+  }
   estadoNombre(id: number) {
     return id === 1 ? 'Nuevo' :
       id === 2 ? 'Abierto' :
