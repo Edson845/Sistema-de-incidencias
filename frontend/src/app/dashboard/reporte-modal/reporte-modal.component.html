@@ -21,7 +21,7 @@
 
     <!-- TAB PDF -->
     <div *ngIf="tabActivaIndex === 0" class="tab-content">
-      <label>Fecha inicial:</label>
+      <!-- <label>Fecha inicial:</label>
       <input 
         type="date"
         [(ngModel)]="filtros.fechaInicio"
@@ -32,7 +32,7 @@
         type="date"
         [(ngModel)]="filtros.fechaFin"
       />
-
+      -->
       <label>Oficina (opcional):</label>
       <select [(ngModel)]="oficinaSeleccionada">
         <option value="">Todas las oficinas</option>
@@ -44,7 +44,7 @@
 
     <!-- TAB EXCEL -->
     <div *ngIf="tabActivaIndex === 1" class="tab-content">
-      <label>Fecha inicial:</label>
+      <!--<label>Fecha inicial:</label>
       <input 
         type="date"
         [(ngModel)]="filtros.fechaInicio"
@@ -55,7 +55,7 @@
         type="date"
         [(ngModel)]="filtros.fechaFin"
       />
-
+      -->
       <label>Oficina (opcional):</label>
       <select [(ngModel)]="oficinaSeleccionada">
         <option value="">Todas las oficinas</option>
