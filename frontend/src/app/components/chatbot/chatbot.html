@@ -10,10 +10,11 @@
 
   <div class="chat-body">
     <div *ngFor="let msg of mensajes" 
-         [class.user]="msg.emisor === 'user'" 
-         [class.bot]="msg.emisor === 'bot'">
-      {{ msg.texto }}
+        [class.user]="msg.emisor === 'user'" 
+        [class.bot]="msg.emisor === 'bot'">
+      <div [innerHTML]="msg.texto | formatoHTML"></div>
     </div>
+
 
     <div class="loader" *ngIf="loading">Escribiendo...</div>
   </div>
@@ -22,4 +23,8 @@
     <input [(ngModel)]="mensaje" placeholder="Escribe tu duda..." (keyup.enter)="enviarMensaje()">
     <button (click)="enviarMensaje()">➤</button>
   </div>
+  <button *ngIf="mostrarBotonTicket" class="btn-ticket" (click)="abrirTicket()">
+  📩 Abrir Ticket de Soporte
+</button>
+
 </div>

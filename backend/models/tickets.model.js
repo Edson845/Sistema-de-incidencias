@@ -199,16 +199,17 @@ export async function actualizarEstadoTecnico(idTicket, nuevoEstado) {
 }
 
 export async function guardarComentario(dni, idTicket, contenido, adjunto, tipo) {
-  await pool.query(
+  const [result] = await pool.query(
     `INSERT INTO comentarios (dni_usuarioComenta, idTicket, contenido, adjunto, tipo)
      VALUES (?, ?, ?, ?, ?)`,
     [dni, idTicket, contenido, adjunto, tipo]
   );
+  return result; 
 }
 
 export async function buscarTicketPorId(idTicket) {
-  const [rows] = await pool.query(
-    `
+  // Obtener datos del ticket
+  const [rows] = await pool.query(`
     SELECT 
       t.*,
       u.nombres AS nombreUsuario,
@@ -225,11 +226,29 @@ export async function buscarTicketPorId(idTicket) {
     LEFT JOIN prioridad p ON t.idPrioridad = p.idPrioridad
     LEFT JOIN estado e ON t.idEstado = e.idEstado
     WHERE t.idTicket = ?
-    `,
-    [idTicket]
-  );
-   return rows[0];
+  `, [idTicket]);
+
+  const ticket = rows[0];
+
+  // Obtener comentario del usuario y observación del técnico
+  const [comentarios] = await pool.query(`
+    SELECT contenido, tipo
+    FROM comentarios
+    WHERE idTicket = ?
+      AND tipo IN ('calificacion', 'observacion')
+  `, [idTicket]);
+
+  const comentarioUsuario = comentarios.find(c => c.tipo === 'calificacion');
+  const observacionTecnico = comentarios.find(c => c.tipo === 'observacion');
+
+  return {
+    ...ticket,
+    comentario: comentarioUsuario?.contenido || null,
+    observacionTecnico: observacionTecnico?.contenido || null
+  };
 }
+
+
 export async function obtenerEstadoTicketModelo(idTicket) {
   const [rows] = await pool.query(
     `
@@ -254,19 +273,34 @@ export async function obtenerComentariosTicketModelo(idTicket) {
         c.contenido,
         c.adjunto,
         c.tipo,
-        u.nombres,
-        u.apellidos,
-        r.nombreRol
+        c.fechaCreacion,
+
+        u.nombres AS nombreUsuario,
+        u.apellidos AS apellidoUsuario,
+
+        COALESCE(
+          (SELECT r.nombreRol 
+           FROM rolusuario ru
+           INNER JOIN rol r ON r.idRol = ru.idRol
+           WHERE ru.dni = u.dni
+           LIMIT 1
+          ), 
+          'Sin Rol'
+        ) AS rolUsuario
       FROM comentarios c
-      LEFT JOIN usuario u ON c.dni_usuarioComenta = u.dni
-      LEFT JOIN rolusuario ru ON ru.dni = u.dni
-      LEFT JOIN rol r ON r.idRol = ru.idRol
+      LEFT JOIN usuario u 
+            ON u.dni = c.dni_usuarioComenta
       WHERE c.idTicket = ?
+      ORDER BY c.fechaCreacion DESC
     `,
     [idTicket]
   );
+
   return rows;
 }
+
+
+
 export async function obtenerHerramientasTicketModelo(idTicket) {
   const [rows] = await pool.query(
     `
@@ -328,38 +362,77 @@ export async function guardarObservacionTecnico(idTicket, observacion, archivo, 
 export async function obtenerHistorialPorTicket(idTicket) {
   try {
     const sql = `
+      -- Comentarios del ticket
       SELECT 
-          c.fechaCreacion AS fechaCreacion,
-          c.tipo AS tipo,
-          c.contenido AS contenido,
-          c.dni_usuarioComenta AS nombres,  -- devolveremos el DNI como "nombres"
-          '' AS apellidos,
-          'Comentario' AS nombreRol,
-          c.adjunto AS adjunto
+          c.fechaCreacion,
+          c.tipo,
+          c.contenido,
+
+          u.nombres AS nombres,
+          u.apellidos AS apellidos,
+
+          COALESCE(r.nombreRol, 'Sin rol') AS nombreRol,
+
+          c.adjunto
       FROM comentarios c
+      LEFT JOIN usuario u ON u.dni = c.dni_usuarioComenta
+      LEFT JOIN rolusuario ru ON ru.dni = u.dni
+      LEFT JOIN rol r ON r.idRol = ru.idRol
       WHERE c.idTicket = ?
 
       UNION ALL
 
+      -- Historial del estado del ticket
       SELECT 
-          h.fechaCreacion AS fechaCreacion,
+          h.fechaCreacion,
           'estado' AS tipo,
           CONCAT(h.accion, ' | Estado nuevo: ', h.estadoNuevo) AS contenido,
-          h.dni_usuarioModifica AS nombres,  -- devolveremos el DNI
-          '' AS apellidos,
-          'Sistema' AS nombreRol,
+
+          u2.nombres AS nombres,
+          u2.apellidos AS apellidos,
+
+          COALESCE(r2.nombreRol, 'Sistema') AS nombreRol,
+
           NULL AS adjunto
       FROM historial h
+      LEFT JOIN usuario u2 ON u2.dni = h.dni_usuarioModifica
+      LEFT JOIN rolusuario ru2 ON ru2.dni = u2.dni
+      LEFT JOIN rol r2 ON r2.idRol = ru2.idRol
       WHERE h.idTicket = ?
 
-      ORDER BY fechaCreacion ASC;
+      ORDER BY fechaCreacion DESC;
     `;
 
     const [rows] = await pool.query(sql, [idTicket, idTicket]);
     return rows;
 
   } catch (error) {
-    console.error("❌ Error en obtenerHistorialPorTicket (model):", error);
+    console.error("❌ Error en obtenerHistorialPorTicket:", error);
     throw error;
   }
 }
+
+export async function obtenerComentarioPorId(idComentario) {
+  const [rows] = await pool.query(
+    `
+      SELECT 
+        c.idComentario,
+        c.contenido,
+        c.adjunto,
+        c.tipo,
+        c.fechaCreacion,
+        u.nombres,
+        u.apellidos,
+        r.nombreRol
+      FROM comentarios c
+      LEFT JOIN usuario u ON c.dni_usuarioComenta = u.dni
+      LEFT JOIN rolusuario ru ON ru.dni = u.dni
+      LEFT JOIN rol r ON r.idRol = ru.idRol
+      WHERE c.idComentario = ?
+    `,
+    [idComentario]
+  );
+  return rows[0];
+}
+
+

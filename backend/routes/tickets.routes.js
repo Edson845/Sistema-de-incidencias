@@ -45,9 +45,6 @@ const upload = multer({
   }
 });
 
-// ----------------------------------------------------------
-// 🔵 RUTAS ESPECÍFICAS (DEBEN IR PRIMERO)
-// ----------------------------------------------------------
 router.get('/mios', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), getTicketsUsuario);
 router.get('/categorias', verificarToken, obtenerCategorias);
 router.get('/detallado', verificarToken, obtenerTicketsDetallado);

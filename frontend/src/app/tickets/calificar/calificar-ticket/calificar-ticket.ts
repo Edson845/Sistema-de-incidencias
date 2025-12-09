@@ -13,6 +13,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 export class CalificarTicket {
 
   rol: string = '';
+  idTicket: number = 0;
   calificacion: number = 0;
   comentario: string = '';
   observacionTecnico: string = '';
@@ -21,16 +22,14 @@ export class CalificarTicket {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<CalificarTicket>
-  ) {this.rol = (data?.rol ?? '').toLowerCase(); }
+    
+  ) {console.log("DATA RECIBIDA:", data);
+    this.rol = (data?.rol ?? '').toLowerCase();
+  this.idTicket = data?.idTicket ?? 0; }
 
   ngOnInit() {
-    //this.rol = (this.data?.rol ?? '').toLowerCase();  // <--- evita null
+    this.rol = (this.data?.rol ?? '').toLowerCase();  // <--- evita null
     console.log("ROL RECIBIDO EN MODAL:", this.rol);
-  }
-  adjunto: File[] = [];
-  onFileSelected(event: any) {
-    this.adjunto = Array.from(event.target.files);
-    console.log("📎 Archivos seleccionados por técnico:", this.adjunto);
   }
   guardar() {
     let payload: any = {rol : this.rol};
@@ -42,15 +41,6 @@ export class CalificarTicket {
         comentario: this.comentario
       };
     }
-
-    if (this.rol === 'tecnico') {
-      payload = {
-        rol: this.rol,
-        observacionTecnico: this.observacionTecnico,
-        adjunto: this.adjunto
-      };
-    }
-
     this.dialogRef.close(payload);
   }
 
@@ -64,7 +54,6 @@ export class CalificarTicket {
 
   getSubtitle(): string {
     if (this.rol === 'usuario') return 'Tu opinión nos ayuda a mejorar';
-    if (this.rol === 'tecnico') return 'Registra las observaciones del trabajo realizado';
     if (this.rol === 'admin') return 'Visualización de la evaluación completa';
     return '';
   }

@@ -113,7 +113,7 @@
           </div>
 
           <div class="timeline-card">
-            <h4 class="timeline-status">{{ getStatusTitle(item.tipo) }}</h4>
+            <h4 class="timeline-status">{{ getStatusTitle(item.tipo, item.nombreRol) }}</h4>
 
             <p class="timeline-description">{{ item.contenido }}</p>
 
@@ -160,7 +160,7 @@
     <button class="btn-action btn-cerr" (click)="cambiarEstado(6)" *ngIf="rolUsuario === 'admin' && ticket.idEstado !== 6 && ticket.idEstado !== 5">
       <mat-icon>lock</mat-icon> No procede
     </button>
-    <button class="btn-action btn-cerr" (click)="abrirEvaluacion(ticket.idTicket)" *ngIf="rolUsuario === 'admin' && ticket.idEstado !== 6">
+    <button class="btn-action btn-cerr" (click)="abrirEvaluacion(ticket)" *ngIf="rolUsuario === 'admin' && ticket.idEstado !== 6">
       <mat-icon>lock</mat-icon> calificacion
     </button>
   </div>

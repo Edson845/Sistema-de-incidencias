@@ -99,42 +99,6 @@
     </div>
   </div>
 
-  <!-- ⭐ Vista para TECNICO -->
-  <div *ngIf="rol === 'tecnico'" class="tecnico-section">
-
-    <div class="input-group">
-      <label>Observación Técnica <span class="required">*</span></label>
-      <textarea [(ngModel)]="observacionTecnico"
-        placeholder="Describe las acciones realizadas, soluciones aplicadas o hallazgos relevantes..."
-        rows="3"></textarea>
-    </div>
-
-    <div class="upload-section">
-      <label>Adjuntar Archivos <span class="optional">(Opcional)</span></label>
-      <div class="upload-area">
-        <input type="file" (change)="onFileSelected($event)" multiple id="fileInput" class="file-input" />
-        <label for="fileInput" class="upload-label">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <span>Haz clic para seleccionar archivos</span>
-          <small>o arrastra y suelta aquí</small>
-        </label>
-      </div>
-
-      <!-- Lista de archivos seleccionados -->
-      <div class="file-list" *ngIf="adjunto.length > 0">
-        <div class="file-item" *ngFor="let file of adjunto; let i = index">
-          <span class="file-icon">📎</span>
-          <span class="file-name">{{ file.name }}</span>
-          <span class="file-size">({{ getFileSize(file.size) }})</span>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ⭐ Vista para ADMIN -->
   <div *ngIf="rol === 'admin'" class="admin-section">

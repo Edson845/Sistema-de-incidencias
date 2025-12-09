@@ -8,6 +8,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CalificarTicket } from '../calificar/calificar-ticket/calificar-ticket';
 import { MatDialog } from '@angular/material/dialog';
+import { SocketService } from '../../services/socket.service';
+import { io, Socket } from 'socket.io-client';
 
 @Component({
   selector: 'app-tickets-details',
@@ -35,7 +37,8 @@ export class TicketsDetailsComponent implements OnInit {
     private router: Router,
     private ticketsService: TicketsService,
     private authService: AuthService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private socketService: SocketService
 
   ) { }
 
@@ -57,6 +60,7 @@ export class TicketsDetailsComponent implements OnInit {
     this.cargarTicket(idTicket);
     this.cargarHerramientas(idTicket);
     this.cargarHistorial(idTicket);
+    this.escucharNuevosComentarios(idTicket);
   }
 
   cargarTicket(id: number) {
@@ -87,34 +91,41 @@ export class TicketsDetailsComponent implements OnInit {
       }
     });
   }
-  abrirEvaluacion(idTicket: number) {
-    const rol = (localStorage.getItem('rol') || '').toLowerCase();
-    const dialogRef = this.dialog.open(CalificarTicket, {
-      width: '550px',
-      maxWidth: '95vw',
-      maxHeight: '90vh',
-      autoFocus: false,
-      data: { idTicket, rol }
-    });
+abrirEvaluacion(ticket: any) {
+  const rol = (localStorage.getItem('rol') || '').toLowerCase();
 
-    dialogRef.afterClosed().subscribe(res => {
-      if (!res) return;
-      const formData = new FormData();
-      formData.append("rol", res.rol);
-      if (res.rol === 'tecnico') {
-        formData.append("observacionTecnico", res.observacionTecnico);
-        formData.append('resolvio', 'true'); // ✅ Marca el ticket como resuelto
-      }
-      if (res.archivos && res.archivos.length > 0) {
-        res.archivos.forEach((file: File) => formData.append("fotos", file));
-      }
+  const dialogRef = this.dialog.open(CalificarTicket, {
+    width: '550px',
+    maxWidth: '95vw',
+    maxHeight: '90vh',
+    autoFocus: false,
+    data: {
+      idTicket: ticket.idTicket,
+      rol,
+      calificacion: ticket.calificacion,
+      comentario: ticket.comentario,
+      observacionTecnico: ticket.observacionTecnico
+    }
+  });
 
-      this.ticketsService.calificarTicket(idTicket, formData).subscribe({
-        next: () => this.cargarTicket(idTicket),
-        error: (err) => console.error("Error al calificar:", err)
-      });
+  dialogRef.afterClosed().subscribe(res => {
+    if (!res) return;
+
+    const formData = new FormData();
+    formData.append("rol", res.rol);
+
+    if (res.rol === 'admin') {
+      formData.append("observacionTecnico", res.observacionTecnico);
+      formData.append('resolvio', 'true');
+    }
+
+    this.ticketsService.calificarTicket(ticket.idTicket, formData).subscribe({
+      next: () => this.cargarTicket(ticket.idTicket),
+      error: (err) => console.error("Error al calificar:", err)
     });
-  }
+  });
+}
+
   cargarHistorial(id: number) {
     this.ticketsService.getHistorialCompleto(id).subscribe({
       next: (data: any[]) => {
@@ -126,7 +137,7 @@ export class TicketsDetailsComponent implements OnInit {
 
         // Ordenar por fecha (ASC o DESC según tu diseño)
         this.historial.sort((a, b) =>
-          new Date(a.fechaCreacion).getTime() - new Date(b.fechaCreacion).getTime()
+          new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime()
         );
 
         // Aplicar filtros iniciales
@@ -199,11 +210,51 @@ export class TicketsDetailsComponent implements OnInit {
     return 'badge-default';
   }
 
-  getStatusTitle(tipo: string): string {
-    if (tipo === 'observacion') return 'Observación del Técnico';
-    if (tipo === 'comentario') return 'Comentario del Usuario';
-    return 'Actualización';
+  getStatusTitle(tipo: string, rol: string): string {
+  if (tipo === 'estado') return 'Actualización de Estado';
+
+  if (tipo === 'observacion') {
+    return rol === 'Técnico' || rol === 'Tecnico'
+      ? 'Observación del Técnico'
+      : `Observación (${rol})`;
   }
+
+  if (tipo === 'comentario') {
+    return rol === 'Usuario'
+      ? 'Comentario del Usuario'
+      : rol === 'Administrador'
+        ? 'Comentario del Administrador'
+        : `Comentario del ${rol}`;
+  }
+
+  return 'Actualización';
+}
+
+escucharNuevosComentarios(idTicket: number) {
+  this.socketService.on<any>('nuevo-comentario').subscribe((data) => {
+
+    console.log("📥 Comentario recibido vía socket:", data);
+
+    // Confirmar que es del ticket actual
+    if (Number(data.idTicket) === idTicket && data.comentario) {
+
+      const nuevoComentario = data.comentario;
+
+      // Agregarlo al historial
+      this.historial.push(nuevoComentario);
+
+      // Ordenar por fecha
+      this.historial.sort((a, b) =>
+        new Date(a.fechaCreacion).getTime() -
+        new Date(b.fechaCreacion).getTime()
+      );
+
+      // Aplicar filtro
+      this.aplicarFiltro();
+    }
+  });
+}
+
 
   volver() {
     this.router.navigate(['/tickets']);

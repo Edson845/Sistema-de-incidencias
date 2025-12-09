@@ -307,10 +307,9 @@ export async function calificarTicketServicio(params) {
     rol,
     calificacion,
     comentario,
-    observacionTecnico,
     adjunto,
-    dniUsuario,
-    resolvio
+    tipo="calificacion",
+    dniUsuario
   } = params;
 
   // -------------------------
@@ -325,7 +324,7 @@ export async function calificarTicketServicio(params) {
       idTicket,
       comentario || "Sin comentario",
       adjunto,
-      "calificacion"
+      tipo
     );
 
     await registrarHistorial({
@@ -362,13 +361,20 @@ export async function obtenerEficienciaTecnicosServicio() {
   return lista;
 }
 export async function agregarComentarioService(idTicket, comentario, dniUsuario, adjunto) {
-  return ticketModel.guardarComentario(
+  const nuevoComentario = await ticketModel.guardarComentario(
     dniUsuario,
     idTicket,
     comentario,
     adjunto,
     "comentario"
   );
+  const comentarioCompleto = await ticketModel.obtenerComentarioPorId(nuevoComentario.insertId);
+  const io = getIO();
+  io.emit("nuevo-comentario", {
+    idTicket,
+    comentario: comentarioCompleto
+  });
+  return comentarioCompleto;
 }
 export async function agregarObservacionTecnico({ idTicket, observacionTecnico, archivo, usuarioModifica }) {
   try {
