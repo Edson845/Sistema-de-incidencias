@@ -91,7 +91,7 @@ export class Asignar {
     this.ticketsService.asignarTicket(this.ticketSeleccionado, dniTecnico, this.herramientasSeleccionadas)
       .subscribe({
         next: () => {
-          this.whatsappService.enviarWhatsApp(tecnico.celular, `Se te ha asignado el ticket #${this.ticketSeleccionado}`).subscribe();
+          this.whatsappService.enviarWhatsApp(tecnico.celular, `Se te ha asignado el ticket #${this.ticketSeleccionado} vea el portal para mas detalles`).subscribe();
           this.dialogRef.close({ ticketAsignado: true });
         },
         error: (err) => console.error('❌ Error al asignar ticket:', err)

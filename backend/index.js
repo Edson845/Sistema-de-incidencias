@@ -5,6 +5,10 @@ import helmet from 'helmet';
 import multer from 'multer';
 import http from 'http';
 import { initSocket } from './socket.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 import authRoutes from './routes/auth.routes.js';
 import ticketsRoutes from './routes/tickets.routes.js';
@@ -46,7 +50,8 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads/tickets', express.static(path.resolve('uploads/tickets')));
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', verificarToken,ticketsRoutes);
 app.use('/api/usuarios',verificarToken, usuariosRoutes);

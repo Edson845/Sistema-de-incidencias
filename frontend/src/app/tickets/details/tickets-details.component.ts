@@ -62,6 +62,11 @@ export class TicketsDetailsComponent implements OnInit {
     this.cargarHistorial(idTicket);
     this.escucharNuevosComentarios(idTicket);
   }
+    // tickets-details.component.ts
+
+  isImage(archivo: string): boolean {
+    return !!archivo.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/);
+  }
 
   cargarTicket(id: number) {
     this.ticketsService.getTicket(id).subscribe({
