@@ -25,7 +25,13 @@ const upload = multer();
 const server = http.createServer(app);
 const io = initSocket(server);
 app.use(cors({
-  origin: 'http://localhost:4200', // Permite tu app Angular
+  origin: [
+    'http://localhost:4200',     // Angular
+    'exp://*',                   // Expo Go
+    'http://192.168.1.*',        // Teléfonos en la red
+    'http://192.168.0.*'
+  ],
+  // Permite tu app Angular
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
@@ -37,11 +43,16 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: ["'self'", "http://localhost:3000", "http://localhost:4200"],
-        connectSrc: ["'self'", "http://localhost:3000", "http://localhost:4200"],
+        defaultSrc: ["'self'"],
+        connectSrc: [
+          "'self'",
+          "http://localhost:3000",
+          "http://localhost:4200",
+          "http://192.168.0.0/16"   // permite toda la red local
+        ],
         imgSrc: ["'self'", "data:", "blob:"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       }
     },
     crossOriginEmbedderPolicy: false,
@@ -53,8 +64,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/uploads/tickets', express.static(path.resolve('uploads/tickets')));
 app.use('/api/auth', authRoutes);
-app.use('/api/tickets', verificarToken,ticketsRoutes);
-app.use('/api/usuarios',verificarToken, usuariosRoutes);
+app.use('/api/tickets', verificarToken, ticketsRoutes);
+app.use('/api/usuarios', verificarToken, usuariosRoutes);
 app.use('/api/estadisticas', estadisticasRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/catalogos', verificarToken, catalogosRoutes);
