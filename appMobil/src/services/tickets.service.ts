@@ -40,5 +40,19 @@ export const TicketsService = {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
+    },
+    obtenerTecnicos: async () => {
+        const response = await client.get('/usuarios/tecnicos');
+        return response.data;
+    },
+    asignarTicket: async (idTicket: number, idUsuario: number) => {
+        // Backend expects { asignadoA: idUsuario, herramientas: [] } inside body
+        // Route likely: router.put('/asignar/:id', ...); OR router.put('/:id/asignar')?
+        // Checking backend service: `asignarTicketConHerramientasService`
+        const response = await client.put(`/tickets/asignar/${idTicket}`, {
+            asignadoA: idUsuario,
+            herramientas: []
+        });
+        return response.data;
     }
 };

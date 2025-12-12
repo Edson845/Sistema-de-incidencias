@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';
 import client from '../api/client';
 import { User } from '../types';
+import WebSocketService from '../services/websocket.service';
 
 interface AuthContextType {
     user: User | null;
@@ -22,6 +23,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         checkLogin();
     }, []);
+
+    useEffect(() => {
+        if (token) {
+            WebSocketService.connect(token);
+        } else {
+            WebSocketService.disconnect();
+        }
+    }, [token]);
 
     const checkLogin = async () => {
         try {
@@ -71,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await SecureStore.deleteItemAsync('token');
         setToken(null);
         setUser(null);
+        WebSocketService.disconnect();
     };
 
     return (

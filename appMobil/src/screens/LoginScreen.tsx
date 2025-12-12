@@ -1,8 +1,10 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+
+const logo = require('../../assets/logo_01.png');
 
 export default function LoginScreen() {
     const [identificador, setIdentificador] = useState('');
@@ -34,6 +36,7 @@ export default function LoginScreen() {
             >
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
+                        <Image source={logo} style={styles.logo} resizeMode="contain" />
                         <Text style={styles.title}>Sistema de Incidencias</Text>
                         <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
                     </View>
@@ -90,6 +93,11 @@ const styles = StyleSheet.create({
     header: {
         alignItems: 'center',
         marginBottom: 40,
+    },
+    logo: {
+        width: 150,
+        height: 150,
+        marginBottom: 20,
     },
     title: {
         fontSize: 28,

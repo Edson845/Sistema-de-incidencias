@@ -1,10 +1,14 @@
 export interface User {
+    id?: number;
+    idUsuario?: number; // Backend might send id or idUsuario
     nombre: string;
+    apellido?: string;
     email: string;
     rol: string;
     // Add other fields if present in decoded token
     username?: string;
     role?: string;
+    dni?: string;
 }
 
 export interface Ticket {

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { TicketsService } from '../services/tickets.service';
-import { Ticket, TICKET_STATES } from '../types';
+import { Ticket, TICKET_STATES, User } from '../types';
 import { format } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
@@ -23,11 +23,15 @@ export default function TicketDetailScreen() {
 
     // Modal controls
     const [modalVisible, setModalVisible] = useState(false);
-    const [modalType, setModalType] = useState<'resolver' | 'no-resuelto' | 'calificar' | null>(null);
+    const [modalType, setModalType] = useState<'resolver' | 'no-resuelto' | 'calificar' | 'asignar' | null>(null);
     const [observacion, setObservacion] = useState('');
     const [calificacion, setCalificacion] = useState(5);
     const [adjunto, setAdjunto] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
+
+    // Admin Assignment State
+    const [tecnicos, setTecnicos] = useState<User[]>([]);
+    const [selectedTecnico, setSelectedTecnico] = useState<number | null>(null);
 
     const loadTicket = async () => {
         try {
@@ -45,6 +49,17 @@ export default function TicketDetailScreen() {
     useEffect(() => {
         loadTicket();
     }, [idTicket]);
+
+    // Load technicians if admin opens assignment modal
+    const loadTecnicos = async () => {
+        try {
+            const data = await TicketsService.obtenerTecnicos();
+            setTecnicos(data);
+        } catch (error) {
+            console.error("Error loading technicians", error);
+            Alert.alert("Error", "No se pudieron cargar los técnicos");
+        }
+    };
 
     const handleEstadoChange = async (nuevoEstado: number) => {
         try {
@@ -69,40 +84,30 @@ export default function TicketDetailScreen() {
     };
 
     const submitAction = async () => {
-        if (modalType === 'resolver' || modalType === 'no-resuelto') {
-            if (!observacion.trim()) {
-                Alert.alert("Error", "La observación es requerida");
-                return;
-            }
-        }
-
         setActionLoading(true);
         try {
             const formData = new FormData();
 
-            if (modalType === 'resolver') { // Técnico resuelve (Estado 4)
+            if (modalType === 'resolver') {
+                if (!observacion.trim()) { Alert.alert("Error", "Observación requerida"); setActionLoading(false); return; }
                 formData.append('observacionTecnico', observacion);
                 if (adjunto) {
                     const file = { uri: adjunto.uri, name: adjunto.name, type: adjunto.mimeType || 'application/octet-stream' } as any;
-                    formData.append('adjunto', file); // Nombre campo puede variar, revisar controller
-                    // Controller 'agregarObservacionTecnico' usa upload.single('adjunto')? Revisar routes.
-                    // En routes: upload.single('adjunto') para observacion/:idTicket
+                    formData.append('adjunto', file);
                 }
                 await TicketsService.agregarObservacionTecnico(idTicket, formData);
                 Alert.alert("Éxito", "Ticket resuelto");
-            } else if (modalType === 'no-resuelto') { // Técnico marca no resuelto (Estado 7)
+
+            } else if (modalType === 'no-resuelto') {
+                if (!observacion.trim()) { Alert.alert("Error", "Observación requerida"); setActionLoading(false); return; }
+                if (!adjunto) { Alert.alert("Error", "Adjunto requerido"); setActionLoading(false); return; }
                 formData.append('observacion', observacion);
-                if (!adjunto) {
-                    Alert.alert("Error", "El archivo adjunto es requerido para marcar como No Resuelto");
-                    setActionLoading(false);
-                    return;
-                }
                 const file = { uri: adjunto.uri, name: adjunto.name, type: adjunto.mimeType || 'application/octet-stream' } as any;
-                formData.append('archivo', file); // Controller usa 'archivo' en req.file? o 'adjunto'?
-                // Routes: router.put('/:id/no-resuelto', upload.single('archivo'), marcarNoResuelto);
+                formData.append('archivo', file);
                 await TicketsService.marcarNoResuelto(idTicket, formData);
                 Alert.alert("Éxito", "Marcado como no resuelto");
-            } else if (modalType === 'calificar') { // Usuario califica (Estado 5)
+
+            } else if (modalType === 'calificar') {
                 formData.append('rol', 'usuario');
                 formData.append('calificacion', calificacion.toString());
                 formData.append('comentario', observacion || 'Sin comentario');
@@ -113,11 +118,17 @@ export default function TicketDetailScreen() {
                 }
                 await TicketsService.calificarTicket(idTicket, formData);
                 Alert.alert("Éxito", "Ticket calificado y cerrado");
+
+            } else if (modalType === 'asignar') {
+                if (!selectedTecnico) { Alert.alert("Error", "Seleccione un técnico"); setActionLoading(false); return; }
+                await TicketsService.asignarTicket(idTicket, selectedTecnico);
+                Alert.alert("Éxito", "Ticket asignado correctamente");
             }
 
             setModalVisible(false);
             setObservacion('');
             setAdjunto(null);
+            setSelectedTecnico(null);
             loadTicket();
         } catch (error) {
             console.error(error);
@@ -127,10 +138,14 @@ export default function TicketDetailScreen() {
         }
     };
 
-    const openModal = (type: 'resolver' | 'no-resuelto' | 'calificar') => {
+    const openModal = async (type: 'resolver' | 'no-resuelto' | 'calificar' | 'asignar') => {
         setModalType(type);
         setObservacion('');
         setAdjunto(null);
+        setSelectedTecnico(null);
+        if (type === 'asignar') {
+            await loadTecnicos();
+        }
         setModalVisible(true);
     };
 
@@ -138,6 +153,18 @@ export default function TicketDetailScreen() {
         if (!ticket || !user) return null;
         const rol = String(user.rol || '').toLowerCase();
         const estado = ticket.idEstado;
+
+        // Admin Assignment Button
+        if (rol === 'admin' && (estado === 1 || estado === 2 || estado === 3)) {
+            // Show 'Asignar' button always or just for unassigned/reassignable?
+            // Assuming Admin can always re-assign if not closed.
+            return (
+                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#6366f1', marginBottom: 15 }]} onPress={() => openModal('asignar')}>
+                    <Ionicons name="person-add" size={20} color="#fff" />
+                    <Text style={styles.actionBtnText}>Asignar Técnico</Text>
+                </TouchableOpacity>
+            );
+        }
 
         if (rol === 'tecnico' || rol === 'admin') {
             if (estado === 2) { // Abierto
@@ -235,38 +262,61 @@ export default function TicketDetailScreen() {
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>
                             {modalType === 'resolver' ? 'Resolver Ticket' :
-                                modalType === 'no-resuelto' ? 'Marcar No Resuelto' : 'Calificar Atención'}
+                                modalType === 'no-resuelto' ? 'Marcar No Resuelto' :
+                                    modalType === 'asignar' ? 'Asignar Técnico' : 'Calificar Atención'}
                         </Text>
 
-                        {modalType === 'calificar' ? (
-                            <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 20 }}>
-                                {[1, 2, 3, 4, 5].map(star => (
-                                    <TouchableOpacity key={star} onPress={() => setCalificacion(star)}>
-                                        <Ionicons name={star <= calificacion ? "star" : "star-outline"} size={32} color="#f59e0b" />
+                        {modalType === 'asignar' ? (
+                            <ScrollView style={{ maxHeight: 300, marginBottom: 20 }}>
+                                {tecnicos.map(tec => (
+                                    <TouchableOpacity
+                                        key={tec.idUsuario || tec.dni} // Fallback to whatever ID is available
+                                        style={[styles.techItem, selectedTecnico === (tec.idUsuario || tec.id) && styles.techItemActive]}
+                                        onPress={() => setSelectedTecnico(tec.idUsuario || tec.id as number)}
+                                    >
+                                        <Ionicons
+                                            name={selectedTecnico === (tec.idUsuario || tec.id) ? "radio-button-on" : "radio-button-off"}
+                                            size={20}
+                                            color={selectedTecnico === (tec.idUsuario || tec.id) ? "#0a3a6b" : "#6b7280"}
+                                        />
+                                        <Text style={styles.techName}>{tec.nombre} {tec.apellido || ''}</Text>
                                     </TouchableOpacity>
                                 ))}
-                            </View>
-                        ) : null}
+                                {tecnicos.length === 0 && <Text>Cargando técnicos...</Text>}
+                            </ScrollView>
+                        ) : (
+                            <>
+                                {modalType === 'calificar' ? (
+                                    <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 20 }}>
+                                        {[1, 2, 3, 4, 5].map(star => (
+                                            <TouchableOpacity key={star} onPress={() => setCalificacion(star)}>
+                                                <Ionicons name={star <= calificacion ? "star" : "star-outline"} size={32} color="#f59e0b" />
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                ) : null}
 
-                        <Text style={styles.label}>
-                            {modalType === 'calificar' ? 'Comentario (Opcional)' : 'Observación / Motivo'}
-                        </Text>
-                        <TextInput
-                            style={styles.textArea}
-                            multiline
-                            numberOfLines={4}
-                            value={observacion}
-                            onChangeText={setObservacion}
-                            placeholder="Escriba los detalles..."
-                        />
+                                <Text style={styles.label}>
+                                    {modalType === 'calificar' ? 'Comentario (Opcional)' : 'Observación / Motivo'}
+                                </Text>
+                                <TextInput
+                                    style={styles.textArea}
+                                    multiline
+                                    numberOfLines={4}
+                                    value={observacion}
+                                    onChangeText={setObservacion}
+                                    placeholder="Escriba los detalles..."
+                                />
 
-                        {/* File Attachment for Actions */}
-                        <TouchableOpacity style={styles.fileButton} onPress={pickDocument}>
-                            <Ionicons name="attach" size={20} color="#0a3a6b" />
-                            <Text style={styles.fileButtonText}>
-                                {adjunto ? adjunto.name : (modalType === 'no-resuelto' ? "Adjuntar Evidencia (Requerido)" : "Adjuntar Archivo (Opcional)")}
-                            </Text>
-                        </TouchableOpacity>
+                                {/* File Attachment for Actions */}
+                                <TouchableOpacity style={styles.fileButton} onPress={pickDocument}>
+                                    <Ionicons name="attach" size={20} color="#0a3a6b" />
+                                    <Text style={styles.fileButtonText}>
+                                        {adjunto ? adjunto.name : (modalType === 'no-resuelto' ? "Adjuntar Evidencia (Requerido)" : "Adjuntar Archivo (Opcional)")}
+                                    </Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
 
                         <View style={styles.modalActions}>
                             <TouchableOpacity style={[styles.modalBtn, { backgroundColor: '#9ca3af' }]} onPress={() => setModalVisible(false)}>
@@ -307,5 +357,8 @@ const styles = StyleSheet.create({
     modalBtn: { flex: 1, padding: 12, borderRadius: 8, alignItems: 'center' },
     modalBtnText: { color: '#fff', fontWeight: 'bold' },
     fileButton: { flexDirection: 'row', alignItems: 'center', padding: 12, borderWidth: 1, borderColor: '#0a3a6b', borderStyle: 'dashed', borderRadius: 8, marginBottom: 15, justifyContent: 'center', backgroundColor: '#eef2ff' },
-    fileButtonText: { marginLeft: 8, color: '#0a3a6b', fontWeight: '500' }
+    fileButtonText: { marginLeft: 8, color: '#0a3a6b', fontWeight: '500' },
+    techItem: { flexDirection: 'row', alignItems: 'center', padding: 12, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
+    techItemActive: { backgroundColor: '#eef2ff' },
+    techName: { marginLeft: 10, fontSize: 16, color: '#374151' }
 });
