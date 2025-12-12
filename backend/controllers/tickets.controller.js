@@ -119,11 +119,39 @@ export async function asignarTicketConHerramientas(req, res) {
 
     await ticketService.asignarTicketConHerramientasService(id, asignadoA, herramientas, usuarioModifica);
 
-    res.json({ mensaje: 'Asignación realizada correctamente' });
-
+    res.status(200).json({ mensaje: "Ticket asignado exitosamente" });
   } catch (err) {
     console.error("❌ Error en asignarTicketConHerramientas:", err);
-    res.status(500).json({ mensaje: 'Error al asignar ticket' });
+    res.status(500).json({ mensaje: "Error al asignar ticket" });
+  }
+}
+
+export async function marcarNoResuelto(req, res) {
+  try {
+    const { id } = req.params;
+    const { observacion } = req.body;
+    const usuarioModifica = req.user?.dni;
+    const archivo = req.file?.filename || null;
+
+    if (!observacion || !observacion.trim()) {
+      return res.status(400).json({ mensaje: "El motivo es requerido" });
+    }
+
+    if (!archivo) {
+      return res.status(400).json({ mensaje: "El archivo es requerido" });
+    }
+
+    const resultado = await ticketService.marcarNoResueltoService({
+      idTicket: id,
+      observacion,
+      archivo,
+      usuarioModifica
+    });
+
+    return res.status(200).json(resultado);
+  } catch (error) {
+    console.error("❌ Error en marcarNoResuelto:", error);
+    return res.status(500).json({ mensaje: "Error al marcar como no resuelto" });
   }
 }
 
@@ -156,7 +184,7 @@ export async function calificarTicket(req, res) {
       : [];
 
     const adjunto = archivos.length > 0 ? archivos.join(",") : null;
-    
+
     const resultado = await ticketService.calificarTicketServicio({
       idTicket,
       rol,
@@ -166,7 +194,7 @@ export async function calificarTicket(req, res) {
       adjunto,
       dniUsuario,
       resolvio
-    }); 
+    });
 
     res.json(resultado);
 

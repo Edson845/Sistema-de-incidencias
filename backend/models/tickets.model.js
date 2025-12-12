@@ -1,5 +1,5 @@
 // models/ticket.model.js
-import  pool  from "../db.js";
+import pool from "../db.js";
 
 export async function obtenerEstado(idTicket) {
   const [rows] = await pool.query(
@@ -192,10 +192,10 @@ export async function actualizarCalificacion(idTicket, calificacion) {
   );
 }
 export async function actualizarEstadoTecnico(idTicket, nuevoEstado) {
-    await pool.query(
-      `UPDATE ticket SET idestado = ? WHERE idTicket = ?`,
-      [nuevoEstado, idTicket]
-    );
+  await pool.query(
+    `UPDATE ticket SET idestado = ? WHERE idTicket = ?`,
+    [nuevoEstado, idTicket]
+  );
 }
 
 export async function guardarComentario(dni, idTicket, contenido, adjunto, tipo) {
@@ -204,7 +204,7 @@ export async function guardarComentario(dni, idTicket, contenido, adjunto, tipo)
      VALUES (?, ?, ?, ?, ?)`,
     [dni, idTicket, contenido, adjunto, tipo]
   );
-  return result; 
+  return result;
 }
 
 export async function buscarTicketPorId(idTicket) {
@@ -373,7 +373,7 @@ export async function obtenerHistorialPorTicket(idTicket) {
 
           COALESCE(r.nombreRol, 'Sin rol') AS nombreRol,
 
-          c.adjunto
+          CAST(c.adjunto AS CHAR) AS adjunto
       FROM comentarios c
       LEFT JOIN usuario u ON u.dni = c.dni_usuarioComenta
       LEFT JOIN rolusuario ru ON ru.dni = u.dni
@@ -434,5 +434,26 @@ export async function obtenerComentarioPorId(idComentario) {
   );
   return rows[0];
 }
+
+export async function guardarObservacionNoResuelto(idTicket, observacion, archivo, dniTecnico) {
+  try {
+    const query = `
+      INSERT INTO comentarios (
+        dni_usuarioComenta,
+        idTicket,
+        contenido,
+        adjunto,
+        tipo
+      )
+      VALUES (?, ?, ?, ?, 'observacion')
+    `;
+
+    await pool.query(query, [dniTecnico, idTicket, observacion, archivo]);
+  } catch (error) {
+    console.error("❌ Error en guardarObservacionNoResuelto:", error);
+    throw error;
+  }
+}
+
 
 

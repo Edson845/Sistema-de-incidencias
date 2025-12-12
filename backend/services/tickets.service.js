@@ -109,7 +109,7 @@ export async function actualizarEstado({ idTicket, titulo, descripcion, estado, 
   return ticketActualizado;
 }
 
-export async function obtenerEstado(idTicket){
+export async function obtenerEstado(idTicket) {
   const [rows] = await pool.query(
     "SELECT idEstado FROM ticket WHERE idTicket = ?",
     [idTicket]
@@ -308,7 +308,7 @@ export async function calificarTicketServicio(params) {
     calificacion,
     comentario,
     adjunto,
-    tipo="calificacion",
+    tipo = "calificacion",
     dniUsuario
   } = params;
 
@@ -408,5 +408,36 @@ export async function servicioObtenerHistorial(idTicket) {
   } catch (error) {
     console.error("Error en servicioObtenerHistorial:", error);
     throw new Error("No se pudo obtener el historial del ticket.");
+  }
+}
+
+export async function marcarNoResueltoService({ idTicket, observacion, archivo, usuarioModifica }) {
+  try {
+    // 1. Guardar observación del técnico con archivo adjunto
+    await ticketModel.guardarObservacionNoResuelto(idTicket, observacion, archivo, usuarioModifica);
+
+    // 2. Actualizar estado del ticket a 7 (No resuelto)
+    await ticketModel.actualizarEstadoTecnico(idTicket, 7);
+
+    // 3. Registrar en historial
+    await registrarHistorial({
+      idTicket,
+      usuario: usuarioModifica,
+      accion: "marcar como no resuelto",
+      estadoAntiguo: 3,
+      estadoNuevo: 7,
+      tipo: "Estado"
+    });
+
+    // 4. Obtener ticket actualizado
+    const ticketActualizado = await ticketModel.obtenerTicketCompletoModel(idTicket);
+
+    // 5. Emitir socket
+    getIO().emit("ticket-actualizado", ticketActualizado);
+
+    return { mensaje: "Ticket marcado como no resuelto correctamente" };
+  } catch (error) {
+    console.error("❌ Error en marcarNoResueltoService:", error);
+    throw error;
   }
 }

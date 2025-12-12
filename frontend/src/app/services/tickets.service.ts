@@ -14,7 +14,7 @@ export class TicketsService {
     return this.http.get(`${this.apiUrl}/mios`);
   }
 
-  
+
 
   // Asignar ticket
   asignarTicket(idTicket: number, dniTecnico: string, herramientas: string[]): Observable<any> {
@@ -71,10 +71,14 @@ export class TicketsService {
   ObservacionTicket(idTicket: number, data: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}/observacion/${idTicket}`, data);
   }
-  agregarComentario(idTicket: number, formData:FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/comentarios/${idTicket}`,formData );
+  agregarComentario(idTicket: number, formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/comentarios/${idTicket}`, formData);
   }
   getHistorialCompleto(idTicket: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/historial/${idTicket}`);
-  } 
+  }
+
+  marcarNoResuelto(idTicket: number, datos: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${idTicket}/no-resuelto`, datos);
+  }
 }

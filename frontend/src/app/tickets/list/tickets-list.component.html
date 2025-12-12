@@ -81,7 +81,8 @@
                   'estado-pendiente': t.idEstado == 3,
                   'estado-resuelto': t.idEstado == 4,
                   'estado-cerrado': t.idEstado == 5,
-                  'estado-no-procede': t.idEstado==6
+                  'estado-no-procede': t.idEstado == 6,
+                  'estado-no-resuelto': t.idEstado == 7
                 }">
                 {{
                 t.idEstado == 1 ? 'Nuevo' :
@@ -90,6 +91,7 @@
                 t.idEstado == 4 ? 'Resuelto' :
                 t.idEstado == 5 ? 'Cerrado':
                 t.idEstado == 6 ? 'No procede' :
+                t.idEstado == 7 ? 'No resuelto' :
                 'Desconocido'
                 }}
               </span>

@@ -49,16 +49,10 @@
       </div>
       <div class="attachment-list">
         <ng-container *ngFor="let archivo of ticket.adjunto.split(',')">
-          <img 
-            *ngIf="isImage(archivo)"
-            [src]="'http://localhost:3000/uploads/tickets/' + archivo" 
-            alt="Archivo adjunto" 
+          <img *ngIf="isImage(archivo)" [src]="'http://localhost:3000/uploads/tickets/' + archivo" alt="Archivo adjunto"
             class="attachment-image">
-            
-          <a 
-            *ngIf="!isImage(archivo)"
-            [href]="'http://localhost:3000/uploads/tickets/' + archivo" 
-            target="_blank">
+
+          <a *ngIf="!isImage(archivo)" [href]="'http://localhost:3000/uploads/tickets/' + archivo" target="_blank">
             {{ archivo }}
           </a>
         </ng-container>
@@ -67,11 +61,11 @@
 
 
   </div>
-  
+
   <!-- Agregar Nuevo Comentario -->
   <div class="comment-form-section" *ngIf="ticket.idEstado !== 5 && ticket.idEstado !== 6">
     <h3 class="section-title">Agregar Comentario</h3>
-    <div class="comment-form" >
+    <div class="comment-form">
       <textarea [(ngModel)]="nuevoComentario" placeholder="Escribe tu comentario aquí..." rows="3"
         class="comment-textarea" [disabled]="enviandoComentario"></textarea>
       <button class="btn-submit-comment" (click)="agregarComentario()"
@@ -163,15 +157,66 @@
     </ul>
   </div>
 
+  <!-- Documentos Adjuntos de Observaciones -->
+  <div class="det-card" *ngIf="observacionesConAdjuntos.length > 0">
+    <h3><mat-icon>attach_file</mat-icon> Documentos Adjuntos (Observaciones)</h3>
+
+    <div class="adjuntos-grid">
+      <div *ngFor="let obs of observacionesConAdjuntos" class="adjunto-card">
+        <div class="adjunto-header">
+          <div class="adjunto-info">
+            <mat-icon class="adjunto-icon">{{isImage(obs.adjunto) ? 'image' : isPDF(obs.adjunto) ? 'picture_as_pdf' :
+              'description'}}</mat-icon>
+            <div class="adjunto-details">
+              <span class="adjunto-nombre">{{ obs.adjunto }}</span>
+              <small class="adjunto-fecha">{{ obs.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</small>
+            </div>
+          </div>
+          <div class="adjunto-actions">
+            <button class="btn-icon" (click)="descargarArchivo(obs.adjunto)" title="Descargar">
+              <mat-icon>download</mat-icon>
+            </button>
+            <button class="btn-icon" (click)="imprimirArchivo(obs.adjunto)" title="Imprimir">
+              <mat-icon>print</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Vista previa para imágenes -->
+        <div class="adjunto-preview" *ngIf="isImage(obs.adjunto)">
+          <img [src]="'http://localhost:3000/uploads/tickets/' + obs.adjunto" [alt]="obs.adjunto"
+            (click)="abrirVistaPrevia(obs.adjunto)">
+        </div>
+
+        <!-- Vista previa para PDFs -->
+        <div class="adjunto-preview pdf" *ngIf="isPDF(obs.adjunto)">
+          <iframe [src]="getSafeUrl('http://localhost:3000/uploads/tickets/' + obs.adjunto)" frameborder="0"></iframe>
+        </div>
+
+        <!-- Para otros archivos -->
+        <div class="adjunto-preview generic" *ngIf="!isImage(obs.adjunto) && !isPDF(obs.adjunto)">
+          <mat-icon>insert_drive_file</mat-icon>
+          <p>Vista previa no disponible</p>
+          <a [href]="'http://localhost:3000/uploads/tickets/' + obs.adjunto" target="_blank" class="btn-view">
+            Abrir archivo
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Acciones de estado -->
-  <div class="acciones-footer" >
-    <button class="btn-action btn-cerr" (click)="abrirEvaluacion(ticket.idTicket) " *ngIf="rolUsuario === 'tecnico' && ticket.idEstado === 3">
-      <mat-icon>lock</mat-icon> No Resuelto
+  <div class="acciones-footer">
+    <button class="btn-action btn-cerr" (click)="marcarNoResuelto(ticket.idTicket)"
+      *ngIf="rolUsuario === 'tecnico' && ticket.idEstado === 3">
+      <mat-icon>cancel</mat-icon> No Resuelto
     </button>
-    <button class="btn-action btn-cerr" (click)="cambiarEstado(6)" *ngIf="rolUsuario === 'admin' && ticket.idEstado !== 6 && ticket.idEstado !== 5">
+    <button class="btn-action btn-cerr" (click)="cambiarEstado(6)"
+      *ngIf="rolUsuario === 'admin' && ticket.idEstado !== 6 && ticket.idEstado !== 5">
       <mat-icon>lock</mat-icon> No procede
     </button>
-    <button class="btn-action btn-cerr" (click)="abrirEvaluacion(ticket)" *ngIf="rolUsuario === 'admin' && ticket.idEstado === 5">
+    <button class="btn-action btn-cerr" (click)="abrirEvaluacion(ticket)"
+      *ngIf="rolUsuario === 'admin' && ticket.idEstado === 5">
       <mat-icon>lock</mat-icon> calificacion
     </button>
   </div>

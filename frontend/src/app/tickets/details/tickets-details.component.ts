@@ -7,9 +7,11 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CalificarTicket } from '../calificar/calificar-ticket/calificar-ticket';
+import { ObservacionTecnico } from '../observacion-tecnico/observacion-tecnico';
 import { MatDialog } from '@angular/material/dialog';
 import { SocketService } from '../../services/socket.service';
 import { io, Socket } from 'socket.io-client';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-tickets-details',
@@ -28,6 +30,7 @@ export class TicketsDetailsComponent implements OnInit {
   historial: any[] = [];
   historialFiltrado: any[] = [];
   filtroActivo: string = 'todos'; // 'todos', 'comentario', 'observacion'
+  observacionesConAdjuntos: any[] = [];
 
   nuevoComentario: string = '';
   enviandoComentario: boolean = false;
@@ -38,8 +41,8 @@ export class TicketsDetailsComponent implements OnInit {
     private ticketsService: TicketsService,
     private authService: AuthService,
     private dialog: MatDialog,
-    private socketService: SocketService
-
+    private socketService: SocketService,
+    private sanitizer: DomSanitizer
   ) { }
 
   ngOnInit() {
@@ -62,7 +65,7 @@ export class TicketsDetailsComponent implements OnInit {
     this.cargarHistorial(idTicket);
     this.escucharNuevosComentarios(idTicket);
   }
-    // tickets-details.component.ts
+  // tickets-details.component.ts
 
   isImage(archivo: string): boolean {
     return !!archivo.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/);
@@ -96,40 +99,40 @@ export class TicketsDetailsComponent implements OnInit {
       }
     });
   }
-abrirEvaluacion(ticket: any) {
-  const rol = (localStorage.getItem('rol') || '').toLowerCase();
+  abrirEvaluacion(ticket: any) {
+    const rol = (localStorage.getItem('rol') || '').toLowerCase();
 
-  const dialogRef = this.dialog.open(CalificarTicket, {
-    width: '550px',
-    maxWidth: '95vw',
-    maxHeight: '90vh',
-    autoFocus: false,
-    data: {
-      idTicket: ticket.idTicket,
-      rol,
-      calificacion: ticket.calificacion,
-      comentario: ticket.comentario,
-      observacionTecnico: ticket.observacionTecnico
-    }
-  });
-
-  dialogRef.afterClosed().subscribe(res => {
-    if (!res) return;
-
-    const formData = new FormData();
-    formData.append("rol", res.rol);
-
-    if (res.rol === 'admin') {
-      formData.append("observacionTecnico", res.observacionTecnico);
-      formData.append('resolvio', 'true');
-    }
-
-    this.ticketsService.calificarTicket(ticket.idTicket, formData).subscribe({
-      next: () => this.cargarTicket(ticket.idTicket),
-      error: (err) => console.error("Error al calificar:", err)
+    const dialogRef = this.dialog.open(CalificarTicket, {
+      width: '550px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      autoFocus: false,
+      data: {
+        idTicket: ticket.idTicket,
+        rol,
+        calificacion: ticket.calificacion,
+        comentario: ticket.comentario,
+        observacionTecnico: ticket.observacionTecnico
+      }
     });
-  });
-}
+
+    dialogRef.afterClosed().subscribe(res => {
+      if (!res) return;
+
+      const formData = new FormData();
+      formData.append("rol", res.rol);
+
+      if (res.rol === 'admin') {
+        formData.append("observacionTecnico", res.observacionTecnico);
+        formData.append('resolvio', 'true');
+      }
+
+      this.ticketsService.calificarTicket(ticket.idTicket, formData).subscribe({
+        next: () => this.cargarTicket(ticket.idTicket),
+        error: (err) => console.error("Error al calificar:", err)
+      });
+    });
+  }
 
   cargarHistorial(id: number) {
     this.ticketsService.getHistorialCompleto(id).subscribe({
@@ -143,6 +146,11 @@ abrirEvaluacion(ticket: any) {
         // Ordenar por fecha (ASC o DESC según tu diseño)
         this.historial.sort((a, b) =>
           new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime()
+        );
+
+        // Filtrar observaciones con adjuntos
+        this.observacionesConAdjuntos = this.historial.filter(
+          item => item.tipo === 'observacion' && item.adjunto
         );
 
         // Aplicar filtros iniciales
@@ -209,6 +217,43 @@ abrirEvaluacion(ticket: any) {
       });
   }
 
+  marcarNoResuelto(idTicket: number) {
+    const dialogRef = this.dialog.open(ObservacionTecnico, {
+      width: '500px',
+      data: { idTicket, titulo: 'Marcar como No Resuelto', mensaje: 'Indique el motivo por el cual este ticket no puede ser resuelto:' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!result) return;
+
+      // Validaciones
+      if (!result.observacion || result.observacion.trim() === '') {
+        alert('La observación es requerida');
+        return;
+      }
+
+      if (!result.archivo) {
+        alert('Debe adjuntar un documento');
+        return;
+      }
+
+      // Crear FormData
+      const formData = new FormData();
+      formData.append('observacion', result.observacion);
+      formData.append('archivo', result.archivo);
+
+      this.ticketsService.marcarNoResuelto(idTicket, formData).subscribe({
+        next: () => {
+          this.cargarTicket(idTicket);
+          this.cargarHistorial(idTicket);
+        },
+        error: (err: any) => {
+          console.error('Error al marcar como no resuelto:', err);
+        }
+      });
+    });
+  }
+
   getBadgeClass(tipo: string): string {
     if (tipo === 'observacion') return 'badge-observacion';
     if (tipo === 'comentario') return 'badge-comentario';
@@ -216,49 +261,77 @@ abrirEvaluacion(ticket: any) {
   }
 
   getStatusTitle(tipo: string, rol: string): string {
-  if (tipo === 'estado') return 'Actualización de Estado';
+    if (tipo === 'estado') return 'Actualización de Estado';
 
-  if (tipo === 'observacion') {
-    return rol === 'Técnico' || rol === 'Tecnico'
-      ? 'Observación del Técnico'
-      : `Observación (${rol})`;
-  }
-
-  if (tipo === 'comentario') {
-    return rol === 'Usuario'
-      ? 'Comentario del Usuario'
-      : rol === 'Administrador'
-        ? 'Comentario del Administrador'
-        : `Comentario del ${rol}`;
-  }
-
-  return 'Actualización';
-}
-
-escucharNuevosComentarios(idTicket: number) {
-  this.socketService.on<any>('nuevo-comentario').subscribe((data) => {
-
-    console.log("📥 Comentario recibido vía socket:", data);
-
-    // Confirmar que es del ticket actual
-    if (Number(data.idTicket) === idTicket && data.comentario) {
-
-      const nuevoComentario = data.comentario;
-
-      // Agregarlo al historial
-      this.historial.push(nuevoComentario);
-
-      // Ordenar por fecha
-      this.historial.sort((a, b) =>
-        new Date(a.fechaCreacion).getTime() -
-        new Date(b.fechaCreacion).getTime()
-      );
-
-      // Aplicar filtro
-      this.aplicarFiltro();
+    if (tipo === 'observacion') {
+      return rol === 'Técnico' || rol === 'Tecnico'
+        ? 'Observación del Técnico'
+        : `Observación (${rol})`;
     }
-  });
-}
+
+    if (tipo === 'comentario') {
+      return rol === 'Usuario'
+        ? 'Comentario del Usuario'
+        : rol === 'Administrador'
+          ? 'Comentario del Administrador'
+          : `Comentario del ${rol}`;
+    }
+
+    return 'Actualización';
+  }
+
+  escucharNuevosComentarios(idTicket: number) {
+    this.socketService.on<any>('nuevo-comentario').subscribe((data) => {
+
+      console.log("📥 Comentario recibido vía socket:", data);
+
+      // Confirmar que es del ticket actual
+      if (Number(data.idTicket) === idTicket && data.comentario) {
+
+        const nuevoComentario = data.comentario;
+
+        // Agregarlo al historial
+        this.historial.push(nuevoComentario);
+
+        // Ordenar por fecha
+        this.historial.sort((a, b) =>
+          new Date(a.fechaCreacion).getTime() -
+          new Date(b.fechaCreacion).getTime()
+        );
+
+        // Aplicar filtro
+        this.aplicarFiltro();
+      }
+    });
+  }
+
+  isPDF(archivo: string): boolean {
+    return archivo.toLowerCase().endsWith('.pdf');
+  }
+
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  descargarArchivo(archivo: string) {
+    const url = `http://localhost:3000/uploads/tickets/${archivo}`;
+    window.open(url, '_blank');
+  }
+
+  imprimirArchivo(archivo: string) {
+    const url = `http://localhost:3000/uploads/tickets/${archivo}`;
+    const printWindow = window.open(url, '_blank');
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    }
+  }
+
+  abrirVistaPrevia(archivo: string) {
+    const url = `http://localhost:3000/uploads/tickets/${archivo}`;
+    window.open(url, '_blank');
+  }
 
 
   volver() {

@@ -1,5 +1,5 @@
 import express from 'express';
-import { upload } from '../middlewares/uploads.config.js'; 
+import { upload } from '../middlewares/uploads.config.js';
 import { verificarToken, verificarRol } from '../middlewares/auth.middleware.js';
 
 import {
@@ -18,7 +18,8 @@ import {
   obtenerHistorial,
   obtenerHerramientasTicket,
   agregarComentario,
-  agregarObservacionTecnico
+  agregarObservacionTecnico,
+  marcarNoResuelto
 } from '../controllers/tickets.controller.js';
 
 const router = express.Router();
@@ -50,6 +51,7 @@ router.post('/', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), 
 // 🔴 RUTAS DINÁMICAS GENERALES (SIEMPRE AL FINAL)
 // ----------------------------------------------------------
 router.put('/:id', verificarToken, verificarRol(['tecnico', 'admin']), actualizarEstado);
+router.put('/:id/no-resuelto', verificarToken, verificarRol(['tecnico']), upload.single('archivo'), marcarNoResuelto);
 router.get('/:id', verificarToken, verificarRol(['usuario', 'tecnico', 'admin']), getTicketPorId);
 
 export default router;

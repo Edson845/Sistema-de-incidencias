@@ -10,13 +10,24 @@
 
   <!-- Bloque de observación -->
   <div *ngIf="mostrarObservacion">
-    <textarea matInput placeholder="Escribe una observación..."
-              [(ngModel)]="observacion"
-              rows="4"></textarea>
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Observación</mat-label>
+      <textarea matInput [(ngModel)]="observacion" rows="4" placeholder="Describe el motivo..."></textarea>
+    </mat-form-field>
+
+    <!-- Campo de archivo -->
+    <div class="file-upload-section">
+      <label>Adjuntar Documento (Requerido)</label>
+      <input type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+      <small *ngIf="archivoSeleccionado">Archivo: {{ archivoSeleccionado.name }}</small>
+    </div>
   </div>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" *ngIf="mostrarObservacion">
   <button mat-button mat-dialog-close>Cancelar</button>
-  <button mat-raised-button color="primary" (click)="guardar()">Guardar</button>
+  <button mat-raised-button color="primary" (click)="guardar()"
+    [disabled]="!observacion.trim() || !archivoSeleccionado">
+    Guardar
+  </button>
 </mat-dialog-actions>
