@@ -7,7 +7,7 @@
     <!-- Header con foto de perfil -->
     <div class="perfil-header">
       <div class="avatar-container">
-        <img [src]="previewUrl || perfil.avatarUrl || 'assets/preder.png'" class="avatar" alt="Foto de perfil">
+        <img [src]="previewUrl || (perfil.avatar ? 'http://localhost:3000' + perfil.avatar : 'assets/preder.png')" class="avatar" alt="Foto de perfil">
         <button *ngIf="editMode" mat-mini-fab color="primary" class="avatar-edit-btn" (click)="fileInput.click()">
           <mat-icon>photo_camera</mat-icon>
         </button>

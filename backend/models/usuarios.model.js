@@ -1,4 +1,4 @@
-import  pool  from "../db.js";
+import pool from "../db.js";
 export async function obtenerUsuarioPorDniModelo(dni) {
   const [rows] = await pool.query(
     `SELECT dni, usuario, celular, nombres, apellidos, correo, idCargo 
@@ -159,5 +159,20 @@ export async function obtenerPerfilModelo(dni) {
      LEFT JOIN oficina o ON u.idOficina = o.idOficina
      WHERE u.dni = ?`,
     [dni]
+  );
+}
+
+export async function obtenerPasswordUsuario(dni) {
+  const [rows] = await pool.query(
+    `SELECT password FROM usuario WHERE dni = ?`,
+    [dni]
+  );
+  return rows.length > 0 ? rows[0].password : null;
+}
+
+export async function actualizarPasswordModelo(dni, nuevaPassword) {
+  return await pool.query(
+    `UPDATE usuario SET password = ? WHERE dni = ?`,
+    [nuevaPassword, dni]
   );
 }

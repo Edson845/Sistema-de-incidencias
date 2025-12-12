@@ -151,3 +151,31 @@ export async function eliminarUsuario(req, res) {
     res.status(500).json({ mensaje: "Error al eliminar usuario" });
   }
 }
+
+export async function cambiarPassword(req, res) {
+  try {
+    const dni = req.user?.dni;
+
+    if (!dni) {
+      return res.status(401).json({ mensaje: "No autorizado: no se encontró el DNI del usuario." });
+    }
+
+    const { actual, nueva } = req.body;
+
+    if (!actual || !nueva) {
+      return res.status(400).json({ mensaje: "Faltan datos: contraseña actual y nueva son requeridas" });
+    }
+
+    const resultado = await usuarioService.cambiarPasswordServicio(dni, actual, nueva);
+
+    if (resultado.error) {
+      return res.status(resultado.codigo).json({ mensaje: resultado.mensaje });
+    }
+
+    return res.status(200).json({ mensaje: resultado.mensaje });
+
+  } catch (error) {
+    console.error("❌ Error en cambiarPassword:", error);
+    return res.status(500).json({ mensaje: "Error interno al cambiar la contraseña" });
+  }
+}

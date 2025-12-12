@@ -9,6 +9,8 @@ import {
   eliminarUsuario,
   actualizarAvatar,
   obtenerPerfil,
+  actualizarPerfil,
+  cambiarPassword,
   obtenerTecnicos
 } from '../controllers/usuarios.controller.js';
 import { subirAvatar } from '../middlewares/avatar.middleware.js';
@@ -26,8 +28,13 @@ router.get('/', verificarToken, verificarRol(['admin']), obtenerUsuarios);
 // Crear usuario vía API (solo admin)
 router.post('/', verificarToken, verificarRol(['admin']), crearUsuario);
 
+// Rutas de perfil (usuario autenticado)
+router.get('/perfil', verificarToken, obtenerPerfil);
+router.put('/perfil', verificarToken, actualizarPerfil);
+router.put('/cambiar-contrasenia', verificarToken, cambiarPassword);
+router.put('/usuario/avatar/:id', verificarToken, subirAvatar.single('avatar'), actualizarAvatar);
+
 // Obtener un usuario por DNI (requiere token)
-router.get('/perfil', obtenerPerfil);
 router.get('/tecnicos', verificarToken, verificarRol(['admin']), obtenerTecnicos);
 router.get('/:id', verificarToken, obtenerUsuario);
 
@@ -36,7 +43,6 @@ router.put('/:id', verificarToken, actualizarUsuario);
 
 // Eliminar usuario (solo admin)
 router.delete('/:id', verificarToken, verificarRol(['admin']), eliminarUsuario);
-router.put('/usuario/avatar/:id', subirAvatar.single('avatar'), actualizarAvatar);
 
 
 

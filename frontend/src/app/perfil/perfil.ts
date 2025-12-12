@@ -39,7 +39,7 @@ export class Perfil implements OnInit {
     apellidos: '',
     correo: '',
     celular: '',
-    avatarUrl: '',
+    avatar: '',
     idCargo: '',
     nombreCargo: '',
     nombreOficina: ''
@@ -151,12 +151,17 @@ export class Perfil implements OnInit {
     if (!this.formContrasenia.actual ||
       !this.formContrasenia.nueva ||
       !this.formContrasenia.confirmar) {
-      alert("Todos los campos son obligatorios");
+      Swal.fire("Advertencia", "Todos los campos son obligatorios", "warning");
+      return;
+    }
+
+    if (this.formContrasenia.nueva.length < 6) {
+      Swal.fire("Advertencia", "La nueva contraseña debe tener al menos 6 caracteres", "warning");
       return;
     }
 
     if (this.formContrasenia.nueva !== this.formContrasenia.confirmar) {
-      alert("Las contraseñas no coinciden");
+      Swal.fire("Error", "Las contraseñas no coinciden", "error");
       return;
     }
 
@@ -167,11 +172,12 @@ export class Perfil implements OnInit {
 
     this.PerfilService.cambiarContrasenia(data).subscribe({
       next: (response) => {
-        alert("Contraseña cambiada con éxito");
+        Swal.fire("Éxito", "Contraseña cambiada con éxito", "success");
         this.cerrarModalContrasenia();
       },
       error: (err) => {
-        alert("Error al cambiar contraseña");
+        const mensaje = err.error?.mensaje || "Error al cambiar contraseña";
+        Swal.fire("Error", mensaje, "error");
       }
     });
   }

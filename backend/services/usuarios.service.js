@@ -63,8 +63,8 @@ export async function crearUsuarioServicio(datos) {
   }
 
   if (!dni || !usuario || !password || !nombres || !apellidos ||
-      !correo || !idRol || !idCargo || !idOficina ||
-      !idDepartamento || !idGerencia) {
+    !correo || !idRol || !idCargo || !idOficina ||
+    !idDepartamento || !idGerencia) {
 
     throw new Error("Faltan datos obligatorios");
   }
@@ -241,5 +241,39 @@ export async function eliminarUsuarioService(dni) {
   } catch (error) {
     await usuarioModel.cancelarTransaccion();
     throw error;
+  }
+}
+
+export async function cambiarPasswordServicio(dni, passwordActual, passwordNueva) {
+  try {
+    // Obtener password actual del usuario
+    const passwordHash = await usuarioModel.obtenerPasswordUsuario(dni);
+
+    if (!passwordHash) {
+      return { error: true, codigo: 404, mensaje: "Usuario no encontrado" };
+    }
+
+    // Verificar que la contraseña actual sea correcta
+    const esValida = await bcrypt.compare(passwordActual, passwordHash);
+    if (!esValida) {
+      return { error: true, codigo: 401, mensaje: "La contraseña actual es incorrecta" };
+    }
+
+    // Validar que la nueva contraseña tenga al menos 6 caracteres
+    if (passwordNueva.length < 6) {
+      return { error: true, codigo: 400, mensaje: "La nueva contraseña debe tener al menos 6 caracteres" };
+    }
+
+    // Hash de la nueva contraseña
+    const passwordNuevaHash = await bcrypt.hash(passwordNueva, 10);
+
+    // Actualizar password en la base de datos
+    await usuarioModel.actualizarPasswordModelo(dni, passwordNuevaHash);
+
+    return { error: false, mensaje: "Contraseña actualizada correctamente" };
+
+  } catch (error) {
+    console.error("❌ Error en cambiarPasswordServicio:", error);
+    return { error: true, codigo: 500, mensaje: "Error al cambiar la contraseña" };
   }
 }
