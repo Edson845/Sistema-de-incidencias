@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import client from '../api/client';
 import { useNavigation } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function CreateTicketScreen() {
 
@@ -11,6 +13,7 @@ export default function CreateTicketScreen() {
     const [categoriaId, setCategoriaId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -20,9 +23,24 @@ export default function CreateTicketScreen() {
             .finally(() => setFetching(false));
     }, []);
 
+    const pickDocument = async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: '*/*', // Allow all file types
+                copyToCacheDirectory: true
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                setSelectedFile(result.assets[0]);
+            }
+        } catch (err) {
+            console.error("Error picking document:", err);
+        }
+    };
+
     const handleSubmit = async () => {
         if (!titulo || !descripcion || !categoriaId) {
-            Alert.alert('Error', 'Por favor complete todos los campos');
+            Alert.alert('Error', 'Por favor complete todos los campos obligatorios');
             return;
         }
 
@@ -33,6 +51,17 @@ export default function CreateTicketScreen() {
             formData.append('titulo', titulo);
             formData.append('descripcion', descripcion);
             formData.append('idCategoria', categoriaId.toString());
+
+            if (selectedFile) {
+                const fileToUpload = {
+                    uri: selectedFile.uri,
+                    name: selectedFile.name,
+                    type: selectedFile.mimeType || 'application/octet-stream' // fallback
+                } as any; // Cast as any because RN FormData expects a specific shape slightly different from web
+
+                // Backend expects 'archivos' array
+                formData.append('archivos', fileToUpload);
+            }
 
             await client.post('/tickets', formData, {
                 headers: {
@@ -91,6 +120,20 @@ export default function CreateTicketScreen() {
                 ))}
             </View>
 
+            <Text style={styles.label}>Adjuntar Archivo (Opcional)</Text>
+            <TouchableOpacity style={styles.fileButton} onPress={pickDocument}>
+                <Ionicons name="attach" size={20} color="#0a3a6b" />
+                <Text style={styles.fileButtonText}>
+                    {selectedFile ? selectedFile.name : "Seleccionar archivo"}
+                </Text>
+            </TouchableOpacity>
+            {selectedFile && (
+                <TouchableOpacity onPress={() => setSelectedFile(null)} style={{ marginTop: 5, marginBottom: 20 }}>
+                    <Text style={{ color: '#dc2626', fontSize: 12 }}>Eliminar archivo</Text>
+                </TouchableOpacity>
+            )}
+
+
             <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Crear Ticket</Text>}
             </TouchableOpacity>
@@ -110,5 +153,22 @@ const styles = StyleSheet.create({
     catButton: { paddingVertical: 8, paddingHorizontal: 16, borderWidth: 1, borderColor: '#0a3a6b', borderRadius: 20 },
     catSelected: { backgroundColor: '#0a3a6b' },
     catText: { color: '#0a3a6b', fontWeight: '500' },
-    catTextSelected: { color: '#fff' }
+    catTextSelected: { color: '#fff' },
+    fileButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#0a3a6b',
+        borderStyle: 'dashed',
+        borderRadius: 8,
+        marginBottom: 8,
+        justifyContent: 'center',
+        backgroundColor: '#eef2ff'
+    },
+    fileButtonText: {
+        marginLeft: 8,
+        color: '#0a3a6b',
+        fontWeight: '500',
+    }
 });
