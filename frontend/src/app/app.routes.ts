@@ -37,6 +37,7 @@ export const routes: Routes = [
       { path: 'usuarios/editar/:id', component: UsuariosEditComponent },
       { path: 'usuarios/:id', component: UsuariosDetailComponent },
       { path: 'usuario/perfil', component: Perfil },
+      { path: 'usuario/perfil/:dni', component: Perfil }, // Admin ver perfil de otro usuario
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

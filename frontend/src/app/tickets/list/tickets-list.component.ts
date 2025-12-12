@@ -151,6 +151,10 @@ export class TicketsListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/tickets', id]);
   }
 
+  verPerfilUsuario(dni: string) {
+    this.router.navigate(['/usuario/perfil', dni]);
+  }
+
   abrirEvaluacionUsuario(idTicket: number) {
     const dialogRef = this.dialog.open(CalificarTicket, {
       width: '550px',

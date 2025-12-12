@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { PerfilService } from '../services/perfil.service';
 import { UsuariosService } from '../services/usuarios.service';
@@ -58,16 +59,61 @@ export class Perfil implements OnInit {
   previewUrl: string | null = null;
   selectedFile: File | null = null;
 
-  constructor(private usuariosService: UsuariosService, private PerfilService: PerfilService) { }
+  // Modo solo lectura para admin viendo otros usuarios
+  modoSoloLectura = false;
+  dniVisualizando: string | null = null;
+  esAdmin = false;
+  rolUsuario: string = '';
+  constructor(
+    private usuariosService: UsuariosService,
+    private PerfilService: PerfilService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private authService: AuthService,
+  ) {
+    // Detectar si el usuario actual es admin
+    this.esAdmin = this.authService.tieneRol('admin');
+  }
 
   ngOnInit() {
-    this.cargarPerfil();
+    // Verificar si hay DNI en la ruta (admin viendo otro usuario)
+    this.dniVisualizando = this.route.snapshot.paramMap.get('dni');
+    this.rolUsuario = this.authService.roles[0];
+    if (this.dniVisualizando) {
+      // Modo admin: ver perfil de otro usuario (solo lectura)
+      this.modoSoloLectura = true;
+      this.cargarPerfilPorDni(this.dniVisualizando);
+    } else {
+      // Modo normal: ver mi propio perfil
+      this.cargarPerfil();
+    }
   }
 
   cargarPerfil() {
     this.PerfilService.getPerfil().subscribe(data => {
       this.perfil = data;
     });
+  }
+
+  cargarPerfilPorDni(dni: string) {
+    this.usuariosService.getUsuario(dni).subscribe({
+      next: (data) => {
+        this.perfil = data;
+      },
+      error: (err) => {
+        Swal.fire('Error', 'No se pudo cargar el perfil del usuario', 'error');
+        this.volver();
+      }
+    });
+  }
+
+  volver() {
+    // Admin vuelve a lista de usuarios, otros roles vuelven a tickets
+    if (this.esAdmin) {
+      this.router.navigate(['/usuarios']);
+    } else {
+      this.router.navigate(['/tickets']);
+    }
   }
 
   onFileSelected(event: any) {

@@ -45,7 +45,7 @@
 
     <!-- TABLA MODERNA -->
     <div *ngIf="!loading && ticketsFiltrados.length > 0" class="table-card">
-      
+
       <table class="modern-table">
         <thead>
           <tr>
@@ -62,10 +62,14 @@
         </thead>
         <tbody>
           <tr *ngFor="let t of ticketsFiltrados" class="table-row">
-            
+
             <td class="td-title">{{ t.tituloTicket }}</td>
             <td class="td-desc">{{ t.descTicket }}</td>
-            <td *ngIf= "rolUsuario === 'usuario'|| rolUsuario === 'admin'">{{t.nombreTecnico ? (t.nombreTecnico + ' ' + t.apellidoTecnico): 'Sin asignar'}}</td>
+            <td *ngIf="rolUsuario === 'usuario'|| rolUsuario === 'admin'">
+              <span *ngIf="t.asignadoA" class="user-link" (click)="verPerfilUsuario(t.asignadoA)">{{t.nombreTecnico + '
+                ' + t.apellidoTecnico}}</span>
+              <span *ngIf="!t.asignadoA">Sin asignar</span>
+            </td>
             <td>{{ t.fechaCreacion | date:'dd/MM/yyyy HH:mm'}}</td>
             <td>
               <span class="badge-categoria">{{ t.nombreCategoria }}</span>
@@ -101,7 +105,11 @@
                 {{ t.nombrePrioridad }}
               </span>
             </td>
-            <td *ngIf="rolUsuario === 'admin' || rolUsuario === 'tecnico'">{{ t.nombreUsuario || '---' }} {{ t.apellidoUsuario || '' }}</td>
+            <td *ngIf="rolUsuario === 'admin' || rolUsuario === 'tecnico'">
+              <span *ngIf="t.usuarioCrea" class="user-link" (click)="verPerfilUsuario(t.usuarioCrea)">{{ t.nombreUsuario
+                || '---' }} {{ t.apellidoUsuario || '' }}</span>
+              <span *ngIf="!t.usuarioCrea">---</span>
+            </td>
 
 
             <!-- ACCIONES -->

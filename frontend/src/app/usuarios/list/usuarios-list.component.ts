@@ -72,7 +72,7 @@ export class UsuariosListComponent implements OnInit {
   }
 
   verDetalle(dni: string) {
-    this.router.navigate(['/usuario/perfil']);
+    this.router.navigate(['/usuario/perfil', dni]);
   }
 
   editarUsuario(dni: string) {

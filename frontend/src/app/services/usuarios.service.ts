@@ -7,15 +7,15 @@ import { tap, catchError } from 'rxjs/operators';
 export class UsuariosService {
   private apiUrl = 'http://localhost:3000/api/usuarios';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Obtener lista de usuarios
   getUsuarios(): Observable<any> {
     return this.http.get(`${this.apiUrl}`);
   }
 
-  // Obtener un usuario por ID
-  getUsuario(id: number): Observable<any> {
+  // Obtener un usuario por ID o DNI
+  getUsuario(id: string | number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
@@ -44,13 +44,13 @@ export class UsuariosService {
     return this.http.post(`${this.apiUrl}/registro`, usuario);
   }
 
-  
+
 
   obtenerRoles(): Observable<any> {
     return this.http.get(`${this.apiUrl}/roles`);
   }
 
-  
+
   // Eliminar usuario
   eliminarUsuario(dni: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${dni}`);

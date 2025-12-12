@@ -1,9 +1,21 @@
 import pool from "../db.js";
 export async function obtenerUsuarioPorDniModelo(dni) {
   const [rows] = await pool.query(
-    `SELECT dni, usuario, celular, nombres, apellidos, correo, idCargo 
-     FROM usuario 
-     WHERE dni = ?`,
+    `SELECT 
+        u.dni,
+        u.usuario,
+        u.celular,
+        u.nombres,
+        u.apellidos,
+        u.correo,
+        u.idCargo,
+        u.avatar,
+        c.nombreCargo,
+        o.nombreOficina
+     FROM usuario u
+     LEFT JOIN cargo c ON u.idCargo = c.idCargo
+     LEFT JOIN oficina o ON u.idOficina = o.idOficina
+     WHERE u.dni = ?`,
     [dni]
   );
 

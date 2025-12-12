@@ -163,7 +163,7 @@ export async function actualizarPerfilServicio(dni, datos) {
   }
 }
 export async function actualizarUsuarioServicio(id, datos) {
-  const { nombres, apellidos, correo, idCargo, password } = datos;
+  const { nombres, apellidos, correo, idCargo, idOficina, idDepartamento, idGerencia, celular, password } = datos;
 
   // Verificar existencia
   const [usuarioExiste] = await usuarioModel.buscarUsuarioPorDNI(id);
@@ -177,7 +177,22 @@ export async function actualizarUsuarioServicio(id, datos) {
   if (nombres) { campos.push("nombres = ?"); valores.push(nombres); }
   if (apellidos) { campos.push("apellidos = ?"); valores.push(apellidos); }
   if (correo) { campos.push("correo = ?"); valores.push(correo); }
+  if (celular) { campos.push("celular = ?"); valores.push(celular); }
   if (idCargo) { campos.push("idCargo = ?"); valores.push(idCargo); }
+
+  // Convertir cadenas vacías a null para campos integer
+  if (idOficina !== undefined) {
+    campos.push("idOficina = ?");
+    valores.push(idOficina === '' || idOficina === null ? null : idOficina);
+  }
+  if (idDepartamento !== undefined) {
+    campos.push("idDepartamento = ?");
+    valores.push(idDepartamento === '' || idDepartamento === null ? null : idDepartamento);
+  }
+  if (idGerencia !== undefined) {
+    campos.push("idGerencia = ?");
+    valores.push(idGerencia === '' || idGerencia === null ? null : idGerencia);
+  }
 
   if (password) {
     const hashed = await bcrypt.hash(password, 10);
