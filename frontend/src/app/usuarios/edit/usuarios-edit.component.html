@@ -28,7 +28,15 @@
       <div class="row">
         <div class="input-group">
           <label>Correo Electrónico</label>
-          <input type="email" [(ngModel)]="usuario.correo" placeholder="ejemplo@munisanroman.gob.pe" />
+          <input type="email" [(ngModel)]="usuario.correo"
+            [placeholder]="esTecnico ? 'usuario@ejemplo.com' : 'ejemplo@munisanroman.gob.pe'" />
+          <small *ngIf="!esTecnico && usuario.idRol"
+            style="color: #6b7280; font-size: 12px; display: block; margin-top: 4px;">
+            Solo correos institucionales (@munisanroman.gob.pe)
+          </small>
+          <small *ngIf="esTecnico" style="color: #10b981; font-size: 12px; display: block; margin-top: 4px;">
+            ✓ Puedes usar cualquier correo válido
+          </small>
         </div>
         <div class="input-group">
           <label>Celular</label>
@@ -45,9 +53,9 @@
       <div class="row">
         <div class="input-group">
           <label>Rol de Sistema</label>
-          <select [(ngModel)]="usuario.idRol">
+          <select [(ngModel)]="usuario.idRol" (change)="onRolChange()">
             <option value="" disabled>Seleccione un rol</option>
-            <option *ngFor="let rol of roles" [value]="rol.idrol">{{ rol.nombreRol }}</option>
+            <option *ngFor="let rol of roles" [value]="rol.idRol || rol.idrol">{{ rol.nombreRol }}</option>
           </select>
         </div>
         <div class="input-group">

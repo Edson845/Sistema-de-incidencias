@@ -1,4 +1,30 @@
 .usuarios-container {
+
+  /* Badges de rol */
+  .badge-rol {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .rol-admin {
+    background: #dc2626;
+    color: white;
+  }
+
+  .rol-tecnico {
+    background: #2563eb;
+    color: white;
+  }
+
+  .rol-usuario {
+    background: #10b981;
+    color: white;
+  }
+
   max-width: 1200px;
   margin: 2rem auto;
   background: #ffffff;

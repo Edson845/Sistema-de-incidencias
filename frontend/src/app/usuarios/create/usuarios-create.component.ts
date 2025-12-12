@@ -22,10 +22,10 @@ export class UsuariosCreateComponent implements OnInit {
     correo: '',
     celular: '',
     idRol: '',
-    idCargo:'',
-    idOficina:'',
-    idDepartamento:'',
-    idGerencia:'',
+    idCargo: '',
+    idOficina: '',
+    idDepartamento: '',
+    idGerencia: '',
     usuario: '',
     password: ''
   };
@@ -43,12 +43,13 @@ export class UsuariosCreateComponent implements OnInit {
   departamentos: any[] = [];
   gerencias: any[] = [];
   mostrarRangoUnidad = false;  // para asistente, secretario, técnico, personal
+  esTecnico = false; // Para controlar validación de correo
 
 
-  constructor(private usuariosService: UsuariosService, private router: Router, 
-    private CatalogoService:CatalogoService,
+  constructor(private usuariosService: UsuariosService, private router: Router,
+    private CatalogoService: CatalogoService,
     private RolService: RolService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarRoles();
@@ -57,8 +58,8 @@ export class UsuariosCreateComponent implements OnInit {
     this.cargarGerencias();
     this.cargarDepartamentos();
   }
-  
-  cargarCargos(){
+
+  cargarCargos() {
     this.CatalogoService.obtenerCargos().subscribe({
       next: (data) => {
         this.cargos = data;
@@ -78,7 +79,7 @@ export class UsuariosCreateComponent implements OnInit {
       }
     });
   }
-  cargarOficinas(){
+  cargarOficinas() {
     this.CatalogoService.obtenerOficinas().subscribe({
       next: (data) => {
         this.oficinas = data;
@@ -88,7 +89,7 @@ export class UsuariosCreateComponent implements OnInit {
       }
     });
   }
-  cargarGerencias(){
+  cargarGerencias() {
     this.CatalogoService.obtenerGerencias().subscribe({
       next: (data) => {
         this.gerencias = data;
@@ -98,7 +99,7 @@ export class UsuariosCreateComponent implements OnInit {
       }
     });
   }
-  cargarDepartamentos(){
+  cargarDepartamentos() {
     this.CatalogoService.obtenerDepartamentos().subscribe({
       next: (data) => {
         this.departamentos = data;
@@ -115,8 +116,8 @@ export class UsuariosCreateComponent implements OnInit {
     this.error = '';
     this.usuario.password = this.usuario.dni; // Establecer contraseña inicial como DNI
     this.usuario.usuario = this.usuario.dni; // Establecer nombre de usuario como DNI
-    if (!this.usuario.dni || !this.usuario.nombres || !this.usuario.apellidos || 
-        !this.usuario.correo || !this.usuario.usuario || !this.usuario.password || !this.usuario.idRol) {
+    if (!this.usuario.dni || !this.usuario.nombres || !this.usuario.apellidos ||
+      !this.usuario.correo || !this.usuario.celular || !this.usuario.usuario || !this.usuario.password || !this.usuario.idRol) {
       console.error('Faltan campos requeridos:', this.usuario);
       this.error = 'Por favor complete todos los campos requeridos';
       this.loading = false;
@@ -140,6 +141,12 @@ export class UsuariosCreateComponent implements OnInit {
       }
     });
   }
+
+  onRolChange() {
+    const rolId = Number(this.usuario.idRol);
+    this.esTecnico = (rolId === 2);
+    console.log('Rol seleccionado:', rolId, 'Es técnico:', this.esTecnico);
+  }
   onCargoChange() {
     const cargo = Number(this.usuario.idCargo);
 
@@ -150,50 +157,50 @@ export class UsuariosCreateComponent implements OnInit {
     this.mostrarRangoUnidad = false;
 
 
-    if (cargo === 2) {  
+    if (cargo === 2) {
       this.mostrarGerencias = true;          // solo gerencia
     }
-    else if (cargo === 3) { 
+    else if (cargo === 3) {
       this.mostrarDepartamentos = true;      // solo departamentos
     }
-    else if (cargo === 4) {  
+    else if (cargo === 4) {
       this.mostrarOficinas = true;           // solo oficinas
     }
-    else if ([5, 6, 7, 8].includes(cargo)) {  
+    else if ([5, 6, 7, 8].includes(cargo)) {
       this.mostrarRangoUnidad = true;
       // asistente / secretario / técnico / personal
     }
   }
   onRangoUnidadChange(rango: any) {
     rango = Number(rango);
-  // Limpiar todo antes de asignar
-  this.usuario.idGerencia = "";
-  this.usuario.idDepartamento = "";
-  this.usuario.idOficina = "";
+    // Limpiar todo antes de asignar
+    this.usuario.idGerencia = "";
+    this.usuario.idDepartamento = "";
+    this.usuario.idOficina = "";
 
-  if (rango === 1) {
-    this.mostrarGerencias = true;
-    this.mostrarDepartamentos = false;
-    this.mostrarOficinas = false;
-  }
+    if (rango === 1) {
+      this.mostrarGerencias = true;
+      this.mostrarDepartamentos = false;
+      this.mostrarOficinas = false;
+    }
 
-  else if (rango === 2) {
-    this.mostrarGerencias = false;
-    this.mostrarDepartamentos = true;
-    this.mostrarOficinas = false;
-  }
+    else if (rango === 2) {
+      this.mostrarGerencias = false;
+      this.mostrarDepartamentos = true;
+      this.mostrarOficinas = false;
+    }
 
-  else if (rango === 3) {
-    this.mostrarGerencias = false;
-    this.mostrarDepartamentos = false;
-    this.mostrarOficinas = true;
+    else if (rango === 3) {
+      this.mostrarGerencias = false;
+      this.mostrarDepartamentos = false;
+      this.mostrarOficinas = true;
+    }
   }
-}
 
   soloNumeros(event: any) {
     event.target.value = event.target.value.replace(/\D/g, '');
   }
-  
+
   cancelar() {
     this.router.navigate(['/usuarios']);
   }

@@ -39,8 +39,11 @@ export async function obtenerTecnicosModel() {
 }
 export async function obtenerTodosLosUsuariosModelo() {
   const [rows] = await pool.query(
-    `SELECT dni, usuario, nombres, apellidos, correo, idCargo 
-     FROM usuario`
+    `SELECT u.dni, u.usuario, u.nombres, u.apellidos, u.correo, u.idCargo,
+            COALESCE(r.nombreRol, 'Sin rol') AS nombreRol, ru.idRol
+     FROM usuario u
+     LEFT JOIN rolusuario ru ON u.dni = ru.dni
+     LEFT JOIN rol r ON ru.idRol = r.idRol`
   );
   return rows;
 }
@@ -164,10 +167,14 @@ export async function obtenerPerfilModelo(dni) {
         u.correo,
         u.idCargo,
         u.avatar,
+        u.idOficina, 
+        u.idDepartamento, 
+        u.idGerencia,
         c.nombreCargo,
-        o.nombreOficina
+        ru.idRol
      FROM usuario u
      LEFT JOIN cargo c ON u.idCargo = c.idCargo
+     LEFT JOIN rolusuario ru ON u.dni = ru.dni
      LEFT JOIN oficina o ON u.idOficina = o.idOficina
      WHERE u.dni = ?`,
     [dni]
@@ -186,5 +193,15 @@ export async function actualizarPasswordModelo(dni, nuevaPassword) {
   return await pool.query(
     `UPDATE usuario SET password = ? WHERE dni = ?`,
     [nuevaPassword, dni]
+  );
+}
+
+export async function actualizarRolUsuario(dni, idRol) {
+  // Primero eliminar el rol actual
+  await pool.query(`DELETE FROM rolusuario WHERE dni = ?`, [dni]);
+  // Luego insertar el nuevo rol
+  return await pool.query(
+    `INSERT INTO rolusuario (dni, idRol) VALUES (?, ?)`,
+    [dni, idRol]
   );
 }

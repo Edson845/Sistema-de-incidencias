@@ -108,13 +108,23 @@ export class UsuariosListComponent implements OnInit {
   get usuariosFiltrados() {
     const texto = this.filtro.toLowerCase().trim();
 
-    return this.usuarios.filter((u) =>
-      u.nombres?.toLowerCase().includes(texto) ||
-      u.apellidos?.toLowerCase().includes(texto) ||
-      u.correo?.toLowerCase().includes(texto) ||
-      u.dni?.toString().includes(texto) || // 🔹 busca por DNI
-      u.usuario?.toLowerCase().includes(texto) // 🔹 busca por usuario
-    );
+    if (!texto) {
+      return this.usuarios;
+    }
+
+    return this.usuarios.filter((u) => {
+      const nombreCargo = this.getNombreCargo(u.idCargo)?.toLowerCase() || '';
+
+      return (
+        u.nombres?.toLowerCase().includes(texto) ||
+        u.apellidos?.toLowerCase().includes(texto) ||
+        u.correo?.toLowerCase().includes(texto) ||
+        u.dni?.toString().includes(texto) ||
+        u.usuario?.toLowerCase().includes(texto) ||
+        u.nombreRol?.toLowerCase().includes(texto) ||
+        nombreCargo.includes(texto)
+      );
+    });
   }
 
   mostrarMensaje(texto: string, tipo: 'success' | 'error') {

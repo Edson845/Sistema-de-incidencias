@@ -75,19 +75,42 @@ export async function crearUsuarioServicio(datos) {
     throw new Error("El usuario ya existe");
   }
 
-  // Verificar si el rol existe
+  // Verificar si el rol existe y obtener información del rol
   const rolExiste = await usuarioModel.buscarRolPorId(idRol);
   if (rolExiste.length === 0) {
     throw new Error(`El rol con ID ${idRol} no existe`);
   }
 
-  // Validar correo y celular
-  const correoRegex = /^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$/;
+  // Obtener nombre del rol para validación de correo
+  const rolModel = await import('../models/rol.model.js');
+  const rolInfo = await rolModel.obtenerRolPorId(idRol);
+
+  console.log('🔍 Información del rol:', rolInfo);
+
+  const nombreRol = rolInfo && rolInfo.length > 0 ? rolInfo[0]?.nombreRol?.toLowerCase() : null;
+
+  console.log('🔍 Nombre del rol obtenido:', nombreRol);
+  console.log('🔍 ID del rol:', idRol);
+
+  // Validar correo según el rol
   const celularRegex = /^[0-9]{9}$/;
 
-  if (!correoRegex.test(correo)) {
-    throw new Error("Correo inválido (debe terminar en @munisanroman.gob.pe)");
+  if (nombreRol === 'tecnico') {
+    console.log('✅ Validando correo para técnico (formato básico)');
+    // Para técnicos: validar formato básico de correo
+    const correoBasico = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!correoBasico.test(correo)) {
+      throw new Error("El correo no tiene un formato válido");
+    }
+  } else {
+    console.log('✅ Validando correo institucional para rol:', nombreRol);
+    // Para otros roles: validar correo institucional
+    const correoRegex = /^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$/;
+    if (!correoRegex.test(correo)) {
+      throw new Error("El correo debe ser institucional (@munisanroman.gob.pe)");
+    }
   }
+
   if (!celularRegex.test(celular)) {
     throw new Error("El celular debe tener 9 dígitos");
   }
@@ -163,12 +186,42 @@ export async function actualizarPerfilServicio(dni, datos) {
   }
 }
 export async function actualizarUsuarioServicio(id, datos) {
-  const { nombres, apellidos, correo, idCargo, idOficina, idDepartamento, idGerencia, celular, password } = datos;
+  const { nombres, apellidos, correo, idCargo, idOficina, idDepartamento, idGerencia, celular, password, idRol } = datos;
 
   // Verificar existencia
   const [usuarioExiste] = await usuarioModel.buscarUsuarioPorDNI(id);
   if (usuarioExiste.length === 0) {
     return { error: true, codigo: 404, mensaje: "Usuario no encontrado" };
+  }
+
+  // Validar correo según el rol
+  if (correo) {
+    // Usar el rol que se está actualizando o el rol actual del usuario
+    const rolParaValidar = idRol || usuarioExiste[0].idRol;
+    const idRolNumber = Number(rolParaValidar);
+
+    console.log('🔍 Validando correo al actualizar. Rol:', idRolNumber, 'Correo:', correo);
+
+    if (idRolNumber === 2) {
+      // Técnico: formato básico
+      const correoBasico = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!correoBasico.test(correo)) {
+        return { error: true, codigo: 400, mensaje: "El correo no tiene un formato válido" };
+      }
+    } else {
+      // Otros roles: correo institucional
+      const correoInstitucional = /^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$/;
+      if (!correoInstitucional.test(correo)) {
+        return { error: true, codigo: 400, mensaje: "El correo debe ser institucional (@munisanroman.gob.pe)" };
+      }
+    }
+  }
+
+  if (celular) {
+    const celularRegex = /^[0-9]{9}$/;
+    if (!celularRegex.test(celular)) {
+      return { error: true, codigo: 400, mensaje: "El celular debe tener 9 dígitos" };
+    }
   }
 
   const campos = [];
@@ -179,6 +232,7 @@ export async function actualizarUsuarioServicio(id, datos) {
   if (correo) { campos.push("correo = ?"); valores.push(correo); }
   if (celular) { campos.push("celular = ?"); valores.push(celular); }
   if (idCargo) { campos.push("idCargo = ?"); valores.push(idCargo); }
+  // NOTA: idRol NO se actualiza aquí porque está en la tabla rolusuario
 
   // Convertir cadenas vacías a null para campos integer
   if (idOficina !== undefined) {
@@ -206,6 +260,12 @@ export async function actualizarUsuarioServicio(id, datos) {
 
   try {
     await usuarioModel.actualizarUsuarioModelo(id, campos, valores);
+
+    // Si se actualiza el rol, actualizar en la tabla rolusuario
+    if (idRol) {
+      await usuarioModel.actualizarRolUsuario(id, idRol);
+    }
+
     return { error: false };
   } catch (err) {
     console.error("❌ Error en actualizarUsuarioServicio:", err);

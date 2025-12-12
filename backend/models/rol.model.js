@@ -1,4 +1,4 @@
-import pool  from '../db.js';
+import pool from '../db.js';
 
 export async function obtenerRolesModel() {
   const [rows] = await pool.query(`
@@ -19,4 +19,12 @@ export async function obtenerRolesPorDniModel(dni) {
   );
 
   return rows || [];
+}
+
+export async function obtenerRolPorId(idRol) {
+  const [rows] = await pool.query(
+    `SELECT idrol, nombreRol FROM rol WHERE idrol = ?`,
+    [idRol]
+  );
+  return rows;
 }

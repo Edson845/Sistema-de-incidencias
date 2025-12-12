@@ -22,7 +22,7 @@
         </div>
 
         <div class="input-group">
-          <label for="celular">Celular</label>
+          <label for="celular">Celular <span>*</span></label>
           <input type="text" id="celular" name="celular" [(ngModel)]="usuario.celular" maxlength="9"
             pattern="^[0-9]{9}$" (input)="soloNumeros($event)" #celCtrl="ngModel" placeholder="999999999" />
           <div class="error-msg" *ngIf="celCtrl.invalid && celCtrl.touched">
@@ -52,14 +52,20 @@
       </div>
 
       <div class="input-group">
-        <label for="correo">Correo Institucional <span>*</span></label>
+        <label for="correo">Correo <span>*</span></label>
         <input type="email" id="correo" name="correo" [(ngModel)]="usuario.correo" required
-          placeholder="usuario@munisanroman.gob.pe" pattern="^[a-zA-Z0-9._%+-]+@munisanroman\.gob\.pe$"
-          #correoCtrl="ngModel" />
+          [placeholder]="esTecnico ? 'usuario@ejemplo.com' : 'usuario@munisanroman.gob.pe'" #correoCtrl="ngModel" />
         <div class="error-msg" *ngIf="correoCtrl.invalid && correoCtrl.touched">
           <span *ngIf="correoCtrl.errors?.['required']">El correo es obligatorio</span>
-          <span *ngIf="correoCtrl.errors?.['pattern']">Debe terminar en @munisanroman.gob.pe</span>
+          <span *ngIf="correoCtrl.errors?.['email']">Formato de correo inválido</span>
         </div>
+        <small *ngIf="!esTecnico && usuario.idRol"
+          style="color: #6b7280; font-size: 12px; display: block; margin-top: 4px;">
+          Solo correos institucionales (@munisanroman.gob.pe)
+        </small>
+        <small *ngIf="esTecnico" style="color: #10b981; font-size: 12px; display: block; margin-top: 4px;">
+          ✓ Puedes usar cualquier correo válido
+        </small>
       </div>
     </div>
 
@@ -70,7 +76,8 @@
       <div class="row">
         <div class="input-group">
           <label for="idRol">Rol de Sistema <span>*</span></label>
-          <select id="idRol" name="idRol" [(ngModel)]="usuario.idRol" required #rolCtrl="ngModel">
+          <select id="idRol" name="idRol" [(ngModel)]="usuario.idRol" (change)="onRolChange()" required
+            #rolCtrl="ngModel">
             <option value="">Seleccione un rol</option>
             <option *ngFor="let r of roles" [value]="r.idrol">{{ r.nombreRol }}</option>
           </select>
@@ -91,9 +98,17 @@
           </div>
         </div>
       </div>
-
       <!-- Campos Condicionales -->
       <div class="conditional-fields">
+        <div class="input-group" *ngIf="mostrarRangoUnidad">
+          <label>Ubicación del Personal</label>
+          <select [(ngModel)]="rangeUnidad" name="rangeUnidad" (change)="onRangoUnidadChange(rangeUnidad)">
+            <option value="" disabled>Seleccione Ubicación</option>
+            <option [value]="1">Gerencia</option>
+            <option [value]="2">Departamento</option>
+            <option [value]="3">Oficina</option>
+          </select>
+        </div>
         <div class="input-group" *ngIf="mostrarGerencias">
           <label>Gerencia</label>
           <select [(ngModel)]="usuario.idGerencia" name="idGerencia">
@@ -114,19 +129,8 @@
             <option *ngFor="let o of oficinas" [value]="o.idOficina">{{ o.nombreOficina }}</option>
           </select>
         </div>
-
-        <div class="input-group" *ngIf="mostrarRangoUnidad">
-          <label>Ubicación del Personal</label>
-          <select [(ngModel)]="rangeUnidad" name="rangeUnidad" (change)="onRangoUnidadChange(rangeUnidad)">
-            <option value="" disabled>Seleccione Ubicación</option>
-            <option [value]="1">Gerencia</option>
-            <option [value]="2">Departamento</option>
-            <option [value]="3">Oficina</option>
-          </select>
-        </div>
       </div>
     </div>
-
     <!-- ACCIONES -->
     <div class="actions-bar">
       <button type="button" class="btn-cancel" (click)="cancelar()">Cancelar</button>

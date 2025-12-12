@@ -7,12 +7,7 @@
     <button class="btn-agregar" (click)="agregarUsuario()">➕ Agregar Usuario</button>
 
     <!-- Barra de búsqueda -->
-    <input
-      type="text"
-      [(ngModel)]="filtro"
-      placeholder="🔍 Buscar por nombre o correo..."
-      class="search-input"
-    />
+    <input type="text" [(ngModel)]="filtro" placeholder="🔍 Buscar por nombre o correo..." class="search-input" />
   </div>
 
   <!-- Indicadores de carga o error -->
@@ -28,6 +23,7 @@
           <th>Nombres</th>
           <th>Apellidos</th>
           <th>Correo</th>
+          <th>Rol</th>
           <th>ID Cargo</th>
           <th>Usuario</th>
           <th>Acciones</th>
@@ -39,6 +35,15 @@
           <td>{{ usuario.nombres }}</td>
           <td>{{ usuario.apellidos }}</td>
           <td>{{ usuario.correo }}</td>
+          <td>
+            <span class="badge-rol" [ngClass]="{
+              'rol-admin': usuario.nombreRol?.toLowerCase() === 'admin',
+              'rol-tecnico': usuario.nombreRol?.toLowerCase() === 'tecnico',
+              'rol-usuario': usuario.nombreRol?.toLowerCase() === 'usuario'
+            }">
+              {{ usuario.nombreRol }}
+            </span>
+          </td>
           <td>{{ getNombreCargo(usuario.idCargo) }}</td>
           <td>{{ usuario.usuario }}</td>
           <td>

@@ -12,6 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { SocketService } from '../../services/socket.service';
 import { io, Socket } from 'socket.io-client';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-tickets-details',
@@ -228,12 +229,22 @@ export class TicketsDetailsComponent implements OnInit {
 
       // Validaciones
       if (!result.observacion || result.observacion.trim() === '') {
-        alert('La observación es requerida');
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campo requerido',
+          text: 'La observación es requerida',
+          confirmButtonColor: '#3b82f6'
+        });
         return;
       }
 
       if (!result.archivo) {
-        alert('Debe adjuntar un documento');
+        Swal.fire({
+          icon: 'warning',
+          title: 'Archivo requerido',
+          text: 'Debe adjuntar un documento',
+          confirmButtonColor: '#3b82f6'
+        });
         return;
       }
 
@@ -244,11 +255,23 @@ export class TicketsDetailsComponent implements OnInit {
 
       this.ticketsService.marcarNoResuelto(idTicket, formData).subscribe({
         next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Ticket marcado',
+            text: 'El ticket ha sido marcado como No Resuelto',
+            confirmButtonColor: '#3b82f6'
+          });
           this.cargarTicket(idTicket);
           this.cargarHistorial(idTicket);
         },
         error: (err: any) => {
           console.error('Error al marcar como no resuelto:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo marcar el ticket como No Resuelto',
+            confirmButtonColor: '#3b82f6'
+          });
         }
       });
     });

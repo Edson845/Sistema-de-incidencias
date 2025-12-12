@@ -46,13 +46,14 @@ export class UsuariosEditComponent implements OnInit {
   mostrarGerencias = false;
   mostrarRangoUnidad = false;
   rangeUnidad = '';
+  esTecnico = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private usuariosService: UsuariosService,
     private CatalogoService: CatalogoService,
-    private RolService: RolService 
+    private RolService: RolService
   ) { }
 
   ngOnInit() {
@@ -75,7 +76,13 @@ export class UsuariosEditComponent implements OnInit {
     this.loading = true;
     this.usuariosService.getUsuario(id).subscribe({
       next: (data) => {
-        this.usuario = { ...data, password: '' }; // Password vacío por defecto
+        this.usuario = { ...data, password: '' };
+
+        // Asignar y detectar rol técnico
+        this.esTecnico = (Number(this.usuario.idRol) === 2);
+        console.log('Usuario cargado:', this.usuario);
+        console.log('Es técnico:', this.esTecnico, 'Rol ID:', this.usuario.idRol);
+
         // Ajustar lógica de visualización según el cargo cargado
         if (this.usuario.idCargo) {
           this.onCargoChange();
@@ -88,6 +95,11 @@ export class UsuariosEditComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  onRolChange() {
+    const rolId = Number(this.usuario.idRol);
+    this.esTecnico = (rolId === 2);
   }
 
   onCargoChange() {
