@@ -156,14 +156,15 @@ export default function TicketDetailScreen() {
 
         // Admin Assignment Button
         if (rol === 'admin' && (estado === 1 || estado === 2 || estado === 3)) {
-            // Show 'Asignar' button always or just for unassigned/reassignable?
-            // Assuming Admin can always re-assign if not closed.
-            return (
-                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#6366f1', marginBottom: 15 }]} onPress={() => openModal('asignar')}>
-                    <Ionicons name="person-add" size={20} color="#fff" />
-                    <Text style={styles.actionBtnText}>Asignar Técnico</Text>
-                </TouchableOpacity>
-            );
+            // Only show if NOT assigned yet
+            if (!ticket.nombreTecnico) {
+                return (
+                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#6366f1', marginBottom: 15 }]} onPress={() => openModal('asignar')}>
+                        <Ionicons name="person-add" size={20} color="#fff" />
+                        <Text style={styles.actionBtnText}>Asignar Técnico</Text>
+                    </TouchableOpacity>
+                );
+            }
         }
 
         if (rol === 'tecnico' || rol === 'admin') {
@@ -242,10 +243,19 @@ export default function TicketDetailScreen() {
                 </View>
             </View>
 
-            <View style={styles.section}>
-                <Text style={styles.label}>Técnico Asignado</Text>
-                <Text style={styles.value}>{ticket.nombreTecnico ? `${ticket.nombreTecnico} ${ticket.apellidoTecnico || ''}` : 'Sin asignar'}</Text>
-            </View>
+            {(String(user?.rol).toLowerCase() === 'admin' || String(user?.rol).toLowerCase() === 'tecnico') && (
+                <View style={styles.section}>
+                    <Text style={styles.label}>Solicitante</Text>
+                    <Text style={styles.value}>{ticket.nombreUsuario} {ticket.apellidoUsuario || ''}</Text>
+                </View>
+            )}
+
+            {(String(user?.rol).toLowerCase() === 'admin' || String(user?.rol).toLowerCase() === 'usuario') && (
+                <View style={styles.section}>
+                    <Text style={styles.label}>Técnico Asignado</Text>
+                    <Text style={styles.value}>{ticket.nombreTecnico ? `${ticket.nombreTecnico} ${ticket.apellidoTecnico || ''}` : 'Sin asignar'}</Text>
+                </View>
+            )}
 
             <View style={{ marginTop: 20 }}>
                 {renderActionButtons()}
@@ -279,7 +289,9 @@ export default function TicketDetailScreen() {
                                             size={20}
                                             color={selectedTecnico === (tec.idUsuario || tec.id) ? "#0a3a6b" : "#6b7280"}
                                         />
-                                        <Text style={styles.techName}>{tec.nombre} {tec.apellido || ''}</Text>
+                                        <Text style={styles.techName}>
+                                            {tec.nombres || tec.nombre} {tec.apellidos || tec.apellido || ''}
+                                        </Text>
                                     </TouchableOpacity>
                                 ))}
                                 {tecnicos.length === 0 && <Text>Cargando técnicos...</Text>}

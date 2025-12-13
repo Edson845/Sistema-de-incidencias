@@ -3,6 +3,8 @@ export interface User {
     idUsuario?: number; // Backend might send id or idUsuario
     nombre: string;
     apellido?: string;
+    nombres?: string; // Backend alternative
+    apellidos?: string; // Backend alternative
     email: string;
     rol: string;
     // Add other fields if present in decoded token

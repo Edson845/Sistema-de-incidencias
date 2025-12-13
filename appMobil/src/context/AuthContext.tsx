@@ -57,7 +57,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const login = async (identificador: string, password: string) => {
         try {
-            const response = await client.post('/auth/login', { identificador, password });
+            const response = await client.post('/auth/login', {
+                identificador: identificador.trim(),
+                password
+            });
             const { token } = response.data;
 
             await SecureStore.setItemAsync('token', token);
