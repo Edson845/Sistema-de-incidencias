@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
+import { environment } from '../environments/environment.prod';
 @Injectable({ providedIn: 'root' })
 export class CatalogoService {
-  private apiUrl = 'http://localhost:3000/api/catalogos';
+  private apiUrl = `${environment.ApiUrl}/catalogos`;
 
   constructor(private http: HttpClient) {}
 // Obtener listados auxiliares

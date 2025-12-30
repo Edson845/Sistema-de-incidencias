@@ -120,7 +120,8 @@ export default function TicketDetailScreen() {
                 Alert.alert("Éxito", "Ticket calificado y cerrado");
 
             } else if (modalType === 'asignar') {
-                if (!selectedTecnico) { Alert.alert("Error", "Seleccione un técnico"); setActionLoading(false); return; }
+                if (selectedTecnico === null) {Alert.alert("Error", "Seleccione un técnico");setActionLoading(false);
+                    return;}
                 await TicketsService.asignarTicket(idTicket, selectedTecnico);
                 Alert.alert("Éxito", "Ticket asignado correctamente");
             }
@@ -278,24 +279,42 @@ export default function TicketDetailScreen() {
 
                         {modalType === 'asignar' ? (
                             <ScrollView style={{ maxHeight: 300, marginBottom: 20 }}>
-                                {tecnicos.map(tec => (
+                                {tecnicos.map((tec) => {
+                                    const tecnicoId = Number(tec.dni) || 0;// ID único y consistente
+
+                                    return (
                                     <TouchableOpacity
-                                        key={tec.idUsuario || tec.dni} // Fallback to whatever ID is available
-                                        style={[styles.techItem, selectedTecnico === (tec.idUsuario || tec.id) && styles.techItemActive]}
-                                        onPress={() => setSelectedTecnico(tec.idUsuario || tec.id as number)}
+                                        key={tecnicoId}
+                                        style={[
+                                        styles.techItem,
+                                        selectedTecnico === tecnicoId && styles.techItemActive
+                                        ]}
+                                        onPress={() => setSelectedTecnico(tecnicoId)}
                                     >
                                         <Ionicons
-                                            name={selectedTecnico === (tec.idUsuario || tec.id) ? "radio-button-on" : "radio-button-off"}
-                                            size={20}
-                                            color={selectedTecnico === (tec.idUsuario || tec.id) ? "#0a3a6b" : "#6b7280"}
+                                        name={
+                                            selectedTecnico === tecnicoId
+                                            ? "radio-button-on"
+                                            : "radio-button-off"
+                                        }
+                                        size={20}
+                                        color={
+                                            selectedTecnico === tecnicoId
+                                            ? "#0a3a6b"
+                                            : "#6b7280"
+                                        }
                                         />
                                         <Text style={styles.techName}>
-                                            {tec.nombres || tec.nombre} {tec.apellidos || tec.apellido || ''}
+                                        {tec.nombres} {tec.apellidos}
                                         </Text>
                                     </TouchableOpacity>
-                                ))}
-                                {tecnicos.length === 0 && <Text>Cargando técnicos...</Text>}
-                            </ScrollView>
+                                    );
+                                })}
+                                {tecnicos.length === 0 && (
+                                    <Text>Cargando técnicos...</Text>
+                                )}
+                                </ScrollView>
+
                         ) : (
                             <>
                                 {modalType === 'calificar' ? (

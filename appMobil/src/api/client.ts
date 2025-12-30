@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 
 // CHANGE THIS to your machine's IP if running on a physical device.
 // For Android Emulator, 10.0.2.2 points to the host machine's localhost.
-const BASE_URL = 'http://192.168.100.51:3000/api';
+const BASE_URL = 'https://sistema-tickets-back-production.up.railway.app/api/';
 
 const client = axios.create({
     baseURL: BASE_URL,
